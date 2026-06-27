@@ -1,9 +1,10 @@
 ---
 name: equity-research-analyst/self-audit
 description: >
-  The pre-publish quality gate. Runs report_lint.py (mechanical) + adversarial
-  self-critique using the Mode B seven-dimension rubric (reasoning). CRITICAL
-  findings BLOCK publication and route back to the failing sub-skill. Step 10 of Mode A.
+  The pre-publish quality gate. Check 1 (Type-A): report_lint.py mechanical.
+  Check 2 (Type-B): 7-dimension self-critique — routes to cross-model (Codex xhigh)
+  for verdict. CRITICAL findings BLOCK and route back to root sub-skill.
+  Step 10 of Mode A.
 license: MIT
 ---
 
@@ -117,21 +118,79 @@ would have found first.
 
 ## Adversarial Review Gate (meta-review)
 
-The self-audit IS the adversarial review for the report. But the orchestrator
-may also spawn a meta-reviewer to verify the self-audit was honest.
+### Gate classification
 
-### Meta-review criteria (if spawned)
-- [ ] **Lint actually run:** Spot-check: grep for "you"/"你" — if found but lint
-  didn't flag, REVISE lint config.
-- [ ] **Self-audit honesty:** Pick one dimension randomly and verify the quoted
-  evidence supports the score. Inflated self-scores → REVISE.
-- [ ] **CRITICAL not dodged:** Are there issues that SHOULD have been CRITICAL
-  but were scored HIGH/MEDIUM? Check: terminal growth vs riskfree, implied
-  market share vs 100%, double-counted cash flows.
-- [ ] **Feedback routing correct:** Does the feedback point to the correct root
-  sub-skill? Wrong routing → REVISE.
+| Check | Type | Reviewer | Rationale |
+|-------|------|----------|-----------|
+| `report_lint.py` | **Type-A** | Same-model (script) | Machine-checkable: exit code, grep counts |
+| 7-dim self-critique | **Type-B** | **Cross-model (Codex xhigh)** | Requires taste/judgment of reasoning quality |
+
+### Cross-model verdict routing (Check 2)
+
+The 7-dim self-critique is a Type-B gate. The loop CANNOT self-acquit:
+
+```
+Claude runs self-audit → produces draft audit scores →
+  → Route to Codex (reasoning: xhigh) with:
+    - The draft report text
+    - The 7-dim critique rubric (references/report-critique-rubric.md)
+    - Claude's self-assessment scores
+  → Codex returns verdict artifact: verdicts/audit.json
+  → Claude reads artifact:
+    - PASS → proceed to PDF
+    - REVISE → route to root sub-skill, re-run from there
+    - BLOCK → escalate to orchestrator
+```
+
+### Verdict artifact format
+
+```json
+{
+  "gate": "self-audit-7dim",
+  "type": "B",
+  "reviewer_model": "codex-xhigh",
+  "reviewer_family": "openai",
+  "dimensions": {
+    "structural_completeness": {"score": "PASS", "claude_score": "PASS", "agrees": true},
+    "input_defensibility": {"score": "PASS", "claude_score": "WEAK", "agrees": false, "note": "..."},
+    "internal_consistency": {"score": "PASS", "claude_score": "PASS", "agrees": true},
+    "accounting_integrity": {"score": "PASS", "claude_score": "PASS", "agrees": true},
+    "terminal_value_scrutiny": {"score": "WEAK", "claude_score": "PASS", "agrees": false, "note": "Terminal 82% not flagged; HIGH"},
+    "uncertainty_handling": {"score": "PASS", "claude_score": "PASS", "agrees": true},
+    "bias_and_independence": {"score": "PASS", "claude_score": "PASS", "agrees": true}
+  },
+  "overall_verdict": "PASS_WITH_HIGH",
+  "critical_count": 0,
+  "high_count": 1,
+  "high_details": ["Terminal value 82% of total not flagged prominently enough — disclose in limitations"],
+  "claude_self_assessment_honest": false,
+  "claude_inflated_dimensions": ["terminal_value_scrutiny"],
+  "recommendation": "PUBLISH_WITH_DISCLOSURE"
+}
+```
+
+### Meta-review criteria
+- [ ] **Cross-model verdict obtained:** Verdict artifact exists and is from a different
+  model family. Missing artifact → BLOCK.
+- [ ] **Self-assessment honesty checked:** Codex explicitly flags whether Claude's
+  self-scores were inflated. If Claude gave PASS on a dimension Codex scored WEAK →
+  the self-audit was dishonest → record this.
+- [ ] **Lint actually run:** Spot-check by Codex — does any "you"/"你" exist that lint
+  didn't flag?
+- [ ] **CRITICAL not dodged:** Codex checks: terminal growth vs riskfree, implied
+  share vs 100%, double-counted cash flows.
+- [ ] **Feedback routing correct:** If CRITICAL, does feedback point to correct root?
+
+### Fallback when cross-model unavailable
+
+If Codex cannot be reached:
+1. Record failure in LOOP-STATE.md
+2. Mark the Type-B gate as UNVERIFIED
+3. Publish with escalated disclosure: "Self-audit gate not independently verified"
+4. NEVER silently self-acquit with same-model fallback
 
 ### Verdict thresholds
-- **PASS:** Lint passes, self-audit honest, no dodged CRITICALs.
-- **REVISE:** Dishonest self-scoring or dodged issues.
-- **BLOCK:** Gate bypass attempted (skipped lint, fabricated audit results).
+- **PASS:** Lint passes (Type-A), cross-model returns PASS on all 7 dims.
+- **PASS-WITH-HIGH:** Cross-model returns HIGH(s) — disclose, proceed.
+- **REVISE:** Cross-model returns CRITICAL → route to root sub-skill.
+- **BLOCK:** Gate bypass attempted, cross-model unreachable without fallback record.

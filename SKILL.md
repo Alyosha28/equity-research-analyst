@@ -11,7 +11,7 @@ license: MIT
 # Equity Research Analyst — Orchestrator
 
 This is the **orchestrator** for the equity-research-analyst skill family. It does
-TWO things that make the pipeline rigorous:
+THREE things that make the pipeline rigorous:
 
 1. **Agent Team — default parallelism.** Where sub-skills are independent, the
    orchestrator spawns parallel agents (not sequential). Industry + Theme analysis
@@ -23,8 +23,16 @@ TWO things that make the pipeline rigorous:
    flaws and demand fixes. Each sub-skill gets 1–2 revision rounds. Only when the
    reviewer signs PASS does the output proceed to the next step.
 
-Together these create a **self-iterating pipeline** where quality is enforced at
-every boundary, not just at the final gate.
+3. **Loop Protocol — Type-A/B gates + cross-model verdict.** Every gate is
+   classified Type-A (machine-checkable: exit code, math, counter) or Type-B
+   (requires taste/judgment). Type-B gates route to a cross-model reviewer
+   (Codex xhigh) — Claude can DRIVE the loop but cannot ACQUIT its own work.
+   A convergence terminator caps iterations at 3 before escalating to risk
+   annotation. Full protocol: `references/loop-protocol.md`.
+
+Together these create a **same-family-safe self-iterating pipeline** where
+quality is enforced at every boundary and no single model family grades
+its own homework.
 
 ## Architecture
 
@@ -65,7 +73,7 @@ Analysis sub-skills invoke these instead of duplicating logic:
 
 ---
 
-## Two Core Mechanisms
+## Three Core Mechanisms
 
 ### Mechanism 1 — Agent Team (Default Parallelism)
 
@@ -187,6 +195,57 @@ sub-skill → output → adversarial review → REVISE?
                               (proceed to               (flag to user
                                next step)              with risk note)
 ```
+
+### Mechanism 3 — Loop Protocol (Type-A/B Gates + Cross-Model Verdict)
+
+Every gate in the pipeline is classified Type-A or Type-B. The taxonomy and
+rules come from `references/loop-protocol.md`.
+
+**Type-A gates** — machine-checkable, same-model self-judgment allowed:
+
+| Gate | Check | Verdict source |
+|------|-------|---------------|
+| `report_lint.py` | Exit code 0, zero FAIL | Shell exit code |
+| JSON validity | `json.load()` succeeds | Python stdlib |
+| Engine sanity | DCF produces positive value | Math comparison |
+| MC trials | trials >= 10000 | Integer comparison |
+| Terminal growth | growth <= riskfree rate | Math |
+
+**Type-B gates** — require taste/judgment, MUST route to cross-model:
+
+| Gate | Routes to | Artifact |
+|------|----------|----------|
+| Adversarial review (every sub-skill) | Codex xhigh | `verdicts/{step}.json` |
+| 7-dim self-audit | Codex xhigh | `verdicts/audit.json` |
+| Write-report voice/depth | Codex xhigh | `verdicts/report.json` |
+
+**Cross-model verdict flow:**
+```
+Claude produces output → Type-B gate reached →
+  → Route to Codex (reasoning: xhigh) with the output + review criteria
+  → Codex returns verdict JSON artifact saved to verdicts/{step}.json
+  → Claude reads artifact → PASS: proceed | REVISE: fix + retry | BLOCK: escalate
+```
+
+**The rule:** "A loop can DRIVE; it cannot ACQUIT." Claude orchestrates and
+executes, but a different model family signs off on quality.
+
+**Same-family-safe conditions (all must hold):**
+1. Every gate classified A or B
+2. Every Type-B gate routes to cross-model
+3. Cross-model verdict saved as inspectable artifact
+4. No same-family majority treated as jury
+5. Type-A self-judgment uses external checks
+
+**Convergence terminator:**
+- Max 2 adversarial review rounds per sub-skill
+- Max 3 pipeline iterations for same error signature
+- On third failure: escalate with risk annotation, publish with disclosure
+- Rule: NEVER silently pass; unresolved issues are always surfaced
+
+**LOOP-STATE.md** — the baton file that records current step, gate history,
+verdict artifacts, revision history, and escalations. Full format in
+`references/loop-protocol.md`.
 
 ---
 

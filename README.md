@@ -55,6 +55,25 @@ WAVE 8             → /generate-pdf
 
 After **EVERY** sub-skill completes, an adversarial review agent critiques the
 output before the pipeline can proceed. The reviewer's stance is **skeptical,
+
+### Mechanism 3 — Loop Protocol (Type-A/B Gates + Cross-Model Verdict)
+
+Every gate is classified Type-A (machine-checkable) or Type-B (requires taste).
+**Type-B gates route to a different model family (Codex xhigh)** — Claude drives
+the loop but a different model signs off on quality. A convergence terminator
+caps iterations at 3, escalating to risk annotation instead of silent pass.
+Full protocol: [`references/loop-protocol.md`](references/loop-protocol.md).
+
+| Gate Type | Examples | Reviewer | Rule |
+|-----------|----------|----------|------|
+| **Type-A** | `report_lint.py`, JSON validity, engine sanity, terminal growth ≤ riskfree | Same-model / script | Self-judgment OK |
+| **Type-B** | 7-dim audit, report voice/depth, adversarial reviews | **Cross-model (Codex xhigh)** | Cannot self-acquit |
+
+> *"A loop can DRIVE; it cannot ACQUIT."* — Claude orchestrates; a different model
+> family verifies. 5 Claude reviewers agreeing = shared bias, not correctness.
+
+After **EVERY** sub-skill completes, an adversarial review agent critiques the
+output before the pipeline can proceed. The reviewer's stance is **skeptical,
 not friendly** — it must find at least one weakness or prove the output is
 genuinely flawless. Each sub-skill gets **1–2 revision rounds**:
 
