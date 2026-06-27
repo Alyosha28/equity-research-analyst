@@ -28,6 +28,70 @@ Python engine** so every number is auditable and every valuation is reproducible
 | **Tests** (`tests/`) | Reproducibility guard, output schema validation, report linter, archetype coverage |
 | **Style Guide** | Investor-facing prose discipline — no second-person, no emoji, long-form argument, MoS buy-band, numbers ledger |
 
+## Modular Architecture — Self-Iterating Pipeline
+
+The skill is decomposed into **14 sub-skills** orchestrated through a self-iterating
+pipeline with four quality gates. Each sub-skill is independently testable and
+optimizable — improve one without breaking the rest.
+
+### The pipeline (Mode A — Full Valuation)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              /equity-research-analyst (orchestrator)         │
+│                                                             │
+│  STEP 1  /classify-archetype    → archetype, engine, playbook│
+│  STEP 2  /analyze-industry      → industry lifecycle, leaders│
+│  STEP 3  /analyze-company       → business model, 10yr fin. │
+│  STEP 4  /analyze-theme         → TAM × share, competitive   │
+│              ┌─── GATE A: Sanity check ───┐                  │
+│  STEP 5  /build-assumptions     → story→numbers, .json file  │
+│              ┌─── GATE B: Input sanity ───┐                  │
+│  STEP 6  /run-valuation          → DCF, MC, breakeven, rev.  │
+│  STEP 7  /durability-check       → ROIC-WACC, CAP, RONIC     │
+│  STEP 8  /triangulate            → 7-lens cross-check        │
+│              ┌─── GATE C: Triangulation ──┐                  │
+│  STEP 9  /write-report           → investor-facing prose      │
+│  STEP 10 /self-audit             → lint + adversarial review  │
+│              ┌─── GATE D: Publish gate ───┐                  │
+│              │ CRITICAL → feedback route  │                  │
+│              │ to failing sub-skill       │                  │
+│              └────────────────────────────┘                  │
+│  STEP 11 /generate-pdf           → typographic PDF deliverable│
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Self-iteration mechanism
+
+When a quality gate fails, the orchestrator routes targeted feedback to the
+specific sub-skill that produced the problematic output, then re-runs downstream
+steps. This creates a **closed optimization loop**:
+
+```
+gate fails → identify root sub-skill → targeted fix → re-run cascade → re-gate
+```
+
+Each sub-skill can be invoked independently for debugging and optimization:
+
+### All sub-skills
+
+| Sub-skill | Role | Mode |
+|-----------|------|------|
+| `/classify-archetype` | Classify company → pick engine + playbook | A |
+| `/analyze-industry` | Industry lifecycle, profit cycles, leader rotation | A |
+| `/analyze-company` | Business model, moat, 10yr trajectory, drawdowns | A |
+| `/analyze-theme` | Thematic driver, TAM × share, competitive map | A |
+| `/build-assumptions` | Story → numbers, accounting adj, write .json | A |
+| `/run-valuation` | Execute Python engine suite | A |
+| `/durability-check` | ROIC-WACC, CAP, RONIC fade, moat decomposition | A |
+| `/triangulate` | 7-lens cross-check, dispute locus | A |
+| `/write-report` | Produce investor-facing long-form prose | A |
+| `/self-audit` | Lint + adversarial self-critique → gate | A/C |
+| `/generate-pdf` | Render report to typographic PDF | A/B/C |
+| `/critique-report` | Audit third-party research (Mode B) | B |
+| `/refresh-valuation` | Currency sweep, driver delta, update memo (Mode C) | C |
+| `/fetch-data` | Fetch financials, build skeleton (shared) | All |
+
 ## Philosophy
 
 > *"A valuation is a story disciplined by numbers. A story without numbers is a
@@ -48,7 +112,7 @@ non-negotiable disciplines:
 
 ```bash
 # Clone
-git clone https://github.com/YOUR_USER/equity-research-analyst.git
+git clone https://github.com/Alyosha28/equity-research-analyst.git
 cd equity-research-analyst
 
 # Reproduce the NVIDIA valuation (Damodaran, June 2023)
@@ -167,6 +231,22 @@ seven-dimension Mode B critique rubric from `references/report-critique-rubric.m
 
 ```
 equity-research-analyst/
+├── SKILL.md              # Main orchestrator (routes Mode A/B/C)
+├── skills/               # 14 sub-skills (the pipeline)
+│   ├── classify-archetype/SKILL.md
+│   ├── analyze-industry/SKILL.md
+│   ├── analyze-company/SKILL.md
+│   ├── analyze-theme/SKILL.md
+│   ├── build-assumptions/SKILL.md
+│   ├── run-valuation/SKILL.md
+│   ├── durability-check/SKILL.md
+│   ├── triangulate/SKILL.md
+│   ├── write-report/SKILL.md
+│   ├── self-audit/SKILL.md
+│   ├── generate-pdf/SKILL.md
+│   ├── critique-report/SKILL.md
+│   ├── refresh-valuation/SKILL.md
+│   └── fetch-data/SKILL.md
 ├── scripts/              # Python valuation engine (10 programs)
 │   ├── dcf_valuation.py
 │   ├── monte_carlo.py
