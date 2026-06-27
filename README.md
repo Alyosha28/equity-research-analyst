@@ -1,11 +1,11 @@
 <p align="center">
-  <h1 align="center">OpenAnalyst</h1>
+  <h1 align="center">AnalystCollective</h1>
   <p align="center"><em>Story → Numbers → Value &nbsp;·&nbsp; A Damodaran-method fundamental equity valuation engine</em></p>
 </p>
 
 ---
 
-**OpenAnalyst** is not a black-box stock recommender. It is a **transparent,
+**AnalystCollective** is not a black-box stock recommender. It is a **transparent,
 AI agent-driven valuation engine** — you see not just what a company is "worth",
 but how the story unfolds under every assumption, and what the gap between price
 and value actually means.

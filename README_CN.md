@@ -1,11 +1,11 @@
 <p align="center">
-  <h1 align="center">OpenAnalyst</h1>
+  <h1 align="center">AnalystCollective</h1>
   <p align="center"><em>叙事 → 数字 → 价值 &nbsp;·&nbsp; 用 Damodaran 的方法论，做可复现的基本面估值</em></p>
 </p>
 
 ---
 
-**OpenAnalyst** 不是一个黑箱荐股工具。它是一套**透明的、由 AI Agent 协作驱动的估值引擎**——
+**AnalystCollective** 不是一个黑箱荐股工具。它是一套**透明的、由 AI Agent 协作驱动的估值引擎**——
 你看到的不只是一家公司"值多少钱"，而是这个故事在每一个假设下如何展开，以及价格与价值的差距到底意味着什么。
 
 它把 Aswath Damodaran 的六层估值框架变成了可运行的 Python 代码，用 **14 个独立的 AI 子 Agent**
@@ -21,14 +21,14 @@
 
 ---
 
-## 为什么是 OpenAnalyst？
+## 为什么是 AnalystCollective？
 
 大多数投资研究工具落在两个极端上：
 
 - **券商/卖方报告**：结论先定，数据后凑。不可复现，不可审计。
 - **量化回测框架**：纯数学，没有故事。把公司当成一串时间序列。
 
-OpenAnalyst 走第三条路——**一人成队**：14 个 Agent 并行工作，彼此交叉验证，每一步都经对抗性审查，最终产出的不是"买/卖"两个字，而是一份完整的、带安全边际区间的、可复现的投资备忘录。
+AnalystCollective 走第三条路——**一人成队**：14 个 Agent 并行工作，彼此交叉验证，每一步都经对抗性审查，最终产出的不是"买/卖"两个字，而是一份完整的、带安全边际区间的、可复现的投资备忘录。
 
 ## 目录
 
@@ -43,7 +43,7 @@ OpenAnalyst 走第三条路——**一人成队**：14 个 Agent 并行工作，
 
 ## 架构：Agent 团队 + 对抗性审查
 
-OpenAnalyst 由 **14 个子 Agent** 组成，通过一条带质量关卡的自迭代管线编排。
+AnalystCollective 由 **14 个子 Agent** 组成，通过一条带质量关卡的自迭代管线编排。
 设计上有两个核心机制：
 
 ### 机制一：默认并行（Agent 团队）
@@ -324,7 +324,7 @@ equity-research-analyst/
 
 本项目建立在纽约大学 Stern 商学院 **Aswath Damodaran** 教授的公开估值方法论之上。
 他的博客 *Musings on Markets* 和开源的电子表格教会了一代人如何给公司估值。
-OpenAnalyst 将他的六层框架变成了可复现、可脚本化的引擎。
+AnalystCollective 将他的六层框架变成了可复现、可脚本化的引擎。
 
 同时融合了以下思想资源：
 
