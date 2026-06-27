@@ -1,0 +1,34 @@
+{
+  "_comment": "Illustrative large-bank inputs (JPMorgan-shaped, NOT a live call). Money in $M, shares in M, rates as decimals. Drives financial_valuation.py (excess-return on equity). Numbers are round and defensible, chosen as a reproducibility anchor, not a published valuation.",
+  "company": "Large-Bank (illustrative, JPMorgan-shaped)",
+  "valuation_date": "2024-12-31",
+
+  "_equity": "common equity ~ $345B; ~2.8B shares => book value ~ $123/share",
+  "book_value_equity": 345000,
+  "shares_outstanding": 2800,
+
+  "_roe": "through-cycle ROE fades from a strong 17% toward a still-healthy 15% normal",
+  "base_roe": 0.17,
+  "target_roe": 0.15,
+  "roe_convergence_year": 5,
+
+  "_payout": "dividends + buybacks ~ 55% of net income; the rest compounds book",
+  "payout_ratio": 0.55,
+
+  "_ke": "cost of equity 10% during the explicit period, drifting to a mature 9%",
+  "cost_of_equity_initial": 0.10,
+  "cost_of_equity_terminal": 0.09,
+  "coe_glide_start_year": 3,
+  "coe_glide_end_year": 8,
+
+  "horizon": 10,
+  "_terminal": "stable growth 3%; terminal ROE 12% keeps a modest perpetual spread over a 9% Ke",
+  "terminal_growth": 0.03,
+  "terminal_roe": 0.12,
+
+  "_failure": "small tail probability of a crisis impairment (2008-style); distress value ~ 0.4x book",
+  "failure_probability": 0.02,
+  "failure_value_per_share": 50,
+
+  "price": 240
+}

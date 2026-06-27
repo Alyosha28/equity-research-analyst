@@ -1,0 +1,35 @@
+{
+  "_comment": "Mature / declining, high-payout company (illustrative) -- a legacy cash cow with flat-to-shrinking revenue. Value shifts from growth to cash RETURN and terminal decay: low/negative growth, light reinvestment, durable margin that slowly erodes. Money in $M, shares in M, rates decimals. Drives dcf_valuation.py.",
+  "company": "Mature/Declining Cash Cow (illustrative)",
+  "valuation_date": "2024-12-31",
+
+  "_revenue": "$50B base, revenue declining then flattening -- no growth story to underwrite",
+  "base_revenue": 50000,
+  "revenue_growth": [-0.03, -0.03, -0.02, -0.02, -0.01, -0.01, 0.0, 0.0, 0.0, 0.0],
+
+  "_margin": "high but slowly eroding margin (30% -> 28%) as scale and pricing fade",
+  "base_operating_margin": 0.30,
+  "target_operating_margin": 0.28,
+  "margin_convergence_year": 5,
+
+  "_reinvest": "barely reinvesting -- high sales-to-capital; cash is returned, not redeployed",
+  "sales_to_capital": 2.5,
+
+  "tax_rate": 0.21,
+
+  "cost_of_capital_initial": 0.08,
+  "cost_of_capital_terminal": 0.075,
+  "coc_glide_start_year": 3,
+  "coc_glide_end_year": 7,
+
+  "terminal_growth": 0.0,
+  "terminal_roc": 0.09,
+  "_terminal": "no perpetual growth; a modest ROC above a low cost of capital",
+
+  "cash": 3000,
+  "debt": 20000,
+  "_leverage": "mature balance sheets carry more debt against stable cash flows",
+  "shares_outstanding": 1800,
+
+  "_price": 58
+}

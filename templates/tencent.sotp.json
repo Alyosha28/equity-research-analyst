@@ -1,0 +1,27 @@
+{
+  "_about": "Tencent (0700.HK) sum-of-the-parts. Core operating value comes from tencent.assumptions.json (RMB); investment portfolio + net cash added here; result converted to HK$/share. Data as of FY2025 results / June 2026 price.",
+  "_units": "RMB millions; per-share in stated currency; shares in millions",
+  "_sources": "Tencent FY2025 results (listed RMB672.7bn, unlisted RMB363.1bn, net cash RMB107.1bn); price HK$433 (2026-06-22); fx ~1 RMB = 1.087 HKD",
+
+  "company": "Tencent Holdings (0700.HK)",
+  "valuation_currency": "RMB",
+  "report_currency": "HKD",
+  "fx_report_per_valuation": 1.087,
+
+  "shares_outstanding": 9238,
+  "market_price_report_ccy": 433.0,
+
+  "core_assumptions_path": "tencent.assumptions.json",
+  "_core_earnings": "Core net earnings (non-IFRS, ex-investment) ~RMB245bn FY2025E, used for the stub P/E cross-check.",
+  "core_earnings": 245000,
+
+  "_portfolio": "Listed at reported fair value with a 15% tax-on-disposal haircut; unlisted at carrying value with a 20% illiquidity/markdown haircut; then a 20% holding-company discount (lack of control + capital-allocation distrust) on the whole portfolio.",
+  "listed_investments": 672700,
+  "listed_haircut": 0.15,
+  "unlisted_investments": 363100,
+  "unlisted_haircut": 0.20,
+  "holding_company_discount": 0.20,
+
+  "net_cash": 107100,
+  "minority_interests": 0
+}

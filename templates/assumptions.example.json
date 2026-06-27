@@ -1,0 +1,41 @@
+{
+  "_about": "Worked example reproducing Aswath Damodaran's NVIDIA valuation (Musings on Markets, 23 Jun 2023). All $ are in MILLIONS USD; rates are decimals. Running dcf_valuation.py on this file yields ~$236/share vs the $409 price on 2023-06-10 -> overvalued, reproducing his ~$240 conclusion.",
+  "_units": "money = $millions, rates = decimal (0.40 = 40%), shares = millions",
+  "_source": "https://aswathdamodaran.blogspot.com/2023/06/ais-winners-losers-and-wannabes-nvidia.html",
+
+  "company": "NVIDIA Corporation (NVDA)",
+  "valuation_date": "2023-06-10",
+
+  "_driver1_growth": "Base = TTM revenue through Q1 FY24 ($25.88B). Growth declines from ~50% to the riskfree rate over 10 yrs, hitting Damodaran's $267B in year 10 (AI + Auto + Gaming bottoms-up).",
+  "base_revenue": 25878.0,
+  "revenue_growth": [0.505, 0.453, 0.401, 0.349, 0.298, 0.246, 0.194, 0.142, 0.090, 0.039],
+
+  "_driver2_margin": "R&D-adjusted pre-tax operating margin recovers from a 2022 setback (~32%) to a 40% target by 2027 (year 4), held in perpetuity.",
+  "base_operating_margin": 0.32,
+  "target_operating_margin": 0.40,
+  "margin_convergence_year": 4,
+
+  "_driver3_reinvestment": "Sales-to-capital rises to the semiconductor industry median of 1.15 (from NVDA's historic 0.65). Reinvestment = change-in-revenue / 1.15.",
+  "sales_to_capital": 1.15,
+
+  "_driver4_risk": "Cost of capital starts at the US semiconductor industry average 12.21% (initial growth period, yrs 1-5) and glides to the market-average mature 8.85% by year 10.",
+  "tax_rate": 0.15,
+  "_tax_note": "NVDA's structural effective tax rate is low (~13-15%: IP location, stock-comp deductions, FDII). Damodaran's headline value uses a low rate. Ramping to a 25% marginal rate (set effective_tax_rate=0.15, tax_rate=0.25, tax_convergence_year=10) lowers value to ~$200 -- still far below $409, so the OVERVALUED conclusion is robust.",
+  "cost_of_capital_initial": 0.1221,
+  "cost_of_capital_terminal": 0.0885,
+  "coc_glide_start_year": 5,
+  "coc_glide_end_year": 10,
+
+  "_terminal": "Stable growth = riskfree rate (3.85%). Terminal ROC of 12% reflects a durable CUDA-driven moat earning a modest excess return in perpetuity (terminal reinvestment rate = g / ROC).",
+  "terminal_growth": 0.0385,
+  "terminal_roc": 0.12,
+
+  "_bridge": "Operating assets -> equity: + cash & marketable securities, - total debt; ~2,470M shares (pre-2024 10:1 split).",
+  "cash": 15320.0,
+  "debt": 11000.0,
+  "minority_interests": 0.0,
+  "shares_outstanding": 2470.0,
+
+  "failure_probability": 0.0,
+  "failure_value_per_share": 0.0
+}

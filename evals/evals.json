@@ -1,0 +1,65 @@
+{
+  "skill_name": "equity-research-analyst",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我用内在价值法给 AMD 估一下值，做一份研报，判断现在的股价是高估还是低估。",
+      "expected_output": "Triggers the skill in PRODUCE mode. Reasons top-down (industry -> company -> AI/datacenter theme -> DCF), builds an AMD assumptions.json from the four drivers (segment TAM x share growth, R&D-adjusted target margin, sales-to-capital, cost of capital with accounting adjustments noted), runs dcf_valuation.py + monte_carlo.py + reverse_dcf.py, triangulates with comps, and delivers a report using Template A: intrinsic value/share vs price, % of value in terminal, where price sits in the distribution, a separated value-vs-momentum call, key risks, and a not-advice disclaimer.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "这是一份关于特斯拉的研报 PDF，帮我审一下它的假设、逻辑和估值靠不靠谱。",
+      "expected_output": "Triggers the skill in CRITIQUE mode. Uses the pdf skill to extract the report text/tables, extracts the thesis + four drivers + terminal assumptions, scores the seven dimensions (structural completeness, input defensibility, internal consistency, accounting integrity, terminal-value scrutiny, uncertainty handling, bias) with quoted evidence, re-runs the report's inputs in the engine to replicate its value and reverse-solve what it requires to be true, then writes severity-tagged findings (CRITICAL/HIGH/MEDIUM/LOW) and a verdict using Template B.",
+      "files": ["<path-to-tesla-report.pdf>"]
+    },
+    {
+      "id": 3,
+      "prompt": "英伟达现在大概 $120（拆股后），市场到底 price-in 了什么样的预期？这些预期现实吗？",
+      "expected_output": "Triggers the skill and runs the reverse-DCF / expectations lens (reverse_dcf.py): solves for the price-implied year-N revenue (and implied CAGR) and the price-implied operating margin, holding other drivers at base case, then judges whether those implied expectations are plausible vs history, peers, and the addressable market. Frames the answer as 'what the price requires you to believe', not a buy/sell tip.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "今天 A 股大盘怎么走？给我一个短线交易信号和买卖点。",
+      "expected_output": "Should NOT trigger this skill. This is a daily technical/sentiment/trading-signal request, which belongs to stock_analyzer. equity-research-analyst is for fundamental intrinsic valuation, not intraday trading signals.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "帮我给摩根大通（JPMorgan）估个值，看现在贵不贵。",
+      "expected_output": "Triggers PRODUCE mode and CLASSIFIES the company as the FINANCIALS archetype (Mode A step 0): recognizes that the FCFF engine is wrong for a bank and uses financial_valuation.py (excess-return on equity (ROE-Ke)xBV with a two-stage DDM cross-check). Follows references/playbook-financials.md: normalizes ROE through the credit cycle (not a peak-year ROE), uses TANGIBLE book value, states the ROE-Ke spread and its competitive-advantage period explicitly, checks CET1 capital headroom, and applies the Buffett discipline (owner-earnings vs reported, margin of safety vs stressed tangible book). Reports value/share, implied P/B, and a not-advice disclaimer.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "自由港麦克莫兰（Freeport, FCX）这种铜矿周期股怎么估值？现在大概 $42。",
+      "expected_output": "Triggers PRODUCE mode and classifies FCX as the CYCLICAL/COMMODITY archetype. Follows references/playbook-cyclical.md: reuses dcf_valuation.py but feeds it THROUGH-CYCLE NORMALIZED margins (not the current spot/peak) and a price-deck-derived revenue path anchored to the commodity's long-run marginal cost. Places the cycle (Dalio's economic machine: short business cycle + long debt cycle) to set the normalization point, sets a thin terminal ROC (commodities rarely compound excess returns), and runs reverse_dcf.py to show whether the price embeds peak or trough margins. Reports normalized intrinsic value vs price, a wide MoS band, and the capital-cycle bear case.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "一家还在亏损、高速增长的公司怎么做 DCF？现在没有利润，这种怎么估？",
+      "expected_output": "Triggers PRODUCE mode and classifies the company as the YOUNG / PRE-PROFIT archetype. Follows references/playbook-young.md: uses dcf_valuation.py with a NEGATIVE base operating margin gliding to a positive target margin at a realistic convergence year, an effective tax rate ramping from 0, and crucially the FAILURE BRANCH (failure_probability, failure_value_per_share) to probability-weight going-concern vs distress. Explains that terminal value can EXCEED 100% of value when early FCFF is negative (the diagnostic signature, not an error), leans heavily on monte_carlo.py to report a distribution rather than a point, and applies the 3P (possible/plausible/probable) discipline. Not a hockey-stick narrative.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "一家营收在萎缩、但分红很高的成熟公司，值多少钱？要不要因为高股息买入？",
+      "expected_output": "Triggers PRODUCE mode and classifies the company as the MATURE / DECLINING / HIGH-PAYOUT archetype. Follows references/playbook-mature.md: uses dcf_valuation.py with a flat-to-negative revenue-growth path, terminal growth near zero, and light reinvestment (high sales-to-capital; a shrinking firm releases working capital, lifting near-term FCFF). Tests whether the dividend/buyback is FUNDED from free cash flow rather than debt, judges buybacks by price vs intrinsic value (Buffett's capital-allocation rule), stresses the decline rate ('melting ice cube'), weighs a breakup/liquidation floor, and flags the agency risk of value-destroying 'growth' M&A. Separates the high-yield optic from the intrinsic value.",
+      "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "用安全边际的思路看看这只股票，现在的价格够不够便宜？",
+      "expected_output": "Triggers the skill and produces (or refreshes) an intrinsic valuation, then expresses the conclusion as a MARGIN-OF-SAFETY BUY-BAND rather than a single point: runs monte_carlo.py to get the value distribution and emits the accumulate-below / fair / rich-above thresholds (intrinsic x (1 - MoS), with MoS widening as the distribution's dispersion widens). Frames 'cheap enough' as price vs the buy-below threshold and where the price sits in the value distribution (percentile), in the Graham/Buffett discipline, with a not-advice disclaimer. Does not give a momentum/trading call.",
+      "files": []
+    },
+    {
+      "id": 10,
+      "prompt": "帮我给 Visa 估值，它是金融股，是不是该用你那个银行的股权模型？",
+      "expected_output": "Triggers PRODUCE mode but CORRECTLY REJECTS the financials equity engine via the Mode A step-0 mis-classification test: Visa is a card NETWORK that earns a fee/take-rate on payment flow, not a spread or underwriting result on its own balance sheet, so it is a capital-light OPERATING company valued with the DEFAULT FCFF engine (dcf_valuation.py), not financial_valuation.py. Explains the distinction (a network/exchange/rating-agency/asset-manager is not a bank) per references/playbook-financials.md section 1, then proceeds with the standard four-driver intrinsic valuation.",
+      "files": []
+    }
+  ]
+}

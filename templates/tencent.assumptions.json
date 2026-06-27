@@ -1,0 +1,39 @@
+{
+  "_about": "Tencent (0700.HK) CORE OPERATING BUSINESS intrinsic DCF, in RMB millions. Excludes the investment portfolio and net cash (those are added in tencent.sotp.json). cash/debt set to 0 so the DCF's operating_asset_value IS the core operating value used by sotp.py. Data ~FY2025, see source notes; refine FY2025 full-year on release.",
+  "_units": "RMB millions; rates decimal; shares in millions",
+  "_sources": "Tencent FY2024 results (PRNewswire 2025-03-19), Q1/Q3 2025 results; FY2025 revenue +14% est.",
+
+  "company": "Tencent core ops (ex-investments)",
+  "valuation_date": "2026-06-23",
+
+  "_driver1_growth": "Base = FY2025E revenue ~RMB750bn. Blended segment growth: Ads (AI-driven, high-teens) + Games (mid) + FinTech&Business (low-double). Declines from 12% to a 3% terminal over 10y (~7.9% CAGR; year-10 ~RMB1.6tn).",
+  "base_revenue": 750000,
+  "revenue_growth": [0.12, 0.11, 0.10, 0.09, 0.08, 0.07, 0.06, 0.05, 0.04, 0.03],
+
+  "_driver2_margin": "Non-IFRS operating margin ~36% (FY24), expanding to a ~40% target by 2029 on mix shift to high-margin AI-driven ads + operating leverage.",
+  "base_operating_margin": 0.36,
+  "target_operating_margin": 0.40,
+  "margin_convergence_year": 4,
+
+  "_driver3_reinvestment": "Capital-light platform (high FCF conversion ~24%); sales-to-capital 2.5 even with rising AI capex. Reinvestment = change-in-revenue / 2.5.",
+  "sales_to_capital": 2.5,
+
+  "_driver4_risk": "China-exposed equity. Effective tax ~16% (software/HNTE incentives) ramping to a 22% marginal blend. Cost of capital ~9% (China riskfree ~2-3% + ERP x beta), gliding to a mature ~8.5%. SENSITIVITY 8-11% shown in report.",
+  "tax_rate": 0.22,
+  "effective_tax_rate": 0.16,
+  "tax_convergence_year": 5,
+  "cost_of_capital_initial": 0.09,
+  "cost_of_capital_terminal": 0.085,
+  "coc_glide_start_year": 5,
+  "coc_glide_end_year": 10,
+
+  "_terminal": "Stable growth 3% (>= China low riskfree but <= nominal GDP). Terminal ROC 15% reflects an asset-light WeChat/gaming moat earning durable excess returns (reinvestment rate = 3%/15% = 20%).",
+  "terminal_growth": 0.03,
+  "terminal_roc": 0.15,
+
+  "_bridge": "cash/debt/minority = 0 here ON PURPOSE: operating_asset_value is the CORE value; net cash + investments are added in the SOTP step. Shares ~9,238M (post 2024-25 buybacks).",
+  "cash": 0.0,
+  "debt": 0.0,
+  "minority_interests": 0.0,
+  "shares_outstanding": 9238.0
+}

@@ -1,0 +1,39 @@
+{
+  "_comment": "Young, pre-profit high-growth company (illustrative). The archetype Damodaran calls the 'dark side' of valuation: value hinges on SURVIVAL probability + the PATH to a target margin, not on (negative) current earnings. Uses the engine's failure branch. Money in $M, shares in M, rates decimals. Drives dcf_valuation.py.",
+  "company": "Young High-Growth (illustrative)",
+  "valuation_date": "2024-12-31",
+
+  "_revenue": "$2B base, growth high and declining toward the riskfree rate",
+  "base_revenue": 2000,
+  "revenue_growth": [0.40, 0.35, 0.30, 0.25, 0.20, 0.15, 0.12, 0.10, 0.08, 0.06],
+
+  "_margin": "currently lossmaking (-15%); a credible PATH to a 20% target by year 7 is the crux of the case",
+  "base_operating_margin": -0.15,
+  "target_operating_margin": 0.20,
+  "margin_convergence_year": 7,
+
+  "sales_to_capital": 1.5,
+
+  "tax_rate": 0.25,
+  "effective_tax_rate": 0.0,
+  "tax_convergence_year": 7,
+  "_tax": "no tax while lossmaking; effective rate ramps to marginal as profits arrive",
+
+  "cost_of_capital_initial": 0.12,
+  "cost_of_capital_terminal": 0.09,
+  "coc_glide_start_year": 4,
+  "coc_glide_end_year": 9,
+
+  "terminal_growth": 0.025,
+  "terminal_roc": 0.12,
+
+  "_failure": "real chance the company never reaches scale; 25% failure probability, ~$2/share distress value",
+  "failure_probability": 0.25,
+  "failure_value_per_share": 2.0,
+
+  "cash": 1500,
+  "debt": 500,
+  "shares_outstanding": 400,
+
+  "_price": 30
+}

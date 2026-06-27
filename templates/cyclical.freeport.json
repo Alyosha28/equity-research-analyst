@@ -1,0 +1,37 @@
+{
+  "_comment": "Freeport-McMoRan (FCX) -- copper, the canonical commodity cyclical. Illustrative, NOT a live call. The whole discipline: feed THROUGH-CYCLE NORMALIZED margins and a price-deck-derived revenue path, never current-spot extrapolation. Money in $M, shares in M, rates decimals. Drives dcf_valuation.py.",
+  "company": "Freeport-McMoRan (FCX, illustrative)",
+  "valuation_date": "2024-12-31",
+
+  "_revenue": "~$25B base; growth = copper volume + a normalized real-price drift declining to terminal. NOT a spot-price extrapolation.",
+  "base_revenue": 25000,
+  "revenue_growth": [0.06, 0.055, 0.05, 0.045, 0.04, 0.035, 0.03, 0.03, 0.025, 0.025],
+
+  "_margin": "through-cycle NORMALIZED EBIT margin ~22% now, ~25% mid-cycle target. A copper miner swings 10-35%; the point is to value the average, not the peak.",
+  "base_operating_margin": 0.22,
+  "target_operating_margin": 0.25,
+  "margin_convergence_year": 3,
+
+  "_reinvest": "mining is capital-heavy: sales-to-capital ~0.55",
+  "sales_to_capital": 0.55,
+
+  "tax_rate": 0.30,
+  "_tax": "high effective tax via mining royalties / Indonesian terms",
+
+  "cost_of_capital_initial": 0.10,
+  "cost_of_capital_terminal": 0.085,
+  "coc_glide_start_year": 3,
+  "coc_glide_end_year": 8,
+
+  "terminal_growth": 0.025,
+  "terminal_roc": 0.10,
+  "_terminal": "mid-cycle ROC ~10%, a thin durable spread -- commodities rarely compound excess returns",
+
+  "cash": 4000,
+  "debt": 9000,
+  "minority_interests": 3000,
+  "_minority": "material minority at the Indonesian (Grasberg) operations",
+  "shares_outstanding": 1440,
+
+  "_price": 42
+}

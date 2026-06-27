@@ -1,0 +1,23 @@
+{
+  "_about": "ILLUSTRATIVE comparable-company set for NVIDIA, approximate ~June 2023 figures ($millions, per-share in $). Numbers are rounded for teaching the METHOD; refresh with live data before relying on output. Peers use TRAILING metrics -- a key caveat: for a hyper-growth name, trailing comps look punishing because they ignore the growth the DCF captures. Read comps as one lens, not the answer.",
+  "_units": "money = $millions; eps & price = $ per share; growth = decimal long-run",
+
+  "target": {
+    "name": "NVIDIA (NVDA)",
+    "revenue": 25878,
+    "ebitda": 11000,
+    "net_income": 5600,
+    "eps": 2.27,
+    "growth": 0.30,
+    "net_debt": -4320,
+    "shares": 2470,
+    "price": 409
+  },
+  "peers": [
+    {"name": "AMD",      "ev": 185000, "revenue": 22680, "ebitda": 3000,  "market_cap": 190000, "net_income": 1300,  "eps": 0.80, "price": 118, "growth": 0.25},
+    {"name": "Intel",    "ev": 160000, "revenue": 52000, "ebitda": 10000, "market_cap": 137000, "net_income": 8000,  "eps": 1.94, "price": 33,  "growth": 0.05},
+    {"name": "TSMC",     "ev": 480000, "revenue": 70000, "ebitda": 45000, "market_cap": 520000, "net_income": 30000, "eps": 5.50, "price": 100, "growth": 0.15},
+    {"name": "Broadcom", "ev": 360000, "revenue": 35000, "ebitda": 20000, "market_cap": 330000, "net_income": 14000, "eps": 32.0, "price": 800, "growth": 0.15},
+    {"name": "Qualcomm", "ev": 140000, "revenue": 40000, "ebitda": 12000, "market_cap": 128000, "net_income": 9000,  "eps": 8.00, "price": 115, "growth": 0.10}
+  ]
+}
