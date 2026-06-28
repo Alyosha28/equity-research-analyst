@@ -397,6 +397,10 @@ figure img,
 figure svg.plot {
   max-width: 100%;
   height: auto;
+  /* Ceiling so a wide raster chart (e.g. 9x5.2in @144dpi) cannot dominate or
+     overflow an A4 page. object-fit keeps aspect ratio when both bounds hit. */
+  max-height: 8.5cm;
+  object-fit: contain;
 }
 
 figcaption {
@@ -565,4 +569,6 @@ svg.plot {
   margin: 0 auto;
   max-width: 100%;
   height: auto;
+  max-height: 8.5cm;
+  object-fit: contain;
 }

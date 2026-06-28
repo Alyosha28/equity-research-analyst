@@ -13,9 +13,28 @@ but how the story unfolds under every assumption, and what the gap between price
 and value actually means.
 
 Built on Aswath Damodaran's six-layer valuation framework, it turns methodology
-into runnable Python code, orchestrated through **14 independent AI sub-agents**
+into runnable Python code, orchestrated through **17 independent AI sub-agents**
 in a self-iterating pipeline with adversarial review at every step. Every number
 is auditable. Every report is reproducible.
+
+---
+
+## What's New (June 2026)
+
+The `generate-pdf` sub-skill received a robustness overhaul based on real-world
+testing with Chinese-language reports on Windows (non-ASCII working directories):
+
+| Feature | Before | After |
+|---------|--------|-------|
+| **Company logo** | `position: fixed` CSS (overlapped title text on every page) | Engine-native: `headerTemplate` (Chromium) / `running()` (WeasyPrint). Top margin auto-grows with logo size — no overlap ever. |
+| **Image paths** | `file://` / relative paths (blank images in non-ASCII dirs like `D:\\研报生成`) | Every image base64-embedded as a `data:` URI — path-independent, engine-neutral. |
+| **Chart sizing** | No height bound (9×5.2″ chart filled the page) | `max-height: 8.5cm; object-fit: contain` ceiling on all chart images. |
+| **Visual verification** | File-size checks only (layout bugs invisible) | `render_pdf_previews()` renders PDF→PNG for actual inspection. `--verify-visual` flag. |
+| **Engine detection** | Crashed on Windows when WeasyPrint raised `OSError` (missing Pango) | Catches broad `Exception` → gracefully falls back to Playwright. |
+| **Logo size** | Hard-coded 0.95cm | Configurable `--logo-height` (cm). Top margin auto-computes: `max(2.5, height + 1.4)`. |
+
+See [`skills/generate-pdf/PDF_FIXES.md`](skills/generate-pdf/PDF_FIXES.md) for the full
+post-mortem and [`skills/generate-pdf/SKILL.md`](skills/generate-pdf/SKILL.md) for the updated spec.
 
 ---
 
@@ -107,7 +126,7 @@ the reviewer checks against a concrete checklist, not vague impressions.
 | `/triangulate` | 7-lens cross-check | No averaging? Dispute locus specific? Variant falsifiable? |
 | `/write-report` | Investor-facing prose | No "you"? All 6 depth elements? Numbers ledger? |
 | `/self-audit` | Lint + self-critique | Lint passes? No dodged CRITICALs? Honest scoring? |
-| `/generate-pdf` | Typographic PDF | Charts embedded? CJK fonts render? Rating box prominent? |
+| `/generate-pdf` | Typographic PDF | Charts embedded? Logo in margin (not overlapping text)? CJK fonts? Rating box? All images base64-embedded? Visual previews verified? |
 | `/critique-report` | Mode B: audit others | Evidence-backed? Re-run present? Verdict matches? |
 | `/refresh-valuation` | Mode C: keep current | Dated sweep? Driver delta explicit? Reverse re-test? |
 | `/fetch-data` | Shared: data skeleton | Sources annotated? Tiers correct? Warnings present? |
@@ -155,6 +174,15 @@ python reverse_dcf.py ../templates/assumptions.example.json --price 409 --solve-
 python monte_carlo.py ../templates/assumptions.example.json --price 409 --json > mc.json
 python charts.py --kind montecarlo --in mc.json --out figs/
 
+# Build a professional PDF (auto-detects engine, embeds images as base64)
+cd ../skills/generate-pdf/scripts
+python render_pdf.py ../../templates/report.example.md --out report.pdf \
+    --cjk --lang zh --chart-index ../../figs/chart-index.json
+
+# With a company logo (auto-sized, never overlaps text)
+python render_pdf.py ../../report.md --out report.pdf \
+    --logo company_logo.jpg --logo-height 1.4 --verify-visual
+
 # Value your own company
 cp ../templates/assumptions.example.json ../my_company.json
 # Edit my_company.json with your estimates
@@ -166,9 +194,10 @@ engine. Optional: `matplotlib` for chart generation.
 
 ## The Engine
 
-All scripts consume a JSON assumptions sheet. Money is in **$ millions**, rates
-are **decimals** (0.40 = 40%), shares in **millions**. Every valuation script
-accepts `--json` for machine-readable output, composable with `charts.py`.
+All scripts consume a JSON assumptions sheet. Money is in **$ millions** (or the
+reporting currency), rates are **decimals** (0.40 = 40%), shares in **millions**.
+Every valuation script accepts `--json` for machine-readable output, composable
+with `charts.py`.
 
 | Script | Lens | Output |
 |--------|------|--------|
@@ -180,6 +209,7 @@ accepts `--json` for machine-readable output, composable with `charts.py`.
 | `comps.py` | Relative valuation | peer-median multiples → implied value |
 | `financial_valuation.py` | Banks & insurers | excess-return `(ROE − Ke) × BV` + DDM cross-check |
 | `charts.py` | Visualization | Monte Carlo histogram, football field, breakeven heatmap, tornado → PNG/SVG |
+| `render_pdf.py` | PDF rendering | MD+charts+CSS → professional PDF. Auto-detect engine (WeasyPrint/Playwright). Logo via headerTemplate/running element. Base64 image embedding. Visual previews. |
 | `report_lint.py` | Quality gate | flags AI-answer tells: second-person, emoji, missing MoS/ledger/disclaimer |
 | `fetch_financials.py` | Data pre-fill | yfinance/EDGAR → assumptions skeleton *(third-party tier — confirm before use)* |
 
@@ -270,7 +300,7 @@ equity-research-analyst/
 │   ├── critique-report/SKILL.md
 │   ├── refresh-valuation/SKILL.md
 │   └── fetch-data/SKILL.md
-├── scripts/              # Python valuation engine (10 programs)
+├── scripts/              # Python valuation engine (11 programs)
 │   ├── dcf_valuation.py
 │   ├── monte_carlo.py
 │   ├── breakeven.py
@@ -279,6 +309,7 @@ equity-research-analyst/
 │   ├── comps.py
 │   ├── financial_valuation.py
 │   ├── charts.py
+│   ├── render_pdf.py       # MD→PDF with logo, base64, visual verify
 │   ├── report_lint.py
 │   ├── fetch_financials.py
 │   └── valuation_inputs.py

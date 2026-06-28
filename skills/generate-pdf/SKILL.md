@@ -368,6 +368,101 @@ For **B/W print compatibility**, charts MUST:
 
 ---
 
+## Company logo & recurring header images
+
+A company logo (or any per-page header image) is placed in the **page top-margin
+box**, not in the body. The engine determines the mechanism — and getting this
+wrong is the single most common logo bug.
+
+### The rule: NEVER use `position: fixed` for a logo in Chromium print
+
+In Chromium's print-to-PDF pipeline, a `position: fixed` element anchors to the
+**content box** (the area *inside* the print margins), not the physical page
+edge. With `top: 0.4cm` it lands 0.4cm into the content area — directly on top of
+the first line of body text (the H1 title on page 1, the first H2 on later
+pages). Widening the page margin does **not** fix it: the fixed element moves
+down with the content box. This produces a logo that overlaps the title on every
+page. (This exact bug shipped once before it was caught by visual inspection.)
+
+### Correct mechanism per engine
+
+| Engine | Logo mechanism | Why |
+|--------|---------------|-----|
+| **Chromium / Playwright** | Native `headerTemplate` via `display_header_footer=True` | The header template renders *inside* the reserved top-margin box, physically separated from body text. Chromium does NOT support CSS `element()`. |
+| **WeasyPrint** | CSS `position: running(name)` + `@page { @top-left { content: element(name) } }` | WeasyPrint supports CSS Paged Media running elements; this is the standard way to repeat content in the margin box. It does NOT honor a headerTemplate. |
+
+The two mechanisms are mutually exclusive and engine-specific — `render_pdf.py`
+injects the right one per engine (`render_playwright` builds a headerTemplate;
+`render_weasyprint` injects a running element + `@page` rule).
+
+### Sizing and clearance (auto-grown top margin)
+
+The top margin must always exceed the logo height plus a clearance band, or the
+logo will overlap text again at larger sizes. `render_pdf.py` computes:
+
+```
+top_margin = max(2.5cm, logo_height + 1.4cm)
+```
+
+So enlarging the logo (e.g. `--logo-height 1.9` for a 2× logo) automatically
+grows the top margin and can never reintroduce overlap. Never hard-code a top
+margin smaller than `logo_height + clearance`.
+
+### Embed the logo as base64 (not a file path)
+
+The logo — like all images — is embedded as a base64 data URI, never referenced
+by a `file://` or relative path. See the next subsection for why.
+
+### CLI usage
+
+```bash
+python render_pdf.py report.md --out report.pdf \
+    --logo company_logo.jpg --logo-height 1.4 --verify-visual
+```
+
+---
+
+## Image paths: ALWAYS base64-embed (non-ASCII path trap)
+
+**Chromium silently fails to load images referenced by relative or `file://`
+paths when the working directory contains non-ASCII characters** (e.g.
+`D:\研报生成`, `/données/`, `/プロジェクト/`). The chart/logo renders blank with
+no error and no log line — the PDF looks "successful" but is missing images.
+
+**Rule:** every image (charts AND logo) is embedded as a base64 data URI
+(`data:image/png;base64,...`). This has zero path dependency and renders
+identically on every engine and every locale. `render_pdf.py`'s
+`_img_to_data_uri()` and `_resolve_charts()` enforce this for PNG charts; inline
+SVG is already path-free. Only fall back to a path reference if base64 encoding
+itself fails (logged as a WARN).
+
+This applies to WeasyPrint too — data URIs work there as well, so base64 is the
+single engine-neutral choice.
+
+---
+
+## Visual self-verification (MANDATORY for layout changes)
+
+File-size and exit-code checks **cannot** catch the layout failures that matter:
+logo-over-text overlap, oversized charts that swallow a page, CJK tofu, figures
+split across a page break. The only reliable check is to **render the output PDF
+back to images and look at them.**
+
+`render_pdf.py --verify-visual` renders the first pages of the finished PDF to
+PNG previews (via PyMuPDF / `fitz`) next to the output file:
+
+```bash
+python render_pdf.py report.md --out report.pdf --logo logo.jpg --verify-visual
+# -> report_preview_p1.png, report_preview_p2.png, report_preview_p3.png
+```
+
+The agent (or a cross-model reviewer) then **opens these PNGs** and checks the
+Type-B gate criteria visually. Adjusting CSS/margins without looking at a
+rendered page is a known anti-pattern — it wastes cycles and ships overlap bugs.
+Render, look, then decide.
+
+---
+
 ## CJK (Chinese/Japanese/Korean) handling
 
 ### The problem
@@ -500,6 +595,11 @@ taste/judgment), so it routes to a cross-model reviewer per the loop protocol.
 | Page break mid-chart | CSS not honored | Add `page-break-inside: avoid` to figure |
 | File too large | Unsubset fonts or high-res PNGs | Use SVG charts; enable font subsetting; compress PNGs |
 | Pandoc CJK fails | Pandoc doesn't inject CJK CSS | Use Path A (Python markdown -> HTML -> WeasyPrint) |
+| Logo overlaps title text | `position: fixed` used in Chromium print (anchors to content box, not page edge) | Use native `headerTemplate` (Chromium) / `position: running()` (WeasyPrint); see "Company logo" section |
+| Logo/chart renders blank | Image referenced by `file://`/relative path under a non-ASCII working dir | Base64-embed every image (data URI); `_img_to_data_uri()` |
+| Oversized chart fills page | No `max-height` on chart img | CSS `max-height: 8.5cm; object-fit: contain` on `figure img, svg.plot` |
+| `--check-deps` crashes on Windows | `_python_import_ok` only caught `ImportError`; WeasyPrint raises `OSError` (Pango DLL) at import | Catch broad `Exception` -> treat as unavailable -> fall back to Playwright |
+| Larger logo overlaps text again | Hard-coded top margin | Auto-grow `top = max(2.5cm, logo_height + 1.4cm)` |
 
 ---
 
@@ -700,25 +800,55 @@ docker run --rm -v "$(pwd):/workspace" equity-research-pdf \
 
 ## Appendix C: Playwright fallback script
 
-When WeasyPrint is unavailable, the script falls back to Playwright:
+When WeasyPrint is unavailable (e.g. Windows without GTK/Pango — the common
+case), the script falls back to Playwright/Chromium. This is the most reliable
+engine on Windows and requires zero system deps beyond Chromium itself.
+
+The logo goes in the native `headerTemplate` — NOT a `position: fixed` element
+(which would overlap body text; see the "Company logo" section). The top margin
+auto-grows with the logo height so overlap is impossible at any size.
 
 ```python
-async def playwright_render(html: str, pdf_path: str) -> None:
+async def playwright_render(html: str, pdf_path: str,
+                            logo_uri: str | None = None,
+                            logo_height_cm: float = 0.95) -> None:
     from playwright.async_api import async_playwright
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page()
         await page.set_content(html, wait_until="networkidle")
-        await page.pdf(
-            path=pdf_path,
-            format="A4",
+
+        kwargs = dict(
+            path=pdf_path, format="A4",
             margin={"top": "2.2cm", "bottom": "2.4cm",
                     "left": "2.4cm", "right": "2.4cm"},
-            print_background=True,
-            display_header_footer=False,
+            print_background=True, display_header_footer=False,
         )
+        if logo_uri:  # base64 data URI — never a file path
+            top = max(2.5, logo_height_cm + 1.4)
+            kwargs["margin"]["top"] = f"{top}cm"
+            kwargs["display_header_footer"] = True
+            kwargs["header_template"] = (
+                '<div style="width:100%;padding:0 0 0 1cm;'
+                '-webkit-print-color-adjust:exact;">'
+                f'<img src="{logo_uri}" style="height:{logo_height_cm}cm;width:auto;"></div>'
+            )
+            kwargs["footer_template"] = (
+                '<div style="width:100%;font-size:8px;color:#999;'
+                'text-align:center;">— <span class="pageNumber"></span> —</div>'
+            )
+        await page.pdf(**kwargs)
         await browser.close()
 ```
+
+**Important Chromium-print gotchas (learned the hard way):**
+- `display_header_footer=True` is required for ANY margin-box content (logo, page
+  numbers). With it `False`, CSS `@page` margin boxes are largely ignored.
+- The `header_template`/`footer_template` render at a tiny default font and have
+  their own zoom; size with explicit `cm`/`px`, and add
+  `-webkit-print-color-adjust:exact` so backgrounds/colors print.
+- Page numbers use `<span class="pageNumber">` / `<span class="totalPages">`
+  inside the templates — NOT CSS counters.
 
 ## Appendix D: Chart label language
 

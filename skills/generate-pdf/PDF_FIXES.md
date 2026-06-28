@@ -715,3 +715,91 @@ def render(
 - Chart generation: `scripts/charts.py`
 - Report linting: `scripts/report_lint.py`
 - Tests: `tests/test_render_pdf.py`, `tests/conftest.py`
+
+---
+
+# Round 2 — Logo, Image-Path, and Robustness Fixes
+
+Date: 2026-06-29
+Source: Real BYD (1211.HK) report generation on a Windows host with a non-ASCII
+working directory (`D:\研报生成`). Each fix below maps to a concrete failure
+observed and corrected in that session. Status: APPLIED to `render_pdf.py`,
+`templates/professional.css`, and `SKILL.md`.
+
+## Fix 4: Logo placement — headerTemplate, not `position: fixed`
+
+### Problem (observed)
+A company logo placed with CSS `position: fixed; top: 0.4cm; left: 0.4cm`
+overlapped the H1 title on page 1 and the first H2 on every later page.
+Widening the page top margin did NOT help — the logo moved down with the text.
+
+### Root cause
+In Chromium's print pipeline, `position: fixed` anchors to the **content box**
+(inside the print margins), not the physical page edge. So the logo always lands
+on the first line of body text, regardless of margin size.
+
+### Fix (applied)
+- **Chromium/Playwright:** render the logo in the native `headerTemplate`
+  (`display_header_footer=True`). It paints inside the reserved top-margin box,
+  isolated from body text.
+- **WeasyPrint:** inject `position: running(logoRun)` + `@page { @top-left {
+  content: element(logoRun) } }`.
+- Top margin auto-grows: `top = max(2.5cm, logo_height + 1.4cm)` so a larger
+  logo can never reintroduce overlap.
+- New params/flags: `render(logo=, logo_height_cm=)`, CLI `--logo`,
+  `--logo-height`. See `render_playwright()` and `_inject_weasyprint_logo()`.
+
+## Fix 5: Base64-embed all images (non-ASCII path trap)
+
+### Problem (observed)
+Charts and the logo rendered blank in the PDF — no error, no log. Working dir
+was `D:\研报生成`.
+
+### Root cause
+Chromium silently fails to load images referenced by `file://`/relative paths
+when the path contains non-ASCII characters. `_resolve_charts()` previously
+emitted `<img src="figs/...">` for PNG charts.
+
+### Fix (applied)
+`_img_to_data_uri()` base64-embeds every image as a `data:` URI. `_resolve_charts()`
+uses it for the PNG branch (inline SVG was already path-free). The logo is
+embedded the same way. Engine-neutral: data URIs work in WeasyPrint too.
+
+## Fix 6: Chart size ceiling for A4
+
+### Problem (observed)
+A 9×5.2in @144dpi raster chart filled most of an A4 page.
+
+### Fix (applied)
+`templates/professional.css`: `figure img, figure svg.plot, svg.plot` now carry
+`max-height: 8.5cm; object-fit: contain` (in addition to `max-width: 100%`).
+
+## Fix 7: Graceful engine detection when WeasyPrint import fails
+
+### Problem (observed)
+`--check-deps` and auto engine detection CRASHED on Windows: importing
+`weasyprint` raises `OSError: cannot load library 'libpango-1.0-0'` (GTK/Pango
+not installed), and `_python_import_ok()` only caught `ImportError`.
+
+### Fix (applied)
+`_python_import_ok()` now catches broad `Exception` and returns `False` — so a
+library that imports-but-fails-to-load-native-deps is treated as unavailable and
+the chain falls back to Playwright instead of crashing.
+
+## Fix 8: Visual self-verification (`--verify-visual`)
+
+### Problem (process)
+Layout bugs (logo overlap, oversized charts, CJK tofu, split figures) are
+invisible to file-size/exit-code checks. They were "fixed" blindly by tweaking
+CSS without looking — wasting cycles and shipping an overlap bug.
+
+### Fix (applied)
+`render_pdf_previews()` renders the first pages of the output PDF to PNG via
+PyMuPDF; `render(verify_visual=True)` / CLI `--verify-visual` invokes it. The
+agent/reviewer MUST open the PNGs and inspect the Type-B criteria. Rule:
+**render, look, then decide — never tweak layout blind.**
+
+### Process lesson (the meta-fix)
+The biggest time sink was adjusting margins/CSS without viewing the rendered
+page. Mandate: for ANY layout/logo/chart change, render to PNG and visually
+verify before declaring done.
