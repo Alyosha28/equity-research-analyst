@@ -1,0 +1,572 @@
+{
+  "$schema": "equity-research design-tokens v1",
+  "description": "Single source of truth for all visual design constants used by charts.py, render_pdf.py, and CSS templates. Changes here propagate to all outputs.",
+  "version": "1.0.0",
+  "generated_for": "equity-research-analyst/generate-pdf + scripts/charts.py",
+
+  "page_geometry": {
+    "size": "A4",
+    "width_mm": 210,
+    "height_mm": 297,
+    "margin_top_cm": 2.2,
+    "margin_bottom_cm": 2.4,
+    "margin_left_cm": 2.4,
+    "margin_right_cm": 2.4,
+    "text_width_mm": 162,
+    "text_height_mm": 251.4
+  },
+
+  "palette": {
+    "colors": {
+      "ink": {
+        "hex": "#1a1e2b",
+        "name": "Near-black navy",
+        "usage": "Body text, primary content",
+        "css_var": "--ink"
+      },
+      "ink_light": {
+        "hex": "#4a5568",
+        "name": "Secondary text gray",
+        "usage": "Secondary text, meta information, figure captions",
+        "css_var": "--ink-light"
+      },
+      "accent": {
+        "hex": "#1a3a6b",
+        "name": "Navy accent",
+        "usage": "Headers, rules, rating box border, table header backgrounds",
+        "css_var": "--accent"
+      },
+      "accent_dim": {
+        "hex": "#2d5a9e",
+        "name": "Lighter navy",
+        "usage": "Hyperlinks, hover states, secondary accents",
+        "css_var": "--accent-dim"
+      },
+      "surface": {
+        "hex": "#f8fafc",
+        "name": "Surface background",
+        "usage": "Rating box background, code blocks, table zebra stripes",
+        "css_var": "--surface"
+      },
+      "rule": {
+        "hex": "#cbd5e1",
+        "name": "Rule line",
+        "usage": "Horizontal rules, table borders, section dividers",
+        "css_var": "--rule"
+      },
+      "rule_light": {
+        "hex": "#e2e8f0",
+        "name": "Light rule",
+        "usage": "Subtle separators, table cell borders",
+        "css_var": "--rule-light"
+      },
+      "up": {
+        "hex": "#15803d",
+        "name": "Green — BUY/undervalued",
+        "usage": "BUY signals, accumulation range, undervalued indicators",
+        "css_var": "--up"
+      },
+      "down": {
+        "hex": "#b91c1c",
+        "name": "Red — SELL/overvalued",
+        "usage": "SELL signals, overvalued indicators, price-at-risk markers",
+        "css_var": "--down"
+      },
+      "neutral": {
+        "hex": "#6b7280",
+        "name": "Neutral gray",
+        "usage": "Neutral ratings, meta-text, page numbers, disclaimers",
+        "css_var": "--neutral"
+      },
+      "grid": {
+        "hex": "#e5e7eb",
+        "name": "Grid line",
+        "usage": "Chart grid lines, spine color",
+        "css_var": null,
+        "note": "Used by charts.py only"
+      },
+      "band": {
+        "hex": "#16a34a",
+        "name": "Margin-of-safety band fill",
+        "usage": "MoS buy-band fill in Monte Carlo histogram",
+        "css_var": null,
+        "note": "Used by charts.py only"
+      },
+      "chart_ink": {
+        "hex": "#1f2a37",
+        "name": "Chart title/text ink",
+        "usage": "Chart titles, axis labels, tick labels in charts.py",
+        "css_var": null,
+        "note": "Slightly different from body --ink for chart contrast"
+      },
+      "chart_muted": {
+        "hex": "#6b7280",
+        "name": "Chart muted text",
+        "usage": "Chart axis labels, tick labels in charts.py",
+        "css_var": null
+      },
+      "chart_accent": {
+        "hex": "#1d4ed8",
+        "name": "Chart accent blue",
+        "usage": "Histogram bars, football field bars, pie chart explicit period",
+        "css_var": null
+      },
+      "chart_up": {
+        "hex": "#15803d",
+        "name": "Chart green — cheap/undervalued",
+        "usage": "Tornado upside bars, Monte Carlo buy-below line",
+        "css_var": null
+      },
+      "chart_down": {
+        "hex": "#b91c1c",
+        "name": "Chart red — rich/overvalued",
+        "usage": "Tornado downside bars, Monte Carlo price line",
+        "css_var": null
+      }
+    },
+    "bw_override_colors": {
+      "ink": "#000000",
+      "ink_light": "#333333",
+      "accent": "#000000",
+      "accent_dim": "#555555",
+      "surface": "#f0f0f0",
+      "rule": "#999999",
+      "rule_light": "#cccccc",
+      "up": "#000000",
+      "down": "#000000",
+      "neutral": "#666666"
+    }
+  },
+
+  "typography": {
+    "font_families": {
+      "body": {
+        "css_var": "--font-body",
+        "stack": [
+          "CJK Body",
+          "Noto Serif CJK SC",
+          "Source Serif 4",
+          "Georgia",
+          "SimSun",
+          "serif"
+        ],
+        "usage": "Body paragraphs, general text"
+      },
+      "heading": {
+        "css_var": "--font-heading",
+        "stack": [
+          "CJK Heading",
+          "Noto Sans CJK SC",
+          "Source Sans 3",
+          "Helvetica",
+          "Microsoft YaHei",
+          "sans-serif"
+        ],
+        "usage": "H1-H4 headings"
+      },
+      "mono": {
+        "css_var": "--font-mono",
+        "stack": [
+          "Cascadia Code",
+          "Source Code Pro",
+          "Consolas",
+          "Courier New",
+          "monospace"
+        ],
+        "usage": "Code blocks, tables, ticker symbols"
+      },
+      "display": {
+        "css_var": "--font-display",
+        "stack": [
+          "CJK Heading",
+          "Noto Sans CJK SC",
+          "Source Sans 3",
+          "Microsoft YaHei",
+          "sans-serif"
+        ],
+        "usage": "Rating box, page headers, figure captions"
+      }
+    },
+    "sizes": {
+      "body": {
+        "pt": 11,
+        "css_var": "--size-body",
+        "usage": "Base body text"
+      },
+      "h1": {
+        "pt": 18,
+        "css_var": "--size-h1",
+        "usage": "H1 headings"
+      },
+      "h2": {
+        "pt": 14,
+        "css_var": "--size-h2",
+        "usage": "H2 section headings"
+      },
+      "h3": {
+        "pt": 12,
+        "css_var": "--size-h3",
+        "usage": "H3 sub-section headings"
+      },
+      "h4": {
+        "pt": 11,
+        "css_var": null,
+        "usage": "H4 sub-headings (same as body)"
+      },
+      "mono": {
+        "pt": 9.5,
+        "css_var": "--size-mono",
+        "usage": "Code blocks, inline code"
+      },
+      "caption": {
+        "pt": 8.5,
+        "css_var": "--size-caption",
+        "usage": "Figure captions"
+      },
+      "header": {
+        "pt": 7.5,
+        "css_var": "--size-header",
+        "usage": "Running page headers"
+      },
+      "footer": {
+        "pt": 7.5,
+        "css_var": "--size-footer",
+        "usage": "Running page footers, page numbers"
+      },
+      "disclaimer": {
+        "pt": 8,
+        "css_var": "--size-disclaimer",
+        "usage": "Disclaimer text"
+      },
+      "rating_box_company": {
+        "pt": 15,
+        "css_var": null,
+        "usage": "Company name in rating box"
+      },
+      "rating_box_kv_label": {
+        "pt": 9.5,
+        "css_var": null,
+        "usage": "Key-value labels in rating box"
+      },
+      "rating_box_kv_value": {
+        "pt": 11,
+        "css_var": null,
+        "usage": "Key-value values in rating box"
+      },
+      "rating_box_thesis": {
+        "pt": 10,
+        "css_var": null,
+        "usage": "Thesis text in rating box"
+      },
+      "table_body": {
+        "pt": 9.5,
+        "css_var": null,
+        "usage": "Table body text"
+      },
+      "table_header": {
+        "pt": 8.5,
+        "css_var": null,
+        "usage": "Table header text"
+      },
+      "table_wide": {
+        "pt": 8,
+        "css_var": null,
+        "usage": "Wide table body (4+ columns)"
+      },
+      "table_wide_header": {
+        "pt": 7.5,
+        "css_var": null,
+        "usage": "Wide table header"
+      },
+      "footnote": {
+        "pt": 8,
+        "css_var": null,
+        "usage": "Footnotes"
+      },
+      "chart_title": {
+        "pt": 13,
+        "css_var": null,
+        "usage": "Chart titles in charts.py"
+      },
+      "chart_axis_label": {
+        "pt": 10,
+        "css_var": null,
+        "usage": "Axis labels in charts.py"
+      },
+      "chart_tick": {
+        "pt": 9,
+        "css_var": null,
+        "usage": "Tick labels in charts.py"
+      },
+      "chart_legend": {
+        "pt": 8.5,
+        "css_var": null,
+        "usage": "Legend text in charts.py"
+      },
+      "chart_annotation": {
+        "pt": 8,
+        "css_var": null,
+        "usage": "Data labels on bars/heatmap cells"
+      },
+      "chart_donut_center": {
+        "pt": 14,
+        "css_var": null,
+        "usage": "Center text in donut/pie charts"
+      }
+    },
+    "line_heights": {
+      "body": {
+        "value": 1.75,
+        "css_var": "--line-body",
+        "note": "CJK text needs 1.6-1.8 vs Latin 1.4-1.5"
+      },
+      "heading": {
+        "value": 1.3,
+        "css_var": "--line-heading"
+      },
+      "mono": {
+        "value": 1.5,
+        "css_var": "--line-mono"
+      },
+      "rating_box_thesis": {
+        "value": 1.55,
+        "css_var": null
+      },
+      "disclaimer": {
+        "value": 1.4,
+        "css_var": null
+      },
+      "footnote": {
+        "value": 1.4,
+        "css_var": null
+      },
+      "table": {
+        "value": 1.35,
+        "css_var": null
+      },
+      "caption": {
+        "value": 1.35,
+        "css_var": null
+      }
+    },
+    "weights": {
+      "heading": {
+        "h1": 700,
+        "h2": 700,
+        "h3": 600,
+        "h4": 600
+      },
+      "body_bold": 700,
+      "caption_bold": 600,
+      "rating_label": 600,
+      "rating_value": 700,
+      "table_header": 600,
+      "disclaimer": "normal"
+    }
+  },
+
+  "spacing": {
+    "paragraph_margin_bottom_em": 0.6,
+    "heading_margins_pt": {
+      "h1_top": 24,
+      "h1_bottom": 12,
+      "h2_top": 18,
+      "h2_bottom": 8,
+      "h3_top": 14,
+      "h3_bottom": 6,
+      "h4_top": 12,
+      "h4_bottom": 4
+    },
+    "horizontal_rule_margin_pt": 18,
+    "blockquote": {
+      "margin_top_pt": 14,
+      "margin_bottom_pt": 14,
+      "margin_left_pt": 18,
+      "padding_left_pt": 14,
+      "border_width_pt": 2
+    },
+    "list": {
+      "margin_top_pt": 8,
+      "margin_bottom_pt": 8,
+      "padding_left_pt": 22,
+      "item_margin_bottom_pt": 3
+    },
+    "figure_margin_pt": 18,
+    "figure_caption_margin_top_pt": 6,
+    "rating_box": {
+      "padding_pt": [18, 22],
+      "margin_bottom_pt": 22,
+      "border_width_pt": 2,
+      "border_radius_pt": 4,
+      "divider_margin_pt": [10, 0, 14, 0],
+      "kv_grid_gap_pt": [4, 14],
+      "kv_grid_columns": ["110pt", "1fr"],
+      "kv_grid_margin_bottom_pt": 14,
+      "thesis_margin_bottom_pt": 10
+    },
+    "code_block": {
+      "padding_pt": [12, 14],
+      "margin_pt": [12, 0],
+      "border_radius_pt": 4,
+      "border_width_pt": 0.5
+    },
+    "table": {
+      "margin_pt": [14, 0],
+      "cell_padding_theader_pt": [6, 8, 4, 8],
+      "cell_padding_tbody_pt": [4, 8],
+      "header_border_bottom_pt": 1.5
+    },
+    "page_footer": {
+      "border_top_pt": 0.5,
+      "padding_top_pt": 6,
+      "margin_top_pt": 6
+    },
+    "disclaimer": {
+      "margin_top_pt": 28,
+      "padding_top_pt": 10,
+      "border_top_pt": 0.5
+    },
+    "toc": {
+      "margin_pt": [22, 0],
+      "item_margin_bottom_pt": 4,
+      "h2_margin_top_pt": 8,
+      "h3_margin_left_pt": 18
+    }
+  },
+
+  "charts": {
+    "figsize_inches": [9.0, 5.2],
+    "dpi": 144,
+    "donut_figsize_inches": [5.6, 5.6],
+    "output_formats": ["png", "svg"],
+    "histogram_bins": 60,
+    "histogram_alpha": 0.55,
+    "football_field_line_width": 9,
+    "football_field_marker_size": 7,
+    "tornado_alpha": 0.75,
+    "donut_width": 0.42,
+    "grid_line_width": 0.6,
+    "grid_alpha": 0.7,
+    "price_line_width": 2.0,
+    "mos_band_line_width": 1.4,
+    "median_line_width": 1.6,
+    "base_line_width": 1.6,
+    "spine_color": "#e5e7eb",
+    "title_pad_pt": 12,
+    "canonical_output_pattern": "figs/{TICKER}_{kind}.{ext}",
+    "chart_kinds": ["montecarlo", "football", "breakeven", "tornado", "terminal"]
+  },
+
+  "pdf_output": {
+    "max_file_size_mb": 5.0,
+    "default_max_inline_svg_mb": 1.0,
+    "cjk_line_height_multiplier": 1.75,
+    "engine_priority_order": [
+      "pandoc-weasyprint",
+      "weasyprint",
+      "playwright",
+      "pandoc-only"
+    ],
+    "rendering_timeout_seconds": {
+      "weasyprint": 120,
+      "pandoc": 180,
+      "playwright": 60
+    },
+    "markdown_extensions": [
+      "tables",
+      "fenced_code",
+      "codehilite",
+      "toc",
+      "footnotes",
+      "attr_list",
+      "def_list"
+    ]
+  },
+
+  "cjk": {
+    "preferred_fonts": {
+      "sans_serif": {
+        "tier1": ["Noto Sans CJK SC", "Source Han Sans SC"],
+        "tier2": {
+          "windows": ["Microsoft YaHei", "SimHei", "Noto Sans SC"],
+          "darwin": ["PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC"],
+          "linux": ["Noto Sans CJK SC", "WenQuanYi Micro Hei"]
+        }
+      },
+      "serif": {
+        "tier1": ["Noto Serif CJK SC", "Source Han Serif SC"],
+        "tier2": {
+          "windows": ["SimSun", "NSimSun", "Noto Serif CJK SC"],
+          "darwin": ["Songti SC", "STSong", "Noto Serif CJK SC"],
+          "linux": ["Noto Serif CJK SC", "WenQuanYi Zen Hei"]
+        }
+      },
+      "mono": {
+        "tier1": ["Noto Sans Mono CJK SC"],
+        "tier2": {
+          "windows": ["SimHei", "SimSun"],
+          "darwin": ["PingFang SC", "Hiragino Sans GB"],
+          "linux": ["Noto Sans Mono CJK SC", "WenQuanYi Micro Hei"]
+        }
+      }
+    },
+    "unicode_ranges_for_css": [
+      "U+2E80-2EFF",
+      "U+3000-303F",
+      "U+31C0-31EF",
+      "U+3200-32FF",
+      "U+3300-33FF",
+      "U+3400-4DBF",
+      "U+4E00-9FFF",
+      "U+F900-FAFF",
+      "U+FE10-FE1F",
+      "U+FE30-FE4F",
+      "U+FF00-FFEF",
+      "U+20000-2A6DF",
+      "U+2A700-2B73F",
+      "U+2B740-2B81F",
+      "U+2F800-2FA1F"
+    ],
+    "layout_adjustments": {
+      "hanging_punctuation": "allow-end",
+      "text_justify": "inter-character",
+      "emphasis_style": "filled circle",
+      "matplotlib_rcparams": {
+        "axes.unicode_minus": false
+      }
+    }
+  },
+
+  "export": {
+    "css_variable_prefix": "--",
+    "chart_palette_keys": [
+      "ink", "muted", "grid", "accent", "up", "down", "band", "surface"
+    ],
+    "chart_palette_js_export": {
+      "ink": "#1f2a37",
+      "muted": "#6b7280",
+      "grid": "#e5e7eb",
+      "accent": "#1d4ed8",
+      "up": "#15803d",
+      "down": "#b91c1c",
+      "band": "#16a34a",
+      "surface": "#f8fafc"
+    },
+    "md_to_html_classes": {
+      "chart_figure": "chart",
+      "chart_missing": "chart-missing",
+      "rating_box": "rating-box",
+      "disclaimer": "disclaimer",
+      "numbers_ledger": "numbers-ledger",
+      "toc": "toc",
+      "landscape_page": "landscape",
+      "two_col": "two-col",
+      "page_break_before": "page-break-before",
+      "page_break_after": "page-break-after",
+      "keep_together": "keep-together",
+      "wide_table": "wide",
+      "report_meta": "report-meta",
+      "memo_header": "memo-header"
+    }
+  }
+}

@@ -42,6 +42,7 @@ SOURCE_MARKER = re.compile(
     re.IGNORECASE,
 )
 
+IMAGE_REF = re.compile(r'!\[[^\]]*\]\(([^)]+)\)')  # captures the path in ![](path)
 EMOJI_EXCLUDE = {0x2713, 0x2714}   # ✓ ✔ are legitimate table marks, not emoji
 
 
@@ -106,6 +107,73 @@ def rule_required_fail(text):
     return out
 
 
+def rule_chart_coverage(text, report_path=None):
+    """Check that chart images are referenced in the report and point to real files.
+
+    This is the automated enforcement of what was previously a manual visual check
+    in the generate-pdf adversarial review (quality gate #1: "All charts embedded").
+
+    Two checks, two severities:
+      FAIL — image reference points to a file that does NOT exist (broken link)
+      WARN — chart files exist in figs/ but are NOT referenced in the report
+    """
+    out = []
+    # -- Collect image references from the report -------------------------------
+    refs = set(IMAGE_REF.findall(text))
+    # Strip extensions for comparison (the canonical format omits them)
+    ref_stems = set()
+    for r in refs:
+        stem = r.rsplit(".", 1)[0] if "." in r.split("/")[-1] else r
+        ref_stems.add(stem)
+
+    # -- If a report_path is given, check filesystem ---------------------------
+    if report_path:
+        import os as _os
+        report_dir = _os.path.dirname(_os.path.abspath(report_path))
+        figs_dir = _os.path.join(report_dir, "figs")
+        if _os.path.isdir(figs_dir):
+            chart_files = [
+                f for f in _os.listdir(figs_dir)
+                if f.endswith((".png", ".svg"))
+            ]
+            chart_stems = set()
+            for cf in chart_files:
+                stem = _os.path.splitext(cf)[0]
+                chart_stems.add(stem)
+                # Also add with figs/ prefix for matching
+                chart_stems.add(f"figs/{stem}")
+
+            # FAIL: image reference points to non-existent file
+            for r in refs:
+                # Resolve: try figs/r, figs/r.png, figs/r.svg
+                candidates = [
+                    _os.path.join(report_dir, r),
+                    _os.path.join(report_dir, f"{r}.png"),
+                    _os.path.join(report_dir, f"{r}.svg"),
+                ]
+                if not any(_os.path.exists(c) for c in candidates):
+                    out.append(Finding(
+                        "FAIL", "broken-chart-ref", None,
+                        f"image reference '{r}' points to a file that does not exist"
+                    ))
+
+            # WARN: chart files exist but aren't referenced
+            unreferenced = []
+            for cf in chart_files:
+                stem = _os.path.splitext(cf)[0]
+                if stem not in ref_stems and f"figs/{stem}" not in ref_stems:
+                    unreferenced.append(cf)
+            if unreferenced:
+                out.append(Finding(
+                    "WARN", "unreferenced-charts", None,
+                    f"{len(unreferenced)} chart(s) in figs/ not referenced in report: "
+                    + ", ".join(unreferenced[:5])
+                    + (f" ... and {len(unreferenced)-5} more" if len(unreferenced) > 5 else "")
+                ))
+
+    return out
+
+
 def rule_required_warn(text, lines):
     out = []
     if not _present(text, r"margin of safety", r"安全边际", r"\bMoS\b", r"buy-band", r"accumulate below", r"增持线"):
@@ -144,14 +212,159 @@ def rule_required_warn(text, lines):
     return out
 
 
-def lint(text):
+def rule_disclosure_requirements(text, lines):
+    """Check for the mandatory disclosures & certifications appendix (B.1–B.7 + B.8).
+
+    These are WARN (becoming FAIL under --strict) because legacy gold-standard examples
+    predate the disclosure requirement, but every new report MUST include them.
+    """
+    out = []
+
+    # B.1 — Analyst Certification (Reg AC language)
+    # Use [\s\S]*? (re.DOTALL equivalent) since certification text often wraps across lines.
+    # Patterns are deliberately loose to tolerate line breaks mid-sentence.
+    has_cert_views = (
+        bool(re.search(r"certify[\s\S]*?that[\s\S]*?(?:all of )?the views expressed[\s\S]*?accurately reflect[\s\S]*?personal\s+views", text, re.IGNORECASE))
+        or _present(text, r"本报告.*分析师.*独立.*撰写")
+    )
+    has_cert_comp = (
+        bool(re.search(r"no part of[\s\S]*?compensation was, is, or will be[\s\S]*?related to the specific[\s\S]*?recommendations", text, re.IGNORECASE))
+        or _present(text, r"薪酬.*与.*特定.*推荐|特定.*建议.*无关")
+    )
+    if not (has_cert_views or has_cert_comp):
+        out.append(Finding("WARN", "disclosure-missing-certification", None,
+            "no analyst certification (Reg AC) found — B.1 is missing or unpopulated"))
+    elif not has_cert_views:
+        out.append(Finding("WARN", "disclosure-incomplete-certification", None,
+            "analyst certification missing 'views accurately reflect personal views' prong"))
+    elif not has_cert_comp:
+        out.append(Finding("WARN", "disclosure-incomplete-certification", None,
+            "analyst certification missing compensation prong"))
+
+    # B.2 — Rating Distribution table
+    has_rating_dist = _present(text,
+        r"rating\s*(distribution|breakdown)", r"评级分布", r"% of.*Coverage",
+        r"coverage universe (comprised|had)",
+    )
+    has_dist_table = _present(text, r"% Investment Banking", r"investment banking clients")
+    if not has_rating_dist:
+        out.append(Finding("WARN", "disclosure-missing-rating-distribution", None,
+            "no rating distribution disclosure — B.2 is missing"))
+    elif not has_dist_table:
+        out.append(Finding("WARN", "disclosure-incomplete-rating-distribution", None,
+            "rating distribution missing '% Investment Banking Clients' column — B.2 incomplete"))
+
+    # B.3 — Meaning of Ratings
+    has_meaning = _present(text,
+        r"meaning of ratings", r"rating definitions", r"评级定义",
+        r"total return.*exceed.*benchmark",
+        r"expects the total return",
+    )
+    if not has_meaning:
+        out.append(Finding("WARN", "disclosure-missing-meaning-of-ratings", None,
+            "no 'Meaning of Ratings' section — B.3 is missing"))
+
+    # B.4 — Conflicts of Interest (FINRA 2241 items A–I)
+    has_conflict_section = _present(text,
+        r"conflicts? of interest", r"利益冲突.*披露",
+        r"FINRA Rule 2241", r"FINRA 2241",
+    )
+    # Check for at least a few of the 9 disclosure items
+    conflict_items_found = sum(1 for p in [
+        r"\(A\).*financial interest",
+        r"\(B\).*compensation.*investment banking",
+        r"\(C\).*managed or co-managed",
+        r"\(D\).*non-investment[- ]banking",
+        r"\(E\).*client of the (firm|member)",
+        r"\(F\).*beneficially own.*1%",
+        r"\(G\).*making a market",
+        r"\(H\).*compensation from the subject company",
+        r"\(I\).*other material conflict",
+    ] if _present(text, p))
+    if not has_conflict_section:
+        out.append(Finding("WARN", "disclosure-missing-conflicts", None,
+            "no conflicts of interest disclosure — B.4 is missing"))
+    elif conflict_items_found < 3:
+        out.append(Finding("WARN", "disclosure-incomplete-conflicts", None,
+            f"conflicts disclosure has only {conflict_items_found}/9 FINRA 2241 items — B.4 incomplete"))
+
+    # B.5 — Price Target Methodology
+    has_dcf_method = _present(text,
+        r"discounted cash flow.*primary|DCF.*primary|DCF.*forecast",
+        r"现金流量折现|现金流折现",
+    )
+    has_triangulation = _present(text,
+        r"triangulation|synthesis.*method|加权",
+    )
+    has_two_methods = _present(text, r"Method 1|Method 2|Primary.*Secondary")
+    if not (has_dcf_method or has_two_methods):
+        out.append(Finding("WARN", "disclosure-missing-methodology", None,
+            "no price target methodology with DCF description — B.5 is missing"))
+    elif not has_triangulation:
+        out.append(Finding("WARN", "disclosure-incomplete-methodology", None,
+            "price target methodology missing triangulation table — B.5 incomplete"))
+    elif not has_two_methods:
+        out.append(Finding("WARN", "disclosure-incomplete-methodology", None,
+            "price target methodology has fewer than 2 methods — B.5 requires at least 2"))
+
+    # B.6 — Risk Factors (at least 3 specific, DRIVER-TIED risks — generic boilerplate doesn't count)
+    # Match a heading that names "Risk Factors" and capture content until the next heading or end
+    risk_section_match = re.search(
+        r'(?:^|\n)#{1,3}\s*(?:risk factors?|风险因素)\s*\n(.*?)(?=\n#{1,3}\s|\Z)',
+        text, re.IGNORECASE | re.DOTALL,
+    )
+    if risk_section_match:
+        risk_block = risk_section_match.group(1)  # group(1) is the content after the heading
+        # Count risk items: bullet points, numbered items, or data rows in a risk table
+        bullet_items = re.findall(r'(?:^[ \t]*[*\-]\s|^[ \t]*\d+\.\s)', risk_block, re.MULTILINE)
+        # Also count table data rows (rows starting with | that have content between pipes,
+        # excluding header/separator rows)
+        table_data_rows = re.findall(r'^\|[^|\n]+\|[^|\n]+\|', risk_block, re.MULTILINE)
+        n_risks = max(len(bullet_items), len(table_data_rows))
+        if n_risks < 3:
+            out.append(Finding("WARN", "disclosure-incomplete-risks", None,
+                f"risk factors section has only {n_risks} items (<3 required) — B.6 incomplete"))
+    else:
+        out.append(Finding("WARN", "disclosure-missing-risks", None,
+            "no dedicated risk factors section — B.6 is missing"))
+
+    # B.7 — General Disclaimer (stricter than the minimal FAIL check)
+    has_info_date = _present(text, r"information.*as of|数据截至|as of.*date")
+    if not has_info_date:
+        out.append(Finding("WARN", "disclosure-incomplete-disclaimer", None,
+            "general disclaimer missing information cutoff date — B.7 incomplete"))
+
+    # B.8 — China supplement (only checked when China indicators are present)
+    # Use word-boundary-aware patterns to avoid substring false matches (e.g. "SSE" in "assess")
+    is_china_name = _present(text,
+        r"中国证券业协会|SAC.*指引|CSRC",
+        r"\bSSE\b|\bSZSE\b|\bBJSE\b|上交所|深交所|北交所",
+        r"\bA[- ]share\b|A股",
+        r"分析师独立性声明",
+    )
+    if is_china_name:
+        has_independence = _present(text, r"分析师独立性声明|独立性声明")
+        has_info_source = _present(text, r"信息来源声明")
+        if not has_independence:
+            out.append(Finding("WARN", "disclosure-missing-china-independence", None,
+                "China-listed name detected but B.8 independence statement (分析师独立性声明) missing"))
+        if not has_info_source:
+            out.append(Finding("WARN", "disclosure-missing-china-info-source", None,
+                "China-listed name detected but B.8 information source statement (信息来源声明) missing"))
+
+    return out
+
+
+def lint(text, report_path=None):
     lines = text.splitlines()
     findings = []
     findings += rule_second_person(lines)
     findings += rule_emoji(lines)
     findings += rule_banned_callouts(lines)
     findings += rule_required_fail(text)
+    findings += rule_chart_coverage(text, report_path)
     findings += rule_required_warn(text, lines)
+    findings += rule_disclosure_requirements(text, lines)
     return findings
 
 
@@ -169,7 +382,7 @@ def _main(argv=None) -> int:
     with open(args.report, "r", encoding="utf-8") as fh:
         text = fh.read()
 
-    findings = lint(text)
+    findings = lint(text, report_path=args.report)
     fails = [f for f in findings if f.severity == "FAIL"]
     warns = [f for f in findings if f.severity == "WARN"]
 

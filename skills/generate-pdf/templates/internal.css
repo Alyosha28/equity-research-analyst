@@ -1,0 +1,196 @@
+/* ==========================================================================
+   Equity Research — Internal Memo CSS
+
+   Lighter, faster version for internal Mode B (critique) and Mode C (refresh)
+   memos. No rating box, no running headers, simpler typography.
+   Designed for quick distribution within the team, not client delivery.
+
+   Usage: python render_pdf.py memo.md --out memo.pdf --style internal
+   ========================================================================== */
+
+:root {
+  --ink:        #1a1a1a;
+  --ink-light:  #555555;
+  --accent:     #2d5a9e;
+  --surface:    #f7f8fa;
+  --rule:       #d0d5dd;
+  --rule-light: #e8eaed;
+  --neutral:    #777777;
+
+  --font-body:    "CJK Body", "Noto Serif CJK SC", "Source Serif 4",
+                  Georgia, serif;
+  --font-heading: "CJK Heading", "Noto Sans CJK SC", "Source Sans 3",
+                  Helvetica, sans-serif;
+  --font-mono:    "Cascadia Code", "Source Code Pro", Consolas, monospace;
+
+  --size-body:   10.5pt;
+  --size-h1:     16pt;
+  --size-h2:     12pt;
+  --size-h3:     11pt;
+  --size-mono:   9pt;
+
+  --line-body:   1.6;
+}
+
+@page {
+  size: A4;
+  margin: 2cm 2.2cm 2.5cm 2.2cm;
+  @bottom-center {
+    content: counter(page);
+    font-size: 8pt;
+    color: var(--neutral);
+  }
+}
+
+@page :first {
+  @bottom-center { content: none; }
+}
+
+html { font-size: var(--size-body); color: var(--ink); }
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--size-body);
+  line-height: var(--line-body);
+}
+
+h1 {
+  font-family: var(--font-heading);
+  font-size: var(--size-h1);
+  font-weight: 700;
+  color: var(--ink);
+  margin-top: 18pt;
+  margin-bottom: 10pt;
+  page-break-after: avoid;
+}
+
+h2 {
+  font-family: var(--font-heading);
+  font-size: var(--size-h2);
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 14pt;
+  margin-bottom: 6pt;
+  page-break-after: avoid;
+}
+
+h3 {
+  font-family: var(--font-heading);
+  font-size: var(--size-h3);
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 10pt;
+  margin-bottom: 4pt;
+  page-break-after: avoid;
+}
+
+p { margin: 0 0 0.5em 0; }
+
+hr {
+  border: none;
+  border-top: 0.5pt solid var(--rule);
+  margin: 14pt 0;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: var(--size-mono);
+  background: var(--surface);
+  padding: 1pt 4pt;
+}
+
+pre {
+  font-family: var(--font-mono);
+  font-size: var(--size-mono);
+  line-height: 1.45;
+  background: var(--surface);
+  border: 0.5pt solid var(--rule-light);
+  padding: 10pt 12pt;
+  margin: 10pt 0;
+  page-break-inside: avoid;
+}
+
+pre code { background: none; padding: 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12pt 0;
+  font-size: 9pt;
+  line-height: 1.3;
+  page-break-inside: avoid;
+}
+
+thead { border-bottom: 1.5pt solid var(--ink); }
+
+thead th {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 8pt;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  padding: 4pt 6pt 3pt 6pt;
+  text-align: left;
+}
+
+tbody td {
+  padding: 3pt 6pt;
+  border-bottom: 0.5pt solid var(--rule-light);
+}
+
+tbody tr:nth-child(even) { background: var(--surface); }
+
+blockquote {
+  margin: 10pt 0 10pt 14pt;
+  padding-left: 10pt;
+  border-left: 1.5pt solid var(--rule);
+  color: var(--ink-light);
+  font-style: italic;
+}
+
+figure {
+  margin: 14pt 0;
+  text-align: center;
+  page-break-inside: avoid;
+}
+
+figure img, figure svg.plot {
+  max-width: 100%;
+  height: auto;
+}
+
+figcaption {
+  font-size: 8pt;
+  color: var(--neutral);
+  margin-top: 4pt;
+}
+
+.disclaimer {
+  margin-top: 20pt;
+  padding-top: 8pt;
+  border-top: 0.5pt solid var(--rule);
+}
+
+.disclaimer p {
+  font-size: 7.5pt;
+  color: var(--neutral);
+  line-height: 1.35;
+  font-style: italic;
+}
+
+ul, ol { margin: 6pt 0; padding-left: 18pt; }
+li { margin-bottom: 2pt; }
+
+.page-break-before { page-break-before: always; }
+.page-break-after  { page-break-after: always; }
+.keep-together     { page-break-inside: avoid; }
+
+/* Internal memo header stamp */
+.memo-header {
+  font-family: var(--font-heading);
+  font-size: 9pt;
+  color: var(--neutral);
+  margin-bottom: 14pt;
+  padding-bottom: 8pt;
+  border-bottom: 1pt solid var(--rule);
+}

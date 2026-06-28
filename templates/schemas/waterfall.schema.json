@@ -1,0 +1,357 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://equity-research-analyst/schemas/waterfall",
+  "title": "Valuation Waterfall & Engine Outputs",
+  "description": "Complete valuation engine results produced by /run-valuation. Contains the DCF waterfall (year-by-year FCFF schedule), terminal value bridge, Monte Carlo distribution summary, breakeven grid, reverse DCF implied expectations, and MoS buy-band. This is the numerical heart of the research report.",
+  "type": "object",
+  "required": ["_meta", "dcf_waterfall", "terminal_value_bridge", "equity_bridge", "monte_carlo", "breakeven", "reverse_dcf", "comps_summary", "charts"],
+  "properties": {
+    "_meta": {
+      "type": "object",
+      "required": ["company", "ticker", "valuation_date", "archetype", "price"],
+      "properties": {
+        "company": { "type": "string" },
+        "ticker": { "type": "string" },
+        "valuation_date": { "type": "string", "format": "date" },
+        "archetype": { "type": "string" },
+        "price": { "type": "number", "description": "Current market price per share" },
+        "currency": { "type": "string", "default": "USD" },
+        "units": { "type": "string", "default": "millions", "description": "All monetary values in $M unless noted otherwise" },
+        "generated_by": { "type": "string", "default": "/run-valuation" },
+        "engine_version": { "type": "string", "description": "Git commit or version tag of the engine scripts" }
+      }
+    },
+
+    "assumptions_snapshot": {
+      "type": "object",
+      "description": "Key assumptions that produced these results — for reproducibility.",
+      "required": ["base_revenue", "target_operating_margin", "sales_to_capital", "cost_of_capital_initial", "cost_of_capital_terminal", "terminal_growth", "terminal_roc", "horizon"],
+      "properties": {
+        "base_revenue": { "type": "number" },
+        "revenue_growth": { "type": "array", "items": { "type": "number" }, "description": "Growth rates for each year" },
+        "base_operating_margin": { "type": "number" },
+        "target_operating_margin": { "type": "number" },
+        "margin_convergence_year": { "type": "integer" },
+        "sales_to_capital": { "type": "number" },
+        "tax_rate": { "type": "number" },
+        "effective_tax_rate": { "type": "number", "nullable": true },
+        "cost_of_capital_initial": { "type": "number" },
+        "cost_of_capital_terminal": { "type": "number" },
+        "coc_glide_start_year": { "type": "integer" },
+        "coc_glide_end_year": { "type": "integer" },
+        "terminal_growth": { "type": "number" },
+        "terminal_roc": { "type": "number" },
+        "horizon": { "type": "integer" },
+        "cash": { "type": "number" },
+        "debt": { "type": "number" },
+        "minority_interests": { "type": "number" },
+        "nonoperating_assets": { "type": "number" },
+        "shares_outstanding": { "type": "number" },
+        "failure_probability": { "type": "number" },
+        "failure_value_per_share": { "type": "number" }
+      }
+    },
+
+    "dcf_waterfall": {
+      "type": "object",
+      "description": "Year-by-year FCFF schedule — the waterfall from revenue to free cash flow to present value.",
+      "required": ["years", "summary"],
+      "properties": {
+        "years": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "type": "object",
+            "required": ["year", "revenue", "growth", "operating_margin", "ebit", "after_tax_ebit", "reinvestment", "fcff", "cost_of_capital", "discount_factor", "pv_fcff"],
+            "properties": {
+              "year": { "type": "integer", "minimum": 1 },
+              "revenue": { "type": "number", "description": "$M" },
+              "growth": { "type": "number", "description": "Year-over-year revenue growth (decimal)" },
+              "operating_margin": { "type": "number", "description": "Pre-tax operating margin (decimal)" },
+              "ebit": { "type": "number", "description": "$M. revenue × operating_margin" },
+              "after_tax_ebit": { "type": "number", "description": "$M. ebit × (1 - tax_rate)" },
+              "reinvestment": { "type": "number", "description": "$M. (revenue_t - revenue_t-1) / sales_to_capital" },
+              "fcff": { "type": "number", "description": "$M. after_tax_ebit - reinvestment" },
+              "cost_of_capital": { "type": "number", "description": "Decimal. Glides from initial to terminal" },
+              "discount_factor": { "type": "number", "description": "Cumulative: product(1/(1+CoC_t)) from t=1" },
+              "pv_fcff": { "type": "number", "description": "$M. fcff × discount_factor" }
+            }
+          }
+        },
+        "summary": {
+          "type": "object",
+          "required": ["pv_fcff_sum", "terminal_value", "pv_terminal_value", "terminal_pct_of_operating_value", "operating_asset_value", "equity_value", "value_per_share", "going_concern_value_per_share"],
+          "properties": {
+            "pv_fcff_sum": { "type": "number", "description": "Sum of PV(FCFF) over explicit years ($M)" },
+            "terminal_value": { "type": "number", "description": "Undiscounted terminal value ($M)" },
+            "pv_terminal_value": { "type": "number", "description": "Terminal value × final year discount factor ($M)" },
+            "terminal_pct_of_operating_value": { "type": "number", "description": "Fraction of operating value in terminal (0-1)" },
+            "operating_asset_value": { "type": "number", "description": "$M. PV(FCFF sum) + PV(TV)" },
+            "equity_value": { "type": "number", "description": "$M. Operating + cash + nonoperating - debt - minority" },
+            "value_per_share": { "type": "number", "description": "$ per share. Equity value / shares outstanding" },
+            "going_concern_value_per_share": { "type": "number", "description": "$ per share before failure adjustment" },
+            "failure_adjusted_value_per_share": { "type": "number", "description": "$ per share after failure probability haircut" }
+          }
+        }
+      }
+    },
+
+    "terminal_value_bridge": {
+      "type": "object",
+      "description": "How the terminal value is built — the single most consequential number in any DCF.",
+      "required": ["terminal_revenue", "terminal_ebit", "terminal_fcff", "terminal_growth", "terminal_coc", "terminal_roc", "reinvestment_rate"],
+      "properties": {
+        "terminal_revenue": { "type": "number", "description": "Year N+1 revenue = last explicit year × (1+g) ($M)" },
+        "terminal_operating_margin": { "type": "number", "description": "Steady-state margin (decimal)" },
+        "terminal_ebit": { "type": "number", "description": "$M. terminal_revenue × margin" },
+        "after_tax_ebit": { "type": "number", "description": "$M" },
+        "terminal_growth": { "type": "number", "description": "Stable growth rate (decimal)" },
+        "terminal_roc": { "type": "number", "description": "Stable return on capital (decimal)" },
+        "reinvestment_rate": { "type": "number", "description": "g / ROC (decimal)" },
+        "terminal_fcff": { "type": "number", "description": "$M. after_tax_ebit × (1 - reinvestment_rate)" },
+        "terminal_coc": { "type": "number", "description": "Cost of capital in terminal period (decimal)" },
+        "terminal_value": { "type": "number", "description": "$M. FCFF_{N+1} / (CoC_terminal - g)" },
+        "final_year_discount_factor": { "type": "number" },
+        "pv_terminal_value": { "type": "number", "description": "$M" }
+      }
+    },
+
+    "equity_bridge": {
+      "type": "object",
+      "description": "Bridge from operating assets to equity value per share.",
+      "required": ["operating_asset_value", "plus_cash", "plus_nonoperating", "less_debt", "less_minority", "equity_value", "shares_outstanding", "value_per_share"],
+      "properties": {
+        "operating_asset_value": { "type": "number" },
+        "plus_cash": { "type": "number" },
+        "plus_nonoperating_assets": { "type": "number" },
+        "less_debt": { "type": "number" },
+        "less_minority_interests": { "type": "number" },
+        "equity_value": { "type": "number" },
+        "shares_outstanding": { "type": "number" },
+        "value_per_share": { "type": "number" },
+        "failure_probability": { "type": "number" },
+        "failure_adjusted_value_per_share": { "type": "number" }
+      }
+    },
+
+    "monte_carlo": {
+      "type": "object",
+      "description": "Monte Carlo simulation results — value as a distribution, not a point.",
+      "required": ["trials", "distribution", "price_position", "mos_band"],
+      "properties": {
+        "trials": { "type": "integer", "minimum": 10000 },
+        "skipped": { "type": "integer", "description": "Economically invalid draws dropped" },
+        "seed": { "type": "integer" },
+        "varied_drivers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "driver": { "type": "string" },
+              "distribution_type": { "type": "string", "enum": ["lognormal", "triangular", "uniform", "normal"] },
+              "params": { "type": "object" }
+            }
+          }
+        },
+        "distribution": {
+          "type": "object",
+          "required": ["mean", "median", "std_dev", "min", "max", "percentiles"],
+          "properties": {
+            "mean": { "type": "number" },
+            "median": { "type": "number" },
+            "std_dev": { "type": "number" },
+            "min": { "type": "number" },
+            "max": { "type": "number" },
+            "percentiles": {
+              "type": "object",
+              "properties": {
+                "p5": { "type": "number" },
+                "p10": { "type": "number" },
+                "p25": { "type": "number" },
+                "p50": { "type": "number" },
+                "p75": { "type": "number" },
+                "p90": { "type": "number" },
+                "p95": { "type": "number" },
+                "p99": { "type": "number" }
+              }
+            }
+          }
+        },
+        "price_position": {
+          "type": "object",
+          "required": ["price", "price_percentile", "p_value_ge_price"],
+          "properties": {
+            "price": { "type": "number" },
+            "price_percentile": { "type": "number", "description": "Fraction of trials where value <= price" },
+            "p_value_ge_price": { "type": "number", "description": "Fraction of trials where value >= price" },
+            "interpretation": { "type": "string", "enum": ["price_in_optimistic_tail", "price_in_plausible_range", "price_in_pessimistic_tail"] }
+          }
+        },
+        "mos_band": {
+          "type": "object",
+          "required": ["median", "dispersion", "mos", "buy_below", "rich_above"],
+          "properties": {
+            "median": { "type": "number" },
+            "dispersion": { "type": "number", "description": "(P90 - P10) / median" },
+            "mos": { "type": "number", "description": "Margin of safety (decimal). Clamp(K × dispersion, 0.15, 0.50)" },
+            "buy_below": { "type": "number", "description": "Accumulate below this price" },
+            "fair_range_low": { "type": "number", "description": "buy_below" },
+            "fair_range_high": { "type": "number", "description": "rich_above" },
+            "rich_above": { "type": "number", "description": "Reduce/sell above this price" }
+          }
+        }
+      }
+    },
+
+    "breakeven": {
+      "type": "object",
+      "description": "What combination of revenue and margin justifies today's price.",
+      "required": ["price", "revenues", "margins", "grid", "narrative"],
+      "properties": {
+        "price": { "type": "number" },
+        "revenues": {
+          "type": "array",
+          "items": { "type": "number" },
+          "description": "Year-10 revenue values tested ($M)"
+        },
+        "margins": {
+          "type": "array",
+          "items": { "type": "number" },
+          "description": "Target operating margins tested (decimal)"
+        },
+        "grid": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "number" },
+            "description": "grid[i][j] = value/share at revenues[i] and margins[j]"
+          }
+        },
+        "justifies_price_cells": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "y10_revenue_b": { "type": "number" },
+              "margin": { "type": "number" },
+              "value_per_share": { "type": "number" }
+            }
+          },
+          "description": "Cells where intrinsic value >= price"
+        },
+        "narrative": { "type": "string", "description": "What has to be true" }
+      }
+    },
+
+    "reverse_dcf": {
+      "type": "object",
+      "description": "What expectations are embedded in the current price.",
+      "required": ["price", "base_value", "solved_drivers"],
+      "properties": {
+        "price": { "type": "number" },
+        "base_value": { "type": "number", "description": "Base-case DCF value per share" },
+        "solved_drivers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["driver", "base_value", "implied_value", "gap_pct", "converged", "plausibility"],
+            "properties": {
+              "driver": { "type": "string", "enum": ["terminal_revenue", "target_operating_margin", "sales_to_capital", "cost_of_capital_initial"] },
+              "base_value": { "type": "number", "description": "Base-case value of this driver" },
+              "implied_value": { "type": "number", "description": "Value of this driver that makes DCF == price" },
+              "gap_pct": { "type": "number", "description": "(implied - base) / base" },
+              "converged": { "type": "boolean", "description": "True if bisection found a solution within bounds" },
+              "plausibility": { "type": "string", "enum": ["plausible", "stretched", "heroic", "impossible"] },
+              "implied_cagr": { "type": "number", "description": "For terminal_revenue: implied 10-year revenue CAGR" }
+            }
+          }
+        },
+        "no_solution_note": { "type": "string", "description": "If a driver could not reach the price even at extremes" }
+      }
+    },
+
+    "comps_summary": {
+      "type": "object",
+      "description": "Relative valuation via peer multiples.",
+      "properties": {
+        "peer_median_multiples": {
+          "type": "object",
+          "properties": {
+            "ev_sales": { "type": "number", "nullable": true },
+            "ev_ebitda": { "type": "number", "nullable": true },
+            "pe": { "type": "number", "nullable": true },
+            "peg": { "type": "number", "nullable": true },
+            "pb": { "type": "number", "nullable": true }
+          }
+        },
+        "implied_value_per_share": {
+          "type": "object",
+          "properties": {
+            "ev_sales": { "type": "number", "nullable": true },
+            "ev_ebitda": { "type": "number", "nullable": true },
+            "pe": { "type": "number", "nullable": true },
+            "peg": { "type": "number", "nullable": true },
+            "pb": { "type": "number", "nullable": true }
+          }
+        },
+        "range": {
+          "type": "object",
+          "properties": {
+            "low": { "type": "number" },
+            "high": { "type": "number" },
+            "median_of_implied": { "type": "number" }
+          }
+        },
+        "peer_set": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "caveat": { "type": "string" }
+      }
+    },
+
+    "charts": {
+      "type": "object",
+      "description": "Generated chart file paths for the report.",
+      "properties": {
+        "monte_carlo_histogram": {
+          "type": "object",
+          "properties": {
+            "png": { "type": "string" },
+            "svg": { "type": "string" }
+          }
+        },
+        "football_field": {
+          "type": "object",
+          "properties": {
+            "png": { "type": "string" },
+            "svg": { "type": "string" }
+          }
+        },
+        "breakeven_heatmap": {
+          "type": "object",
+          "properties": {
+            "png": { "type": "string" },
+            "svg": { "type": "string" }
+          }
+        },
+        "tornado": {
+          "type": "object",
+          "properties": {
+            "png": { "type": "string" },
+            "svg": { "type": "string" }
+          }
+        },
+        "terminal_pie": {
+          "type": "object",
+          "properties": {
+            "png": { "type": "string" },
+            "svg": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

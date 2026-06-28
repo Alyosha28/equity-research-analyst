@@ -1,0 +1,600 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://equity-research-analyst/schemas/history",
+  "title": "Historical Financial Data Skeleton",
+  "description": "Multi-year financial history skeleton produced by /fetch-data. Every numeric field carries source, tier, and date annotations. All values are unconfirmed third-party data until verified against filings. Feeds /build-assumptions as a starting point for judgment inputs.",
+  "type": "object",
+  "required": ["_meta", "company_profile", "income_statement", "balance_sheet", "cash_flow", "market_data"],
+  "properties": {
+    "_meta": {
+      "type": "object",
+      "required": ["company", "ticker", "data_as_of", "fiscal_year_end", "archetype", "data_quality_warning"],
+      "properties": {
+        "company": { "type": "string", "description": "Full legal name" },
+        "ticker": { "type": "string" },
+        "exchange": { "type": "string" },
+        "sector": { "type": "string" },
+        "industry": { "type": "string" },
+        "data_as_of": { "type": "string", "format": "date" },
+        "fiscal_year_end": { "type": "string", "description": "Month-Day, e.g. '08-31'" },
+        "currency": { "type": "string", "default": "USD" },
+        "units": { "type": "string", "default": "millions", "description": "All monetary values in millions unless noted" },
+        "archetype": { "type": "string" },
+        "data_quality_warning": {
+          "type": "string",
+          "const": "THIRD-PARTY DATA — CONFIRM AGAINST FILINGS BEFORE USE. All values are unverified aggregator-tier until manually confirmed."
+        },
+        "generated_by": { "type": "string", "default": "/fetch-data" }
+      }
+    },
+
+    "company_profile": {
+      "type": "object",
+      "required": ["business_description", "founded", "headquarters", "employees"],
+      "properties": {
+        "business_description": { "type": "string" },
+        "founded": { "type": "integer" },
+        "headquarters": { "type": "string" },
+        "employees": { "type": "integer" },
+        "website": { "type": "string", "format": "uri" }
+      }
+    },
+
+    "income_statement": {
+      "type": "object",
+      "required": ["fiscal_years", "metrics"],
+      "properties": {
+        "fiscal_years": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 10,
+          "items": { "type": "string", "description": "e.g. 'FY2025', 'FY2024', ..." },
+          "description": "Ordered most-recent-first. At least 5 years, ideally 10."
+        },
+        "metrics": {
+          "type": "object",
+          "required": ["revenue", "cost_of_revenue", "gross_profit", "operating_income", "net_income", "eps_diluted"],
+          "properties": {
+            "revenue": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": {
+                  "type": "array",
+                  "items": { "type": "number" },
+                  "description": "Annual revenue, aligned with fiscal_years order ($M)"
+                },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string", "enum": ["audited", "management-guidance", "sell-side-consensus", "third-party-aggregator", "own-estimate"] },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "cost_of_revenue": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string", "enum": ["audited", "management-guidance", "sell-side-consensus", "third-party-aggregator", "own-estimate"] },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "gross_profit": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "gross_margin": {
+              "type": "object",
+              "required": ["values"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Decimal (0.40 = 40%)" }
+              },
+              "description": "Computed from revenue and cost_of_revenue"
+            },
+            "r_and_d": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "sga": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "operating_income": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "operating_margin": {
+              "type": "object",
+              "required": ["values"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Decimal. Computed as operating_income / revenue" }
+              }
+            },
+            "r_and_d_adjusted_operating_margin": {
+              "type": "object",
+              "required": ["values"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Decimal. (OperatingIncome + R&D) / Revenue — capitalizes R&D as investment" },
+                "_note": { "type": "string" }
+              }
+            },
+            "d_and_a": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "ebitda": {
+              "type": "object",
+              "required": ["values"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Computed: OperatingIncome + D&A" }
+              }
+            },
+            "ebitda_margin": {
+              "type": "object",
+              "required": ["values"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Decimal" }
+              }
+            },
+            "interest_expense": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "pretax_income": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "effective_tax_rate": {
+              "type": "object",
+              "required": ["values"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Decimal. income_tax / pretax_income" }
+              }
+            },
+            "net_income": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "net_margin": {
+              "type": "object",
+              "required": ["values"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Decimal" }
+              }
+            },
+            "eps_diluted": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "$ per share" },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "sbc": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Stock-based compensation ($M)" },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "sbc_pct_of_revenue": {
+              "type": "object",
+              "required": ["values"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Decimal" }
+              }
+            },
+            "revenue_growth_yoy": {
+              "type": "object",
+              "required": ["values"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Decimal. Year-over-year growth" }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "balance_sheet": {
+      "type": "object",
+      "required": ["fiscal_years", "metrics"],
+      "properties": {
+        "fiscal_years": {
+          "type": "array",
+          "minItems": 5,
+          "items": { "type": "string" }
+        },
+        "metrics": {
+          "type": "object",
+          "required": ["total_assets", "cash_and_equivalents", "marketable_securities", "total_debt", "shareholders_equity"],
+          "properties": {
+            "total_assets": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "cash_and_equivalents": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "marketable_securities": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "total_debt": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Short-term + long-term debt ($M)" },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "net_debt": {
+              "type": "object",
+              "required": ["values"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Total debt - cash - marketable securities" }
+              }
+            },
+            "shareholders_equity": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "invested_capital": {
+              "type": "object",
+              "required": ["values"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Total debt + shareholders equity - cash. Or more precisely: (PPE + working capital + R&D asset)." },
+                "_method": { "type": "string" }
+              }
+            },
+            "ppe_net": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "goodwill_and_intangibles": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "working_capital": {
+              "type": "object",
+              "required": ["values"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Non-cash current assets - non-debt current liabilities ($M)" },
+                "_method": { "type": "string" }
+              }
+            },
+            "book_value_per_share": {
+              "type": "object",
+              "required": ["values"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } }
+              }
+            },
+            "tangible_book_value_per_share": {
+              "type": "object",
+              "required": ["values"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "cash_flow": {
+      "type": "object",
+      "required": ["fiscal_years", "metrics"],
+      "properties": {
+        "fiscal_years": { "type": "array", "items": { "type": "string" } },
+        "metrics": {
+          "type": "object",
+          "required": ["operating_cash_flow", "capex", "free_cash_flow"],
+          "properties": {
+            "operating_cash_flow": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "capex": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Capital expenditures, including equipment and facilities ($M)" },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "capex_pct_of_revenue": {
+              "type": "object",
+              "required": ["values"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Decimal" }
+              }
+            },
+            "free_cash_flow": {
+              "type": "object",
+              "required": ["values"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Operating CF - Capex ($M)" }
+              }
+            },
+            "fcf_margin": {
+              "type": "object",
+              "required": ["values"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "Decimal" }
+              }
+            },
+            "dividends": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "share_buybacks": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" } },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            },
+            "depreciation_and_amortization": {
+              "type": "object",
+              "required": ["values", "_source", "_tier", "_date"],
+              "properties": {
+                "values": { "type": "array", "items": { "type": "number" }, "description": "From cash flow statement, may differ from income statement D&A" },
+                "_source": { "type": "string" },
+                "_tier": { "type": "string" },
+                "_date": { "type": "string", "format": "date" },
+                "_estimate": { "type": "boolean", "default": false }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "segments": {
+      "type": "object",
+      "nullable": true,
+      "properties": {
+        "_note": { "type": "string", "description": "Segment data rarely available from aggregators; manually collect from 10-K" },
+        "as_of_year": { "type": "string" },
+        "breakdown": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "revenue", "_source"],
+            "properties": {
+              "name": { "type": "string" },
+              "revenue": { "type": "number", "description": "$M" },
+              "revenue_pct": { "type": "number" },
+              "operating_income": { "type": "number" },
+              "margin": { "type": "number" },
+              "_source": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "market_data": {
+      "type": "object",
+      "required": ["current_price", "shares_outstanding", "market_cap", "enterprise_value"],
+      "properties": {
+        "current_price": {
+          "type": "object",
+          "required": ["value", "date", "_source"],
+          "properties": {
+            "value": { "type": "number", "description": "Price per share" },
+            "date": { "type": "string", "format": "date" },
+            "_source": { "type": "string" }
+          }
+        },
+        "shares_outstanding": {
+          "type": "object",
+          "required": ["basic", "diluted", "_source", "_tier", "_date"],
+          "properties": {
+            "basic": { "type": "number", "description": "Millions of shares" },
+            "diluted": { "type": "number", "description": "Millions of shares, fully diluted" },
+            "dilution_pct": { "type": "number", "description": "(diluted - basic) / basic" },
+            "_source": { "type": "string" },
+            "_tier": { "type": "string" },
+            "_date": { "type": "string", "format": "date" },
+            "_estimate": { "type": "boolean", "default": false }
+          }
+        },
+        "market_cap": { "type": "number", "description": "Computed: price × basic shares ($M)" },
+        "enterprise_value": { "type": "number", "description": "Computed: market cap + net debt ($M)" },
+        "beta": {
+          "type": "object",
+          "required": ["value", "_source"],
+          "properties": {
+            "value": { "type": "number" },
+            "period": { "type": "string", "description": "e.g. '5Y monthly'" },
+            "_source": { "type": "string" }
+          }
+        },
+        "historical_pe_range": {
+          "type": "object",
+          "properties": {
+            "low_5yr": { "type": "number" },
+            "high_5yr": { "type": "number" },
+            "median_5yr": { "type": "number" },
+            "current": { "type": "number" },
+            "_source": { "type": "string" },
+            "_note": { "type": "string", "description": "Cyclicals: P/E is near-useless at cycle trough (E near zero). Use EV/EBITDA or P/B instead." }
+          }
+        },
+        "historical_ev_ebitda_range": {
+          "type": "object",
+          "properties": {
+            "low_5yr": { "type": "number" },
+            "high_5yr": { "type": "number" },
+            "median_5yr": { "type": "number" },
+            "current": { "type": "number" },
+            "_source": { "type": "string" }
+          }
+        },
+        "dividend_yield": {
+          "type": "object",
+          "properties": {
+            "value": { "type": "number", "description": "Decimal" },
+            "_source": { "type": "string" }
+          }
+        },
+        "short_interest": {
+          "type": "object",
+          "properties": {
+            "pct_of_float": { "type": "number" },
+            "days_to_cover": { "type": "number" },
+            "_source": { "type": "string" },
+            "_date": { "type": "string", "format": "date" }
+          }
+        }
+      }
+    },
+
+    "peers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ticker", "name"],
+        "properties": {
+          "ticker": { "type": "string" },
+          "name": { "type": "string" },
+          "rationale": { "type": "string", "description": "Why this is a peer" }
+        }
+      }
+    }
+  }
+}

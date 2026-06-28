@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://equity-research-analyst/schemas/risks",
+  "title": "Durability & Risk Assessment",
+  "description": "Competitive durability (moat) assessment produced by /durability-check. Decomposes moat into named components with threats and monitorable indicators, assesses the Competitive Advantage Period, models RONIC fade, and provides terminal value sensitivity. Underwrites the most consequential number in any DCF: the terminal value.",
+  "type": "object",
+  "required": ["_meta", "value_creation_check", "competitive_advantage_period", "moat_decomposition", "ronic_fade", "terminal_sensitivity", "risk_register"],
+  "properties": {
+    "_meta": {
+      "type": "object",
+      "required": ["company", "ticker", "valuation_date", "archetype"],
+      "properties": {
+        "company": { "type": "string" },
+        "ticker": { "type": "string" },
+        "valuation_date": { "type": "string", "format": "date" },
+        "archetype": { "type": "string" },
+        "generated_by": { "type": "string", "default": "/durability-check" },
+        "terminal_value_pct_of_total": { "type": "number", "description": "From DCF: fraction of value in terminal — if >80%, flag prominently" },
+        "terminal_value_warning": { "type": "string", "description": "If terminal > 80%: explicit warning that the bet is on perpetuity" }
+      }
+    },
+    "value_creation_check": {
+      "type": "object",
+      "required": ["current_roic", "current_wacc", "spread", "verdict", "historical_roic"],
+      "properties": {
+        "current_roic": { "type": "number", "description": "R&D-adjusted ROIC (decimal)" },
+        "roic_method": { "type": "string", "description": "e.g. 'NOPAT / (Debt+Equity-Cash), R&D capitalized over 5yr'" },
+        "current_wacc": { "type": "number" },
+        "spread": { "type": "number", "description": "ROIC - WACC (decimal)" },
+        "verdict": {
+          "type": "string",
+          "enum": ["strongly_creating_value", "creating_value", "neutral", "destroying_value", "strongly_destroying_value"]
+        },
+        "growth_destroying_value": { "type": "boolean", "description": "True if ROIC < WACC — must flag prominently" },
+        "historical_roic": {
+          "type": "object",
+          "required": ["years", "values", "_source"],
+          "properties": {
+            "years": { "type": "array", "minItems": 5, "items": { "type": "integer" } },
+            "values": { "type": "array", "items": { "type": "number" } },
+            "trend": { "type": "string", "enum": ["improving", "stable", "declining", "cyclical", "erratic"] },
+            "_source": { "type": "string" },
+            "_note": { "type": "string" }
+          }
+        }
+      }
+    },
+    "competitive_advantage_period": {
+      "type": "object",
+      "required": ["cap_years", "justification", "industry_rotation_evidence"],
+      "properties": {
+        "cap_years": { "type": "integer", "minimum": 0, "maximum": 25 },
+        "confidence": { "type": "string", "enum": ["low", "medium", "high"] },
+        "justification": { "type": "string" },
+        "industry_rotation_evidence": { "type": "string" },
+        "moat_composite_score": { "type": "number", "description": "Weighted avg moat score (1-5)" },
+        "cap_scenarios": {
+          "type": "object",
+          "properties": {
+            "bear": { "type": "integer" },
+            "base": { "type": "integer" },
+            "bull": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "moat_decomposition": {
+      "type": "object",
+      "required": ["components", "composite_assessment"],
+      "properties": {
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["name", "type", "strength", "durability_years", "threat", "monitorable_indicator", "weight"],
+            "properties": {
+              "name": { "type": "string" },
+              "type": { "type": "string", "enum": ["demand_side", "supply_side", "lock_in", "legal", "intangible", "network_effects", "scale_economies", "regulatory", "data_advantage", "cultural"] },
+              "strength": { "type": "integer", "minimum": 1, "maximum": 5 },
+              "durability_years": { "type": "integer", "minimum": 0 },
+              "threat": { "type": "string" },
+              "threat_probability": { "type": "string", "enum": ["low", "medium", "high"] },
+              "monitorable_indicator": { "type": "string" },
+              "monitoring_frequency": { "type": "string", "enum": ["quarterly", "semi_annual", "annual"] },
+              "weight": { "type": "number" },
+              "evidence": { "type": "string" }
+            }
+          }
+        },
+        "composite_assessment": {
+          "type": "object",
+          "required": ["weighted_strength", "weighted_durability", "moat_width"],
+          "properties": {
+            "weighted_strength": { "type": "number" },
+            "weighted_durability": { "type": "number" },
+            "moat_width": { "type": "string", "enum": ["none", "narrow", "wide", "fortress"] },
+            "moat_trend": { "type": "string", "enum": ["widening", "stable", "narrowing", "under_attack"] }
+          }
+        }
+      }
+    },
+    "ronic_fade": {
+      "type": "object",
+      "required": ["fade_path", "terminal_roc", "fade_rationale"],
+      "properties": {
+        "current_roic": { "type": "number" },
+        "fade_path": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["year", "ronic"],
+            "properties": {
+              "year": { "type": "integer" },
+              "ronic": { "type": "number" }
+            }
+          }
+        },
+        "terminal_roc": { "type": "number" },
+        "terminal_roc_defense": { "type": "string" },
+        "fade_speed": { "type": "string", "enum": ["rapid", "moderate", "slow", "glacial"] },
+        "fade_rationale": { "type": "string" },
+        "half_life": { "type": "number", "description": "Years for half the spread (ROIC - terminal_roc) to close" }
+      }
+    },
+    "terminal_sensitivity": {
+      "type": "object",
+      "required": ["scenarios", "key_insight"],
+      "properties": {
+        "base_case": {
+          "type": "object",
+          "required": ["cap", "terminal_roc", "value_per_share"],
+          "properties": {
+            "cap": { "type": "integer" },
+            "terminal_roc": { "type": "number" },
+            "terminal_growth": { "type": "number" },
+            "value_per_share": { "type": "number" },
+            "terminal_pct_of_value": { "type": "number" }
+          }
+        },
+        "scenarios": {
+          "type": "array",
+          "minItems": 4,
+          "items": {
+            "type": "object",
+            "required": ["name", "cap", "terminal_roc", "value_per_share", "delta_vs_base_pct"],
+            "properties": {
+              "name": { "type": "string" },
+              "cap": { "type": "integer" },
+              "terminal_roc": { "type": "number" },
+              "terminal_growth": { "type": "number" },
+              "value_per_share": { "type": "number" },
+              "delta_vs_base_pct": { "type": "number" },
+              "terminal_pct_of_value": { "type": "number" }
+            }
+          }
+        },
+        "key_insight": { "type": "string" }
+      }
+    },
+    "risk_register": {
+      "type": "object",
+      "required": ["risks", "aggregate_risk_assessment"],
+      "properties": {
+        "risks": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "type": "object",
+            "required": ["risk", "category", "impact", "probability", "monitorable_indicator"],
+            "properties": {
+              "risk": { "type": "string" },
+              "category": { "type": "string", "enum": ["competitive", "technological", "regulatory", "macro", "operational", "financial", "geopolitical", "demand", "supply_chain", "key_person", "esg"] },
+              "impact": { "type": "string", "enum": ["catastrophic", "major", "moderate", "minor"] },
+              "impact_value_pct": { "type": "number" },
+              "probability": { "type": "string", "enum": ["high", "medium", "low", "tail"] },
+              "monitorable_indicator": { "type": "string" },
+              "trigger_for_action": { "type": "string" },
+              "mitigation": { "type": "string" },
+              "in_base_case": { "type": "boolean" }
+            }
+          }
+        },
+        "aggregate_risk_assessment": {
+          "type": "object",
+          "required": ["overall_risk_level", "key_concentration", "tail_risks"],
+          "properties": {
+            "overall_risk_level": { "type": "string", "enum": ["low", "moderate", "high", "extreme"] },
+            "key_concentration": { "type": "string" },
+            "tail_risks": { "type": "array", "items": { "type": "string" } },
+            "what_breaks_the_thesis": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "$schema": "equity-research output-manifest v2",
+  "generated_at": "2026-06-28",
+  "ticker": "MU",
+  "company": "Micron Technology",
+  "valuation_date": "2026-06-28",
+  "theme": "default",
+  "lang": "en-US",
+  "output_dir": "figs/MU",
+  "engine_outputs": {},
+  "chart_requests": [
+    {
+      "kind": "terminal",
+      "title": "Terminal Value Dependency -- MU",
+      "priority": "required"
+    },
+    {
+      "kind": "montecarlo",
+      "title": "Intrinsic Value Distribution -- Monte Carlo -- MU",
+      "priority": "required"
+    },
+    {
+      "kind": "breakeven",
+      "title": "Breakeven: What Must Be True -- MU",
+      "priority": "required"
+    },
+    {
+      "kind": "football",
+      "title": "Valuation Football Field -- MU",
+      "priority": "required"
+    },
+    {
+      "kind": "tornado",
+      "title": "Sensitivity Tornado -- MU",
+      "priority": "required"
+    },
+    {
+      "kind": "roic_spread",
+      "title": "ROIC-WACC Spread -- Durability Assessment -- MU",
+      "priority": "required"
+    },
+    {
+      "kind": "scenarios",
+      "title": "Scenario Analysis -- MU Value Ranges",
+      "priority": "optional",
+      "produced_by": "/build-assumptions",
+      "note": "Input JSON not produced by any valuation engine script. Run /build-assumptions to generate the source data for this chart."
+    },
+    {
+      "kind": "price_vs_value",
+      "title": "Price vs. Intrinsic Value -- MU",
+      "priority": "optional",
+      "produced_by": "/analyze-company",
+      "note": "Input JSON not produced by any valuation engine script. Run /analyze-company to generate the source data for this chart."
+    },
+    {
+      "kind": "waterfall",
+      "title": "Value Bridge: Driver Contributions -- MU",
+      "priority": "optional",
+      "produced_by": "/triangulate",
+      "note": "Input JSON not produced by any valuation engine script. Run /triangulate to generate the source data for this chart."
+    },
+    {
+      "kind": "capex_cycle",
+      "title": "Industry Capacity Cycle -- MU",
+      "priority": "optional",
+      "produced_by": "/analyze-industry",
+      "note": "Input JSON not produced by any valuation engine script. Run /analyze-industry to generate the source data for this chart."
+    },
+    {
+      "kind": "risk_matrix",
+      "title": "Risk Matrix -- Probability vs. Value Impact -- MU",
+      "priority": "optional",
+      "produced_by": "/durability-check",
+      "note": "Input JSON not produced by any valuation engine script. Run /durability-check to generate the source data for this chart."
+    }
+  ],
+  "missing_optional_inputs": [
+    {
+      "kind": "scenarios",
+      "label": "Scenario comparison (bull / base / bear)",
+      "produced_by": "/build-assumptions"
+    },
+    {
+      "kind": "price_vs_value",
+      "label": "Price vs intrinsic value history",
+      "produced_by": "/analyze-company"
+    },
+    {
+      "kind": "waterfall",
+      "label": "Driver waterfall bridge",
+      "produced_by": "/triangulate"
+    },
+    {
+      "kind": "capex_cycle",
+      "label": "CAPEX cycle chart",
+      "produced_by": "/analyze-industry"
+    },
+    {
+      "kind": "risk_matrix",
+      "label": "Risk matrix",
+      "produced_by": "/durability-check"
+    }
+  ]
+}

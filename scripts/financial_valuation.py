@@ -69,10 +69,22 @@ class FinancialInputs:
             raise ValueError(
                 f"terminal cost of equity ({self.cost_of_equity_terminal}) must "
                 f"exceed terminal growth ({self.terminal_growth}).")
+        if self.terminal_roe <= self.terminal_growth:
+            raise ValueError(
+                f"terminal_roe ({self.terminal_roe}) must exceed terminal_growth "
+                f"({self.terminal_growth}); otherwise the implied sustainable dividend "
+                f"(ROE - g) * BV is non-positive and the DDM terminal value collapses.")
         if not (0.0 <= self.payout_ratio <= 1.0):
             raise ValueError("payout_ratio must be in [0, 1].")
         if self.roe_convergence_year < 1:
             raise ValueError("roe_convergence_year must be >= 1.")
+        if self.coe_glide_start_year < 1:
+            raise ValueError("coe_glide_start_year must be >= 1.")
+        if self.coe_glide_end_year <= self.coe_glide_start_year:
+            raise ValueError(
+                f"coe_glide_end_year ({self.coe_glide_end_year}) must exceed "
+                f"coe_glide_start_year ({self.coe_glide_start_year}); otherwise "
+                f"the CoE path degenerates to a step function instead of a glide.")
 
 
 def _glide(base, target, conv_year, n):

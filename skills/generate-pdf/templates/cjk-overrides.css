@@ -1,0 +1,115 @@
+/* ==========================================================================
+   CJK Font Overrides for Equity Research Reports
+
+   Included after professional.css. Defines @font-face rules that map
+   CSS font-family names to locally-installed CJK fonts via local().
+
+   WeasyPrint v63+ will embed (subset) any font referenced via local()
+   that is installed on the system. This means:
+   - The PDF will contain the CJK glyphs used in the document
+   - File size stays small (~200KB subset for a typical report)
+   - No tofu on any PDF viewer, even without CJK fonts installed
+
+   Fallback chain: Noto CJK > Source Han > System fonts
+
+   Usage: Load this file AFTER professional.css
+     python render_pdf.py report.md --cjk
+   ========================================================================== */
+
+/* ── CJK Serif Body Font ────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: "CJK Body";
+  src: local("Noto Serif CJK SC"),
+       local("Source Han Serif SC"),
+       local("SimSun"),
+       local("Songti SC"),
+       local("PMingLiU");
+  unicode-range:
+    U+2E80-2EFF,   /* CJK Radicals Supplement */
+    U+3000-303F,   /* CJK Symbols and Punctuation */
+    U+31C0-31EF,   /* CJK Strokes */
+    U+3200-32FF,   /* Enclosed CJK Letters and Months */
+    U+3300-33FF,   /* CJK Compatibility */
+    U+3400-4DBF,   /* CJK Unified Ideographs Extension A */
+    U+4E00-9FFF,   /* CJK Unified Ideographs */
+    U+F900-FAFF,   /* CJK Compatibility Ideographs */
+    U+FE10-FE1F,   /* Vertical Forms (CJK) */
+    U+FE30-FE4F,   /* CJK Compatibility Forms */
+    U+FF00-FFEF,   /* Halfwidth and Fullwidth Forms */
+    U+20000-2A6DF, /* CJK Unified Ideographs Extension B */
+    U+2A700-2B73F, /* CJK Unified Ideographs Extension C */
+    U+2B740-2B81F, /* CJK Unified Ideographs Extension D */
+    U+2F800-2FA1F; /* CJK Compatibility Ideographs Supplement */
+}
+
+/* ── CJK Sans-Serif Heading Font ────────────────────────────────────────── */
+
+@font-face {
+  font-family: "CJK Heading";
+  src: local("Noto Sans CJK SC"),
+       local("Source Han Sans SC"),
+       local("Microsoft YaHei"),
+       local("PingFang SC"),
+       local("Heiti SC"),
+       local("SimHei"),
+       local("Microsoft JhengHei");
+  unicode-range:
+    U+2E80-2EFF, U+3000-303F, U+31C0-31EF, U+3200-32FF,
+    U+3300-33FF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF,
+    U+FE10-FE1F, U+FE30-FE4F, U+FF00-FFEF,
+    U+20000-2A6DF, U+2A700-2B73F, U+2B740-2B81F, U+2F800-2FA1F;
+}
+
+/* ── CJK Layout Adjustments ──────────────────────────────────────────────── */
+
+/* CJK text needs more vertical space than Latin text.
+   Characters are roughly square; 1.6-1.8x line-height is ideal. */
+:root {
+  --line-body-cjk: 1.75;
+}
+
+/* When the report contains CJK, increase body line-height */
+html[lang|="zh"], html[lang|="ja"], html[lang|="ko"],
+body:has(:lang(zh)), body:has(:lang(ja)), body:has(:lang(ko)) {
+  line-height: var(--line-body-cjk);
+}
+
+/* CJK text justification — WeasyPrint v65+ supports this */
+p {
+  text-justify: inter-character;  /* Fallback for mixed text */
+}
+
+/* Hanging punctuation for CJK — allows punctuation at line edges */
+p:lang(zh), p:lang(ja), p:lang(ko) {
+  hanging-punctuation: allow-end;
+}
+
+/* CJK emphasis dots (not italic — CJK has no true italic) */
+em:lang(zh), em:lang(ja), em:lang(ko) {
+  font-style: normal;
+  text-emphasis: filled circle;
+  -webkit-text-emphasis: filled circle;
+}
+
+/* ── Platform-Specific Font Detection Helpers ────────────────────────────── */
+
+/* Windows CJK fallback: Microsoft YaHei is universally installed */
+/* macOS CJK fallback: PingFang SC since 10.11 El Capitan */
+/* Linux CJK fallback: Noto CJK or WenQuanYi */
+
+/* The font-family stack in professional.css already handles this:
+     --font-body: "CJK Body", "Noto Serif CJK SC", "Source Serif 4",
+                  Georgia, "SimSun", serif;
+     --font-heading: "CJK Heading", "Noto Sans CJK SC", "Source Sans 3",
+                     Helvetica, "Microsoft YaHei", sans-serif;
+
+   The @font-face rules above define "CJK Body" and "CJK Heading" to use
+   local() references. If no CJK font is installed, the browser falls
+   through to the Latin fonts (Source Serif 4, Georgia, etc.), and CJK
+   characters will render as tofu (empty boxes).
+
+   PREVENTION: Always install fonts-noto-cjk (Linux), or use a system
+   with native CJK support (Windows/macOS). The render_pdf.py script
+   checks for this before generating the PDF.
+   ========================================================================== */

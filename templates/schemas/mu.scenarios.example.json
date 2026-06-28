@@ -1,0 +1,126 @@
+{
+  "_about": "Micron Technology (MU) triangulation — realistic illustrative example. All values in $USD, money in $M, per-share in $. This is METHOD demonstration data, not a live call. Refresh with actual filings before publishing.",
+
+  "_meta": {
+    "company": "Micron Technology, Inc.",
+    "ticker": "MU",
+    "valuation_date": "2026-06-15",
+    "archetype": "cyclical",
+    "price": 125.40,
+    "currency": "USD",
+    "generated_by": "/triangulate"
+  },
+
+  "lenses": {
+    "dcf": {
+      "label": "Intrinsic DCF",
+      "value_per_share": 138.50,
+      "terminal_pct": 0.62,
+      "premium_discount": 0.104,
+      "signal": "BUY",
+      "key_driver_sensitivity": "Target operating margin — a ±2pp move shifts value by ~$18/share"
+    },
+    "monte_carlo": {
+      "label": "Monte Carlo",
+      "median": 142.30,
+      "mean": 147.80,
+      "p10": 72.50,
+      "p90": 238.00,
+      "trials": 20000,
+      "price_percentile": 0.38,
+      "p_undervalued": 0.62,
+      "mos_accumulate_below": 92.50,
+      "mos_fair": 142.30,
+      "mos_rich_above": 192.10,
+      "signal": "BUY"
+    },
+    "breakeven": {
+      "label": "Breakeven",
+      "justifies_price_at": {
+        "y10_revenue_b": 62.5,
+        "target_margin": 0.22
+      },
+      "narrative": "At the current $125 price, the market requires $62.5B revenue in year 10 at a 22% margin, OR $45B at 28% margin. Both are within historical plausibility — the price is not embedding a heroic combination. The base case ($50B at 22%) already exceeds the price → upside exists even at conservative assumptions.",
+      "signal": "BUY"
+    },
+    "reverse_dcf": {
+      "label": "Reverse DCF",
+      "implied_revenue_b": 58.0,
+      "base_revenue_b": 50.2,
+      "uplift_pct": 0.155,
+      "implied_margin": 0.24,
+      "base_margin": 0.22,
+      "implied_cagr": 0.072,
+      "plausibility": "plausible",
+      "signal": "BUY"
+    },
+    "comps": {
+      "label": "Comps",
+      "range_low": 95.00,
+      "range_high": 155.00,
+      "median": 128.50,
+      "multiples_used": ["EV/EBITDA", "P/E (normalized)", "PEG"],
+      "peer_set": ["005930.KS (Samsung)", "000660.KS (SK Hynix)", "WDC (Western Digital)", "2382.TW (Nanya)"],
+      "caveat": "Memory peers trade on EV/EBITDA through the cycle. Current multiples are near mid-cycle averages — not stretched, not cheap. Samsung and SK Hynix command premiums for HBM leadership. P/E is distorted by cycle position — use normalized earnings.",
+      "signal": "FAIR"
+    },
+    "sotp": {
+      "label": "SOTP",
+      "applicable": false,
+      "reason_if_na": "Micron is a pure-play memory manufacturer — no conglomerate discount or holding-company structure to unpack.",
+      "signal": "N/A"
+    },
+    "bear": {
+      "label": "Bear Case",
+      "top_break_mechanisms": [
+        {
+          "mechanism": "Memory downcycle from AI capex digestion",
+          "trigger": "Hyperscaler capex growth decelerates below 10% YoY; DRAM contract prices decline 3 consecutive quarters",
+          "value_impact_pct": -0.35,
+          "plausibility": "medium"
+        },
+        {
+          "mechanism": "Chinese memory entrants achieve commercially viable DRAM at scale",
+          "trigger": "CXMT announces DDR5 qualification at major OEM; CXMT bit share crosses 10%",
+          "value_impact_pct": -0.40,
+          "plausibility": "low"
+        },
+        {
+          "mechanism": "HBM technology shift favors Samsung/SK Hynix, widening Micron's margin gap",
+          "trigger": "Micron HBM3E yield stays below 70% while competitors reach 85%+; NVIDIA shifts HBM allocation",
+          "value_impact_pct": -0.25,
+          "plausibility": "medium"
+        }
+      ],
+      "signal": "SELL"
+    }
+  },
+
+  "dispute_locus": {
+    "dimension": "terminal_durability",
+    "driver": "target_operating_margin",
+    "market_view": "The memory industry's structural consolidation to 3 players has raised through-cycle margins to 25-28% — but the market prices only ~22% sustained, implying skepticism about consolidation durability.",
+    "our_view": "Industry consolidation is real and durable: top-3 DRAM share is 97% and barriers (capex ~$15B for a new leading-edge fab, ASML EUV monopoly) are higher than ever. Through-cycle margins of 22% are conservative — the market is underappreciating the structural shift.",
+    "agreement_pattern": {
+      "agreeing_lenses": ["DCF", "Monte Carlo", "Breakeven", "Reverse DCF"],
+      "disagreeing_lenses": ["Comps"],
+      "neutral_lenses": ["SOTP", "Bear"]
+    }
+  },
+
+  "variant_perception": {
+    "claim": "The memory industry's consolidation to 3 players has structurally raised through-cycle operating margins from the historical 15-20% to a sustainable 22-25%. The market prices a reversion to the old mean that will not occur because the barriers to new entry (capex, process complexity, ASML EUV dependency) are higher than at any point in memory history.",
+    "falsification_condition": "A new DRAM entrant achieves >5% bit share with DDR5-qualified product, OR industry operating margins fall below 15% for 4+ consecutive quarters outside a macro recession.",
+    "time_horizon": "3-5 years (2-3 memory cycles)",
+    "confidence": "medium",
+    "edge_rationale": "The market systematically overestimates mean reversion in consolidated commodity industries. Comparable dynamics: hard disk drives (Seagate/WDC duopoly), DRAM (3-player). In both cases, post-consolidation margins settled structurally higher than pre-consolidation — but it took 2-3 cycles for the market to accept the new normal."
+  },
+
+  "verdict": {
+    "rating": "UNDERVALUED",
+    "confidence": "medium",
+    "diligence_concentration": "The highest-ROI single research question is: what are CXMT's real DDR5 yields and bit-shipment trajectory over the next 18 months? If they are 2+ years behind schedule, the consolidation thesis strengthens and upside is ~$160+. If they are on track, the bear case activates.",
+    "key_risk_to_verdict": "Chinese memory entrants (CXMT) achieving commercially competitive DDR5 at scale within 2-3 years — this is the one thing that breaks the consolidation thesis and reverts margins to historical levels.",
+    "prose_summary": "Micron presents a moderate upside case built on a structural, not cyclical, thesis. Four of six applicable lenses point to undervaluation: intrinsic DCF ($138), Monte Carlo median ($142, price at 38th percentile), breakeven (plausible combination needed to justify price), and reverse DCF (7.2% implied CAGR is 1.5pp below industry demand growth). Comps are mixed at $128 — not cheap, not rich — which is expected for a name mid-cycle. The bear case is real but priced: the market has already discounted for memory cyclical risk and Chinese entrants. The variant perception is that industry consolidation has raised the structural margin floor, and the market is anchoring on the wrong historical mean. The key risk is CXMT execution — monitor quarterly DRAM bit-share data. If the consolidation thesis holds, Micron trades to $155-165 within 2 cycles."
+  }
+}

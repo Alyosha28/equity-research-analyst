@@ -1,0 +1,286 @@
+{
+  "_about": "Micron Technology (MU) durability & risk assessment — realistic illustrative example from /durability-check. Rates as decimals, money in $M. Not a live call → METHOD demonstration only.",
+
+  "_meta": {
+    "company": "Micron Technology, Inc.",
+    "ticker": "MU",
+    "valuation_date": "2026-06-15",
+    "archetype": "cyclical",
+    "generated_by": "/durability-check",
+    "terminal_value_pct_of_total": 0.575,
+    "terminal_value_warning": "Terminal value at 57.5% of operating value is moderate for a cyclical — well below the 75%+ danger zone. The bet is balanced between explicit FCFF and terminal."
+  },
+
+  "value_creation_check": {
+    "current_roic": 0.22,
+    "roic_method": "NOPAT / (Debt + Equity - Cash - Marketable Securities). NOPAT = (Operating Income + R&D) × (1 - effective_tax_rate). R&D fully expensed in NOPAT numerator; R&D asset added to invested capital (5-year straight-line amortization, carrying 60% of last 5 years' R&D spend). Operation leases not material. Goodwill ($1.3B from Elpida/Numonyx acquisitions) included in capital.",
+    "current_wacc": 0.095,
+    "spread": 0.125,
+    "verdict": "strongly_creating_value",
+    "growth_destroying_value": false,
+    "historical_roic": {
+      "years": [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018],
+      "values": [0.22, 0.08, -0.05, 0.32, 0.25, 0.11, 0.28, 0.48],
+      "trend": "cyclical",
+      "_source": "Computed from SEC EDGAR data; R&D adjusted as described",
+      "_note": "ROIC swings from -5% (trough) to +48% (peak) illustrate why DAMODARAN'S THROUGH-CYCLE NORMALIZATION is essential for memory. Current ~22% appears near mid-cycle — consistent with the industry margin positioning from /analyze-industry."
+    },
+    "historical_wacc": {
+      "years": [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018],
+      "values": [0.095, 0.102, 0.115, 0.098, 0.090, 0.105, 0.100, 0.092],
+      "trend": "stable"
+    },
+    "roic_components": {
+      "nopat_m": 6900,
+      "invested_capital_m": 31360,
+      "revenue_m": 32100,
+      "after_tax_margin": 0.215,
+      "capital_turnover": 1.024,
+      "roic_dupont": 0.220
+    }
+  },
+
+  "competitive_advantage_period": {
+    "cap_years": 8,
+    "confidence": "medium",
+    "justification": "Memory moat is scale- and process-driven, not IP-driven. The CAP reflects: (1) industry consolidation to 3 players is structural and durable — barriers are HIGHER than ever ($15B+ for a leading-edge fab, ASML EUV bottleneck); (2) leader rotation is RARE — the top 3 have been the same since Elpida's bankruptcy in 2012; (3) but technology shifts (HBM, CXL, new memory architectures) create windows for disruption. CAP of 8 years means we believe excess returns persist through ~2034 — 2 full memory cycles — which is aggressive but defensible given the consolidation evidence. Beyond 10 years, probability of a technology disruption or Chinese entrant achieving parity rises meaningfully.",
+    "industry_rotation_evidence": "Leader rotation is rare: Samsung has been #1 since 1992. SK Hynix gained 3pp share in 10 years (HBM leadership). Micron's share has been stable at ~23-25% for 15 years. No new entrant has broken into the top 3 since the 1990s (Elpida went bankrupt; Qimonda went bankrupt; Nanya relegated to specialty). This extreme stability supports a longer-than-average CAP.",
+    "moat_composite_score": 3.8,
+    "cap_scenarios": {
+      "bear": 4,
+      "base": 8,
+      "bull": 12
+    }
+  },
+
+  "moat_decomposition": {
+    "components": [
+      {
+        "name": "Manufacturing scale & cost position",
+        "type": "scale_economies",
+        "strength": 4,
+        "durability_years": 10,
+        "threat": "Samsung and SK Hynix maintain 5-10% cost advantage from larger scale. If the scale gap WIDENS (e.g., Samsung invests disproportionately in next-gen capacity), Micron's cost position erodes.",
+        "threat_probability": "medium",
+        "monitorable_indicator": "Micron gross margin vs Samsung Semiconductor margin — track quarterly. A persistent >500bp gap widening over 4+ quarters signals structural cost disadvantage.",
+        "monitoring_frequency": "quarterly",
+        "weight": 0.30,
+        "evidence": "Micron's 1b nm DRAM process delivers ~15% cost-per-bit reduction. Gross margins of 40-45% at mid-cycle are within 300bp of Samsung. Cost parity is unlikely but the gap is stable."
+      },
+      {
+        "name": "Process technology know-how",
+        "type": "supply_side",
+        "strength": 4,
+        "durability_years": 10,
+        "threat": "Chinese entrants (CXMT) close the process gap through state-funded R&D and equipment access. DRAM process tech is tacit knowledge — difficult to replicate even with equipment access. However, $50B+ in Chinese subsidies could accelerate learning.",
+        "threat_probability": "low",
+        "monitorable_indicator": "CXMT node progression: track announced technology node vs Samsung/Micron. Currently 3-4 nodes behind (1x nm vs 1b nm). If gap narrows to 1 node, raise threat to medium.",
+        "monitoring_frequency": "annual",
+        "weight": 0.25,
+        "evidence": "Only 3 companies produce DDR5 at scale. DRAM process development cycle is ~5 years from concept to HVM. CXMT is ~5% of bits, mostly DDR4/LPDDR4, and ~3-4 nodes behind on process."
+      },
+      {
+        "name": "HBM (High Bandwidth Memory) capability",
+        "type": "supply_side",
+        "strength": 3,
+        "durability_years": 5,
+        "threat": "HBM is a technology moat within memory. Micron is the #3 HBM supplier (vs Samsung #1, SK Hynix #2) but has qualified HBM3E at NVIDIA. If HBM becomes 30%+ of DRAM revenue (vs ~15% today) and Micron's share is <15%, the technology gap becomes a structural margin headwind.",
+        "threat_probability": "medium",
+        "monitorable_indicator": "Micron HBM revenue as % of DRAM revenue, and NVIDIA HBM allocation share. If Micron <15% share on next-gen HBM4, the gap is widening.",
+        "monitoring_frequency": "quarterly",
+        "weight": 0.20,
+        "evidence": "Micron HBM3E qualified at NVIDIA in 2025 — was 6-12 months behind SK Hynix but caught up. HBM3E yields improving from 60% to 75%+. HBM4 development on track for 2027-28."
+      },
+      {
+        "name": "IP portfolio & patent thicket",
+        "type": "legal",
+        "strength": 3,
+        "durability_years": 8,
+        "threat": "Patent cliff — DRAM and NAND core patents expire over time. Chinese companies can design-around or litigate. The patent thicket is a deterrent but not an absolute barrier (witness: CXMT's existence despite IP disputes).",
+        "threat_probability": "low",
+        "monitorable_indicator": "US patent office challenges to MU patents; ITC import bans sought against MU by Chinese companies. If CXMT successfully invalidates >3 key MU DRAM patents, threat rises.",
+        "monitoring_frequency": "annual",
+        "weight": 0.15,
+        "evidence": "Micron holds ~50,000 patents. Ongoing IP enforcement: Micron v. UMC/JSMC (2018, trade secret theft — settled); US DOJ indictments of Chinese nationals for MU IP theft (2020). Patent protection is strong in US/KR/TW; weaker in China."
+      },
+      {
+        "name": "Customer relationships & qualification moat",
+        "type": "lock_in",
+        "strength": 3,
+        "durability_years": 5,
+        "threat": "Qualification cycles are 12-18 months, creating switching costs. However, hyperscalers actively dual-source to avoid reliance. If a new entrant (CXMT) achieves qualification at a major OEM/hyperscaler, the lock-in erodes.",
+        "threat_probability": "medium",
+        "monitorable_indicator": "Announced design wins: track CXMT or YMTC announcements of qualification at Dell, HPE, AWS, or Google. A single tier-1 qualification is a meaningful signal.",
+        "monitoring_frequency": "quarterly",
+        "weight": 0.10,
+        "evidence": "Micron is qualified at every major OEM and hyperscaler. DDR5 qualification took 18 months; HBM3E took 12 months. Switching costs are real but not insurmountable — cloud providers actively qualify multiple sources."
+      }
+    ],
+    "composite_assessment": {
+      "weighted_strength": 3.55,
+      "weighted_durability": 8.3,
+      "moat_width": "narrow",
+      "moat_trend": "stable"
+    }
+  },
+
+  "ronic_fade": {
+    "current_roic": 0.22,
+    "fade_path": [
+      { "year": 0, "ronic": 0.22 },
+      { "year": 3, "ronic": 0.19 },
+      { "year": 5, "ronic": 0.17 },
+      { "year": 8, "ronic": 0.14 },
+      { "year": 10, "ronic": 0.12 }
+    ],
+    "terminal_roc": 0.12,
+    "terminal_roc_defense": "Terminal ROC of 12% reflects a modest perpetual excess return over WACC (~8.2%): a 3.8pp spread. This is defensible for a consolidated, capital-intensive commodity industry with high barriers. The memory industry has historically produced 10-20% through-cycle ROIC for the top 3 players. 12% is conservative — it implies some erosion from competitive dynamics but not a full mean reversion to cost of capital.",
+    "terminal_roc_vs_current": 0.545,
+    "fade_speed": "moderate",
+    "fade_rationale": "Fade is moderate (not rapid because barriers are high and rising; not slow because technology disruption risk is real in semiconductors). Half the spread closes in ~8 years — aligned with the CAP. After CAP ends (~2034), ROIC continues fading toward terminal ROC. The terminal 12% ROC is defended by: (a) consolidated industry structure, (b) no viable substitute for DRAM/NAND at scale, (c) demand growth from AI/cloud provides a tailwind even as competitive advantage erodes.",
+    "half_life": 6.5
+  },
+
+  "terminal_sensitivity": {
+    "base_case": {
+      "cap": 8,
+      "terminal_roc": 0.12,
+      "terminal_growth": 0.03,
+      "value_per_share": 138.50,
+      "terminal_pct_of_value": 0.575
+    },
+    "scenarios": [
+      {
+        "name": "Longer CAP (+5yr)",
+        "cap": 13,
+        "terminal_roc": 0.12,
+        "terminal_growth": 0.03,
+        "value_per_share": 168.20,
+        "delta_vs_base_pct": 0.214,
+        "terminal_pct_of_value": 0.62
+      },
+      {
+        "name": "Shorter CAP (-5yr)",
+        "cap": 3,
+        "terminal_roc": 0.12,
+        "terminal_growth": 0.03,
+        "value_per_share": 98.40,
+        "delta_vs_base_pct": -0.290,
+        "terminal_pct_of_value": 0.48
+      },
+      {
+        "name": "Higher terminal ROC (+2pp)",
+        "cap": 8,
+        "terminal_roc": 0.14,
+        "terminal_growth": 0.03,
+        "value_per_share": 176.50,
+        "delta_vs_base_pct": 0.274,
+        "terminal_pct_of_value": 0.68
+      },
+      {
+        "name": "Lower terminal ROC (-2pp)",
+        "cap": 8,
+        "terminal_roc": 0.10,
+        "terminal_growth": 0.03,
+        "value_per_share": 108.30,
+        "delta_vs_base_pct": -0.218,
+        "terminal_pct_of_value": 0.49
+      },
+      {
+        "name": "Bear: Chinese entry + shorter CAP",
+        "cap": 3,
+        "terminal_roc": 0.09,
+        "terminal_growth": 0.03,
+        "value_per_share": 72.50,
+        "delta_vs_base_pct": -0.477,
+        "terminal_pct_of_value": 0.38
+      }
+    ],
+    "key_insight": "Value is roughly 2× more sensitive to terminal ROC than to CAP — a 2pp move in terminal ROC shifts value by ~25% vs ~21-29% for a 5-year CAP change. This means the real bet is not 'how long does the moat last' but 'what is the structural profit level the industry settles at.' The bear scenario (Chinese entry forcing terminal ROC to 9%) cuts value nearly in half to $72. This is the scenario that BREAKS the thesis — and it requires CXMT achieving commercially viable DDR5 AND gaining 15%+ share, which most industry estimates place 5+ years out."
+  },
+
+  "risk_register": {
+    "risks": [
+      {
+        "risk": "Memory downcycle from AI capex digestion (2027-28)",
+        "category": "demand",
+        "impact": "major",
+        "impact_value_pct": -0.30,
+        "probability": "medium",
+        "monitorable_indicator": "Hyperscaler capex guidance (AWS/Azure/GCP/Meta combined). If aggregate 2027 capex growth decelerates below 10% YoY, a digestion cycle is likely.",
+        "trigger_for_action": "Two consecutive quarters of hyperscaler capex growth <10% AND DRAM contract prices declining >5% QoQ → reduce position sizing, revisit cyclical timing assumption.",
+        "mitigation": "Micron has diversified end-market exposure. HBM is supply-constrained, not demand-constrained — even in a capex digestion, HBM pricing holds. Net cash balance sheet ($3.5B net debt) vs historically leveraged — can weather a downcycle.",
+        "in_base_case": true
+      },
+      {
+        "risk": "CXMT achieves DDR5 qualification at tier-1 OEM (2028-30)",
+        "category": "competitive",
+        "impact": "catastrophic",
+        "impact_value_pct": -0.45,
+        "probability": "low",
+        "monitorable_indicator": "CXMT press releases on DDR5 qualification; Dell/HP/Lenovo announcements; CXMT DRAM bit share crossing 10% (from current ~5%).",
+        "trigger_for_action": "CXMT announces DDR5 qualification at any tier-1 OEM → immediately reassess terminal margin assumption (from 22% to 17%) and CAP (from 8 to 4). Re-run DCF.",
+        "mitigation": "US export controls on advanced semiconductor equipment to China. ASML EUV tools are not exportable to China. CXMT is limited to DUV-based process nodes which cap out ~1x nm — 2-3 nodes behind leading edge.",
+        "in_base_case": false
+      },
+      {
+        "risk": "HBM technology disruption: Micron loses NVIDIA HBM4 allocation",
+        "category": "technological",
+        "impact": "major",
+        "impact_value_pct": -0.20,
+        "probability": "medium",
+        "monitorable_indicator": "NVIDIA's public HBM supplier announcements for next-gen GPUs. If MU is absent from HBM4 qualification at NVIDIA (Rubin platform, ~2027), this is a meaningful negative signal.",
+        "trigger_for_action": "MU not listed as HBM4 supplier on NVIDIA Rubin platform → reduce target margin from 22% to 19% (HBM is ~30% higher margin than commodity DRAM).",
+        "mitigation": "Micron HBM3E performance is competitive (higher bandwidth, lower power than SK Hynix HBM3E in some benchmarks). HBM roadmap through HBM4 extends to 2028-30. Diversifying HBM customer base beyond NVIDIA (AMD, Intel, custom ASICs).",
+        "in_base_case": false
+      },
+      {
+        "risk": "Taiwan Strait geopolitical disruption",
+        "category": "geopolitical",
+        "impact": "catastrophic",
+        "impact_value_pct": -0.60,
+        "probability": "tail",
+        "monitorable_indicator": "PLA military exercises near Taiwan; TSMC/ASE/U MC production disruptions; insurance market pricing for Taiwan risk.",
+        "trigger_for_action": "Any kinetic action in Taiwan Strait → halt thesis regardless of MU-specifics. Memory supply chain depends on Taiwan (Nanya, PSMC, Winbond manufacturing; TSMC for controller chips). Global semiconductor supply disruption would be systemic, not MU-specific.",
+        "mitigation": "Micron has diversified manufacturing: US (Boise, Manassas, Clay NY), Japan (Hiroshima), Taiwan (Taichung), Singapore, Malaysia. Taiwan exposure is smaller than logic peers (TSMC-dependent). But memory SUPPLY would tighten globally if Korean fabs also disrupted — pricing could offset volume impact.",
+        "in_base_case": false
+      },
+      {
+        "risk": "Structural margin compression from NAND commoditization",
+        "category": "competitive",
+        "impact": "moderate",
+        "impact_value_pct": -0.10,
+        "probability": "medium",
+        "monitorable_indicator": "NAND industry operating margin staying below 10% for 4+ consecutive quarters, even as DRAM margins normalize.",
+        "trigger_for_action": "If NAND segment margin stays below 10% for 4+ quarters with no cyclical catalyst → reduce consolidated target margin by 1-2pp (NAND is 25% of revenue).",
+        "mitigation": "NAND has more competitors (6 major players vs 3 for DRAM) and lower barriers (YMTC is more advanced in NAND than CXMT in DRAM). Micron focuses NAND on high-value segments (data center SSDs) where margins are better. NAND margins are structurally lower than DRAM — this is known and in the base case.",
+        "in_base_case": true
+      },
+      {
+        "risk": "Water/power constraints at new US fabs (Boise, Clay NY)",
+        "category": "operational",
+        "impact": "minor",
+        "impact_value_pct": -0.05,
+        "probability": "low",
+        "monitorable_indicator": "Local news on water restrictions in Boise/Clay; Micron operational updates on fab ramp timelines.",
+        "trigger_for_action": "Significant delays (>12 months) in US fab ramp → slower capacity addition but also higher capex/revenue ratio. Net impact ambiguous; monitor for details.",
+        "mitigation": "Micron has secured water rights and power agreements with local utilities. CHIPS Act funding ($6.1B for Micron) includes infrastructure support. Fab construction is phased — not all capacity dependent on single site.",
+        "in_base_case": false
+      }
+    ],
+    "aggregate_risk_assessment": {
+      "overall_risk_level": "moderate",
+      "key_concentration": "The investment case concentrates risk in two areas: (1) memory cycle timing — we are 2 years into an upcycle, and cycles average 3.5 years; (2) Chinese competition trajectory — the bull case depends on CXMT being 3-5 years from DDR5 parity, not 2-3.",
+      "tail_risks": [
+        "Taiwan Strait military conflict → catastrophic for global semis, not MU-specific",
+        "CXMT achieves DDR5 qualification 2 years ahead of consensus → breaks consolidation thesis",
+        "Novel memory architecture (CXL-pooled memory, photonic interconnects) renders HBM architecture obsolete → low probability in 5-year horizon but non-zero"
+      ],
+      "what_breaks_the_thesis": [
+        "CXMT ships commercially viable DDR5 at scale (>10% bit share) within 3 years → this is the SINGLE BIGGEST risk. It would break the consolidation thesis and force a re-rating to pre-consolidation multiples (terminal ROC 9%, CAP 3 years, value ~$72).",
+        "AI demand proves cyclical (not secular) and 2027-28 sees a sharp hyperscaler capex digestion → memory downcycle would be severe because industry has added capacity for AI that would need to be repurposed to lower-margin commodity applications. Value could fall 30-40%.",
+        "Micron loses HBM technology race: excluded from NVIDIA HBM4 allocation while Samsung/SK Hynix split the market → structural margin headwind of 3-5pp on consolidated basis, as HBM (highest-margin memory product) becomes a competitor advantage."
+      ]
+    }
+  }
+}

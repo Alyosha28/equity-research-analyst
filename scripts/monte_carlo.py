@@ -1,4 +1,4 @@
-"""Monte Carlo simulation over the four value drivers -- Damodaran's way of
+"""Monte Carlo simulation over the five core value drivers -- Damodaran's way of
 turning estimation uncertainty into a value DISTRIBUTION instead of a single
 point estimate.
 
@@ -7,6 +7,22 @@ For NVIDIA (June 2023) Damodaran varied:
   * target op margin  : triangular, 30% / 40% / 50%
   * sales-to-capital  : 0.65 (historic) / 1.15 (base) / 1.94 (75th pct)
   * cost of capital   : 8.85% (market) / 12.21% (base) / 15% (90th pct)
+
+This implementation varies all FIVE core value drivers (terminal revenue, target
+operating margin, sales-to-capital, cost of capital, terminal growth).  Terminal
+growth directly affects (a) the shape of the declining-growth revenue path
+(steepness of deceleration), (b) the terminal-value denominator (CoC -- g), and
+(c) the reinvestment rate implied by g / terminal_roc. For terminal-heavy
+valuations (60-85% of value) these effects compound materially and omitting them
+understates the true value distribution.
+
+By default ALL FIVE driver distributions are auto-derived from the base case's own
+values (Damodaran's "simulate around the analyst's base estimate" discipline) so
+the value distribution is centred on the company being valued, not on NVDA.
+Callers may override any distribution explicitly via the ``distributions``
+keyword argument; ``DEFAULT_DISTRIBUTIONS`` serves only as a last-resort
+fallback when auto-derivation cannot produce a valid centre (e.g. negative
+base margin, zero revenue).
 
 Each trial re-shapes the revenue path to the sampled year-10 revenue, then runs
 the intrinsic DCF. Output: percentiles of value/share + where the price sits.
@@ -29,17 +45,23 @@ except ImportError:
     from scripts import dcf_valuation as dcf  # type: ignore
 
 
-# Distribution specs mirror Damodaran's NVDA simulation.
+# Distribution spec format:
 #   ("triangular", low, mode, high)   -- bounded, for margins / ratios / CoC
 #   ("lognormal", median, sigma)      -- positive & right-skewed, for revenue
-# Revenue is lognormal centered on the base year-10 revenue ($267B) so the
-# distribution's CENTRE matches the base case; sigma=0.33 puts the ~1st/99th
-# percentiles near Damodaran's stated <$100B / >$600B extremes.
+#
+# The values below are NVDA-specific LAST-RESORT FALLBACKS.  `simulate()` will
+# auto-derive target_operating_margin, sales_to_capital, terminal_growth,
+# terminal_revenue, and cost_of_capital_initial from the base case whenever the
+# caller does not supply an explicit override.  The DEFAULT_DISTRIBUTIONS dict
+# serves only as a safety net when auto-derivation cannot produce a positive
+# centre (e.g. negative base margin).  In normal usage the NVDA numbers are
+# never reached; they exist to prevent a crash, not to centre the distribution.
 DEFAULT_DISTRIBUTIONS = {
     "terminal_revenue": ("lognormal", 267_000.0, 0.33),
     "target_operating_margin": ("triangular", 0.30, 0.40, 0.50),
     "sales_to_capital": ("triangular", 0.65, 1.15, 1.94),
     "cost_of_capital_initial": ("triangular", 0.0885, 0.1221, 0.15),
+    "terminal_growth": ("triangular", 0.025, 0.0385, 0.045),
 }
 
 
@@ -120,8 +142,68 @@ def json_summary(values, price=None) -> dict:
 
 def simulate(base_inp, trials=20000, seed=42, distributions=None):
     rng = random.Random(seed)
-    d = {**DEFAULT_DISTRIBUTIONS, **(distributions or {})}
+    merge = distributions or {}
+    d = {**DEFAULT_DISTRIBUTIONS, **merge}
     n = base_inp.horizon
+
+    # Auto-derive distributions that were NOT explicitly overridden by the caller.
+    # DEFAULT_DISTRIBUTIONS are NVDA-specific placeholders; for any other company
+    # they produce a value distribution centred on the wrong company's economics.
+    # When the caller doesn't supply their own spec for a driver, we centre the
+    # distribution on the base case's own values (Damodaran's "simulate around the
+    # analyst's base-case estimate" discipline).
+    #
+    # terminal_revenue: lognormal centred on the base case's year-N revenue so the
+    #   distribution median equals the analyst's best estimate.  sigma=0.33 is
+    #   preserved from Damodaran's original (puts ~1st/99th %iles near <$100B/>$600B
+    #   for NVDA; serves as a reasonable default for 10-yr forecast dispersion).
+    if "terminal_revenue" not in merge:
+        base_yN_rev = base_inp.revenue_path()[-1]
+        # Ensure positive (the base case can't have non-positive year-N revenue)
+        if base_yN_rev > 0:
+            d["terminal_revenue"] = ("lognormal", base_yN_rev, 0.33)
+    # cost_of_capital_initial: triangular centred on the base case's own CoC with
+    #   width ratios matched to Damodaran's NVDA spread (low ~0.72x mode, high ~1.23x
+    #   mode).  Clamped to [0.02, 0.50] to keep the distribution economically
+    #   plausible regardless of the base rate.
+    if "cost_of_capital_initial" not in merge:
+        base_coc = base_inp.cost_of_capital_initial
+        lo = max(0.02, base_coc * 0.72)
+        hi = min(0.50, base_coc * 1.23)
+        d["cost_of_capital_initial"] = ("triangular", lo, base_coc, hi)
+    # target_operating_margin: triangular centred on the base case's own target
+    #   margin with a +/-50% spread (lo ~0.50x mode, hi ~1.50x mode), clamped to
+    #   [0.005, 0.95].  Without this the Monte Carlo would sample from NVDA's
+    #   30-50% margin range for EVERY company -- a 20%-margin young-growth firm
+    #   gets a ~2.5x inflated value distribution, a 3%-margin legacy retailer
+    #   gets a ~13x inflated median.
+    if "target_operating_margin" not in merge:
+        base_margin = base_inp.target_operating_margin
+        if base_margin > 0:
+            lo = max(0.005, base_margin * 0.50)
+            hi = min(0.95, base_margin * 1.50)
+            d["target_operating_margin"] = ("triangular", lo, base_margin, hi)
+    # sales_to_capital: triangular centred on the base case's own S2C with a
+    #   +/-50% spread (lo ~0.50x mode, hi ~1.67x mode), clamped to [0.10, 5.0].
+    #   Without this a 0.55 S2C capital-intensive cyclical (Freeport) samples
+    #   from NVDA's 0.65-1.94 range, overstating reinvestment efficiency and
+    #   therefore value.
+    if "sales_to_capital" not in merge:
+        base_s2c = base_inp.sales_to_capital
+        if base_s2c > 0:
+            lo = max(0.10, base_s2c * 0.50)
+            hi = min(5.0, base_s2c * 1.67)
+            d["sales_to_capital"] = ("triangular", lo, base_s2c, hi)
+    # terminal_growth: triangular centred on the base case's own terminal growth
+    #   with a narrower spread (lo ~0.65x mode, hi ~1.17x mode) because the
+    #   risk-free rate bounds this driver tightly.  Clamped to [0.005, 0.06].
+    if "terminal_growth" not in merge:
+        base_g = base_inp.terminal_growth
+        if base_g > 0:
+            lo = max(0.005, base_g * 0.65)
+            hi = min(0.06, base_g * 1.17)
+            d["terminal_growth"] = ("triangular", lo, base_g, hi)
+
     values, skipped = [], 0
     for _ in range(trials):
         rev_y10 = _sample(rng, d["terminal_revenue"])
@@ -129,12 +211,34 @@ def simulate(base_inp, trials=20000, seed=42, distributions=None):
         s2c = _sample(rng, d["sales_to_capital"])
         coc = _sample(rng, d["cost_of_capital_initial"])
 
+        # Terminal growth (g_term): sampled and clamped to ensure
+        # 0 < g_term < terminal CoC -- 0.005 (the DCF requires CoC > g).
+        # Also clamped not to exceed terminal_roc -- 0.005 (otherwise the
+        # implied reinvestment rate g/ROC >= 1 and terminal FCFF <= 0).
+        # Callers may opt OUT of terminal_growth variation by passing
+        # {"terminal_growth": None} in the distributions override.
+        if d.get("terminal_growth") is not None:
+            g_term = _sample(rng, d["terminal_growth"])
+            g_term = max(0.005, min(g_term,
+                                    base_inp.cost_of_capital_terminal - 0.005,
+                                    base_inp.terminal_roc - 0.005))
+        else:
+            g_term = base_inp.terminal_growth
+
         growth = build_declining_growth(base_inp.base_revenue, rev_y10,
-                                         base_inp.terminal_growth, n)
-        # Keep terminal CoC strictly above terminal growth so the TV denominator
-        # stays positive even when a very low initial CoC is sampled.
-        coc_term = max(base_inp.terminal_growth + 0.005,
-                       min(base_inp.cost_of_capital_terminal, coc))
+                                         g_term, n)
+        # Terminal CoC is the MATURE / market-average rate to which all
+        # companies converge -- it is independent of the initial CoC draw.
+        # The initial CoC only affects early-year discounting through the
+        # glide path (glide_start_year -> glide_end_year).  Making coc_term
+        # float with coc creates asymmetric bias: low-CoC draws get amplified
+        # terminal values (smaller denominator), but high-CoC draws are capped
+        # at the base terminal CoC -- skewing the distribution rightward.
+        # The defensive floor (g_term + 5bp) is a no-op in almost all trials
+        # because g_term is already clamped below terminal CoC - 5bp, but it
+        # stays as a safety net in case a caller overrides the clamping.
+        coc_term = max(g_term + 0.005,
+                       base_inp.cost_of_capital_terminal)
         try:
             trial = base_inp.with_(
                 revenue_growth=growth,
@@ -142,6 +246,7 @@ def simulate(base_inp, trials=20000, seed=42, distributions=None):
                 sales_to_capital=s2c,
                 cost_of_capital_initial=coc,
                 cost_of_capital_terminal=coc_term,
+                terminal_growth=g_term,
             )
             values.append(dcf.value(trial).value_per_share)
         except ValueError:

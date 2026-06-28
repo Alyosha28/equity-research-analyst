@@ -77,7 +77,7 @@ sensitivity. **Separate absolute-pool growth from your share of the marginal dol
 — they can diverge. *Blind spot:* capex-as-proxy is breaking down; concentration risk.
 
 ## 4. Intrinsic DCF (Damodaran) — the anchor
-*(Primary: Damodaran's blog, June 2023 + 2024–25 updates.)*
+*(Primary: Damodaran's blog (June 2023 NVDA), 2024-2026 data updates, The Corporate Life Cycle book (Aug 2024), 17th annual ERP study (March 2026).)*
 
 The skill's spine; see `methodology-damodaran.md` and `input-estimation.md` for full
 detail. Four drivers: revenue (**TAM × share**, ~$267B by 2033), R&D-adjusted **margin

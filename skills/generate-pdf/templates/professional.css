@@ -1,0 +1,568 @@
+/* ==========================================================================
+   Equity Research Report — Professional PDF Stylesheet
+
+   Used by: equity-research-analyst/generate-pdf
+   Target: WeasyPrint v63+ (CSS Paged Media + CJK font subsetting)
+           Playwright/Chromium 115+ (fallback)
+
+   Design: Restrained institutional typography with one navy accent.
+           B/W-printable. No decorative elements. A4 page geometry.
+   ========================================================================== */
+
+/* ── CSS Custom Properties (Design Tokens) ─────────────────────────────── */
+
+:root {
+  /* Colors */
+  --ink:        #1a1e2b;
+  --ink-light:  #4a5568;
+  --accent:     #1a3a6b;
+  --accent-dim: #2d5a9e;
+  --surface:    #f8fafc;
+  --rule:       #cbd5e1;
+  --rule-light: #e2e8f0;
+  --up:         #15803d;
+  --down:       #b91c1c;
+  --neutral:    #6b7280;
+
+  /* Typography */
+  --font-body:    "CJK Body", "Noto Serif CJK SC", "Source Serif 4",
+                  Georgia, "SimSun", serif;
+  --font-heading: "CJK Heading", "Noto Sans CJK SC", "Source Sans 3",
+                  Helvetica, "Microsoft YaHei", sans-serif;
+  --font-mono:    "Cascadia Code", "Source Code Pro", Consolas,
+                  "Courier New", monospace;
+  --font-display: "CJK Heading", "Noto Sans CJK SC", "Source Sans 3",
+                  "Microsoft YaHei", sans-serif;
+
+  --size-body:   11pt;
+  --size-h1:     18pt;
+  --size-h2:     14pt;
+  --size-h3:     12pt;
+  --size-mono:   9.5pt;
+  --size-caption: 8.5pt;
+  --size-header: 7.5pt;
+  --size-footer: 7.5pt;
+  --size-disclaimer: 8pt;
+
+  --line-body:   1.75;
+  --line-heading: 1.3;
+  --line-mono:   1.5;
+}
+
+/* ── Page Geometry ──────────────────────────────────────────────────────── */
+
+@page {
+  size: A4;
+  margin-top: 2.2cm;
+  margin-bottom: 2.4cm;
+  margin-left: 2.4cm;
+  margin-right: 2.4cm;
+  @bottom-center {
+    content: "Page " counter(page) " of " counter(pages);
+    font-family: var(--font-display);
+    font-size: var(--size-footer);
+    color: var(--neutral);
+    border-top: 0.5pt solid var(--rule);
+    padding-top: 6pt;
+    margin-top: 6pt;
+  }
+}
+
+@page :first {
+  /* First page: rating box, no running header, no page number */
+  @bottom-center { content: none; }
+}
+
+/* ── Running Headers ────────────────────────────────────────────────────── */
+
+h1 {
+  string-set: report-title content();
+}
+
+@page {
+  @top-right {
+    content: string(report-title);
+    font-family: var(--font-display);
+    font-size: var(--size-header);
+    color: var(--neutral);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 0.5pt solid var(--rule);
+    padding-bottom: 6pt;
+    margin-bottom: 6pt;
+  }
+}
+
+@page :first {
+  @top-right { content: none; }
+}
+
+/* ── Base Typography ────────────────────────────────────────────────────── */
+
+html {
+  font-size: var(--size-body);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--size-body);
+  line-height: var(--line-body);
+  text-align: justify;
+  hyphens: auto;
+  orphans: 3;
+  widows: 3;
+}
+
+/* Headings */
+h1 {
+  font-family: var(--font-heading);
+  font-size: var(--size-h1);
+  font-weight: 700;
+  line-height: var(--line-heading);
+  color: var(--ink);
+  margin-top: 24pt;
+  margin-bottom: 12pt;
+  page-break-after: avoid;
+}
+
+h2 {
+  font-family: var(--font-heading);
+  font-size: var(--size-h2);
+  font-weight: 700;
+  line-height: var(--line-heading);
+  color: var(--accent);
+  margin-top: 18pt;
+  margin-bottom: 8pt;
+  page-break-after: avoid;
+}
+
+h3 {
+  font-family: var(--font-heading);
+  font-size: var(--size-h3);
+  font-weight: 600;
+  line-height: var(--line-heading);
+  color: var(--ink);
+  margin-top: 14pt;
+  margin-bottom: 6pt;
+  page-break-after: avoid;
+}
+
+h4 {
+  font-family: var(--font-heading);
+  font-size: var(--size-body);
+  font-weight: 600;
+  line-height: var(--line-heading);
+  color: var(--ink-light);
+  margin-top: 12pt;
+  margin-bottom: 4pt;
+  page-break-after: avoid;
+}
+
+/* Paragraphs */
+p {
+  margin-top: 0;
+  margin-bottom: 0.6em;
+  text-indent: 0;
+}
+
+/* Links */
+a {
+  color: var(--accent-dim);
+  text-decoration: none;
+}
+
+/* ── Horizontal Rules ───────────────────────────────────────────────────── */
+
+hr {
+  border: none;
+  border-top: 0.5pt solid var(--rule);
+  margin: 18pt 0;
+}
+
+/* ── Blockquotes ────────────────────────────────────────────────────────── */
+
+blockquote {
+  margin: 14pt 0 14pt 18pt;
+  padding-left: 14pt;
+  border-left: 2pt solid var(--rule);
+  color: var(--ink-light);
+  font-style: italic;
+}
+
+/* ── Inline Code ────────────────────────────────────────────────────────── */
+
+code {
+  font-family: var(--font-mono);
+  font-size: var(--size-mono);
+  background: var(--surface);
+  padding: 1pt 4pt;
+  border-radius: 2pt;
+  color: var(--ink);
+}
+
+/* ── Pre / Code Blocks ──────────────────────────────────────────────────── */
+
+pre {
+  font-family: var(--font-mono);
+  font-size: var(--size-mono);
+  line-height: var(--line-mono);
+  background: var(--surface);
+  border: 0.5pt solid var(--rule-light);
+  border-radius: 4pt;
+  padding: 12pt 14pt;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  page-break-inside: avoid;
+  margin: 12pt 0;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+}
+
+/* ── Tables ─────────────────────────────────────────────────────────────── */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14pt 0;
+  font-family: var(--font-body);
+  font-size: 9.5pt;
+  line-height: 1.35;
+  page-break-inside: avoid;
+}
+
+thead {
+  border-bottom: 1.5pt solid var(--ink);
+}
+
+thead th {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 8.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-light);
+  padding: 6pt 8pt 4pt 8pt;
+  text-align: left;
+  vertical-align: bottom;
+}
+
+tbody td {
+  padding: 4pt 8pt;
+  border-bottom: 0.5pt solid var(--rule-light);
+  vertical-align: top;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:nth-child(even) {
+  background: var(--surface);
+}
+
+/* Wide tables: shrink font to fit A4 (210mm - 4.8cm margins = 162mm) */
+table.wide {
+  font-size: 8pt;
+}
+table.wide thead th {
+  font-size: 7.5pt;
+}
+
+/* ── Lists ──────────────────────────────────────────────────────────────── */
+
+ul, ol {
+  margin: 8pt 0;
+  padding-left: 22pt;
+}
+
+li {
+  margin-bottom: 3pt;
+}
+
+/* ── Emphasis ───────────────────────────────────────────────────────────── */
+
+strong {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+em {
+  font-style: italic;
+}
+
+/* ── Footnotes ──────────────────────────────────────────────────────────── */
+
+.footnote {
+  font-size: 8pt;
+  color: var(--ink-light);
+  line-height: 1.4;
+}
+
+/* ── Rating Box (First Page) ────────────────────────────────────────────── */
+
+.rating-box {
+  border: 2pt solid var(--accent);
+  background: var(--surface);
+  padding: 18pt 22pt;
+  margin: 0 0 22pt 0;
+  border-radius: 4pt;
+  page-break-after: avoid;
+}
+
+.rating-box .company-name {
+  font-family: var(--font-display);
+  font-size: 15pt;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+
+.rating-box .ticker {
+  font-family: var(--font-mono);
+  font-size: 11pt;
+  color: var(--neutral);
+}
+
+.rating-box .divider {
+  border: none;
+  border-top: 1pt solid var(--rule);
+  margin: 10pt 0 14pt 0;
+}
+
+.rating-box .kv-grid {
+  display: grid;
+  grid-template-columns: 110pt 1fr;
+  gap: 4pt 14pt;
+  margin-bottom: 14pt;
+}
+
+.rating-box .kv-label {
+  font-family: var(--font-display);
+  font-size: 9.5pt;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rating-box .kv-value {
+  font-family: var(--font-display);
+  font-size: 11pt;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.rating-box .kv-value.down { color: var(--down); }
+.rating-box .kv-value.up   { color: var(--up); }
+
+.rating-box .thesis-label {
+  font-family: var(--font-display);
+  font-size: 9pt;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6pt;
+}
+
+.rating-box .thesis-text {
+  font-family: var(--font-body);
+  font-size: 10pt;
+  line-height: 1.55;
+  color: var(--ink);
+  margin-bottom: 10pt;
+}
+
+.rating-box .mos-band {
+  font-family: var(--font-display);
+  font-size: 9pt;
+  color: var(--ink-light);
+}
+
+/* ── Figures and Charts ─────────────────────────────────────────────────── */
+
+figure {
+  counter-increment: figure-counter;
+  margin: 18pt 0;
+  text-align: center;
+  page-break-inside: avoid;
+}
+
+figure img,
+figure svg.plot {
+  max-width: 100%;
+  height: auto;
+}
+
+figcaption {
+  font-family: var(--font-display);
+  font-size: var(--size-caption);
+  color: var(--neutral);
+  line-height: 1.35;
+  margin-top: 6pt;
+  text-align: left;
+}
+
+figcaption::before {
+  content: "Figure " counter(figure-counter) ": ";
+  font-weight: 600;
+  color: var(--ink-light);
+}
+
+/* ── Disclaimer ─────────────────────────────────────────────────────────── */
+
+.disclaimer {
+  margin-top: 28pt;
+  padding-top: 10pt;
+  border-top: 0.5pt solid var(--rule);
+}
+
+.disclaimer p {
+  font-size: var(--size-disclaimer);
+  color: var(--neutral);
+  line-height: 1.4;
+  font-style: italic;
+}
+
+/* ── Numbers Ledger Table ───────────────────────────────────────────────── */
+
+.numbers-ledger {
+  margin-top: 20pt;
+}
+
+.numbers-ledger h3 {
+  font-size: var(--size-h3);
+  color: var(--ink);
+}
+
+.numbers-ledger table {
+  font-size: 8pt;
+}
+
+.numbers-ledger thead th {
+  font-size: 7.5pt;
+}
+
+/* ── Table of Contents ──────────────────────────────────────────────────── */
+
+.toc {
+  margin: 22pt 0;
+  page-break-after: always;
+}
+
+.toc h2 {
+  margin-top: 0;
+}
+
+.toc ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.toc li {
+  margin-bottom: 4pt;
+}
+
+.toc li a {
+  color: var(--ink-light);
+  text-decoration: none;
+}
+
+.toc li a::after {
+  content: leader(".") target-counter(attr(href), page);
+}
+
+.toc .toc-h2 {
+  font-weight: 600;
+  margin-top: 8pt;
+  margin-left: 0;
+}
+
+.toc .toc-h3 {
+  margin-left: 18pt;
+}
+
+/* ── Print / B/W Optimization ───────────────────────────────────────────── */
+
+@media print {
+  .rating-box {
+    border-color: var(--ink);
+    background: none;
+  }
+  figure img {
+    filter: grayscale(100%);
+  }
+}
+
+/* ── Landscape Pages (for wide charts) ──────────────────────────────────── */
+
+@page landscape {
+  size: A4 landscape;
+  margin-top: 2.2cm;
+  margin-bottom: 2.4cm;
+  margin-left: 2.4cm;
+  margin-right: 2.4cm;
+}
+
+.landscape {
+  page: landscape;
+  page-break-before: always;
+  page-break-after: always;
+}
+
+/* ── Multi-Column Layout (for sensitivity exhibits) ─────────────────────── */
+
+.two-col {
+  column-count: 2;
+  column-gap: 18pt;
+  column-rule: 0.5pt solid var(--rule);
+  margin: 12pt 0;
+}
+
+/* ── Page Break Helpers ─────────────────────────────────────────────────── */
+
+.page-break-before {
+  page-break-before: always;
+}
+
+.page-break-after {
+  page-break-after: always;
+}
+
+.keep-together {
+  page-break-inside: avoid;
+}
+
+/* ── Report Metadata Block ──────────────────────────────────────────────── */
+
+.report-meta {
+  font-family: var(--font-display);
+  font-size: 9pt;
+  color: var(--neutral);
+  margin-bottom: 14pt;
+  padding-bottom: 10pt;
+  border-bottom: 1pt solid var(--rule);
+}
+
+.report-meta span {
+  margin-right: 18pt;
+}
+
+/* ── Superscript / Subscript ────────────────────────────────────────────── */
+
+sup { font-size: 0.75em; vertical-align: super; }
+sub { font-size: 0.75em; vertical-align: sub; }
+
+/* ── Responsive SVG inline ──────────────────────────────────────────────── */
+
+svg.plot {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+}

@@ -153,3 +153,133 @@ model, which is the point of shipping it.
 
 *Analysis for educational purposes, not personalized investment advice. Inputs as of
 June 2023; valuation is sensitive to assumptions, the cost of capital most of all.*
+
+## Numbers ledger
+
+| Figure | Value | Source / basis | As of |
+|---|---|---|---|
+| Year-10 (2033) revenue (base) | ~$267bn | Own estimate, bottom-up from segment TAM × share | 2023 projection |
+| Target operating margin (2027+) | 40% | Own estimate, within NVIDIA's history (42.5% in 2020) | 2023 |
+| Cost of capital (initial → terminal) | 12.21% → 8.85% | Own estimate (US semiconductor average → mature market) | 2023 |
+| Sales-to-capital ratio | 0.65 → 1.15 | R&D-adjusted financials; own estimate of convergence to industry median | FY2023 |
+| Terminal growth rate | ≤ risk-free rate | DCF model constraint | 2023 |
+| Intrinsic value per share | ~$240 | `dcf_valuation.py` on above assumptions | this run |
+| Monte Carlo median / price percentile | ~$238 / 94th | `monte_carlo.py`, 10,000 trials | this run |
+| Price (10 Jun 2023) | $409.00 | Market data | 10 Jun 2023 |
+| Margin-of-safety buy-band | Accumulate below ~$168 (intrinsic × 0.7); fair ~$240; rich above ~$312 | `monte_carlo.py` output | this run |
+
+---
+
+## Disclosures & Certifications
+
+### Analyst Certification
+
+I, Aswath Damodaran, hereby certify that all of the views expressed in this research
+report accurately reflect my personal views about NVIDIA Corporation and its
+securities. I also certify that no part of my compensation was, is, or will be,
+directly or indirectly, related to the specific recommendations or views expressed in
+this report.
+
+### Rating Distribution
+
+As of June 30, 2023, the author's equity research coverage universe comprised 1
+company (illustrative educational analysis). As this is independent, unaffiliated
+educational research, the firm conducts no investment banking business and has no
+investment banking clients.
+
+| Rating | % of Total Coverage | % Investment Banking Clients |
+|--------|-------------------|----------------------------|
+| Buy / Overweight | 0% | 0% (no IB business) |
+| Hold / Neutral | 0% | 0% (no IB business) |
+| Sell / Underweight / Reduce | 100% | 0% (no IB business) |
+
+### Meaning of Ratings
+
+- **Reduce (Sell-equivalent):** The analyst expects the total return (price
+  appreciation plus dividend yield, if any) of the subject security to be below the
+  return of the broader market over a 12-month investment horizon. In this report,
+  the intrinsic value of approximately $240 per share is ~40% below the current price
+  of $409.
+- **Buy:** The analyst expects the total return to exceed the broader market return
+  over a 12-month horizon.
+- **Hold:** The analyst expects the total return to be in line with the market.
+
+### Conflicts of Interest Disclosure
+
+This report is independent, unaffiliated educational research. The analyst and
+publishing entity:
+
+- (A) Have no financial interest in NVIDIA Corporation securities.
+- (B) Receive no investment-banking-related compensation.
+- (C) Have not managed or co-managed any public offering for NVIDIA.
+- (D) Have received no non-investment-banking compensation from NVIDIA.
+- (E) NVIDIA is not and has not been a client.
+- (F) Do not beneficially own 1% or more of any class of NVIDIA equity.
+- (G) Do not make a market in NVIDIA securities.
+- (H) Have received no compensation from NVIDIA in the past 12 months.
+- (I) Have no other material conflicts of interest known to the analyst.
+
+### Price Target Methodology
+
+**Method 1 — Discounted Cash Flow (DCF):** *Primary.* Free cash flows to the firm
+were projected over an explicit 10-year forecast period (2023–2033) and discounted at
+a cost of capital starting at 12.21% (US semiconductor average) and drifting to 8.85%
+(mature market average). The terminal value was estimated using a perpetual growth
+model with a terminal growth rate anchored at the risk-free rate. Accounting
+adjustments applied: R&D capitalization, operating lease capitalization, and
+stock-based compensation expensed. DCF-derived intrinsic value: **$240 per share**.
+
+**Method 2 — Reverse DCF / Market-Implied:** *Secondary.* The market price of $409
+was inverted to solve for the growth rate and operating margin the price implies. The
+price-implied year-10 revenue of ~$489bn (34% CAGR) and/or operating margin near 65%
+were assessed against NVIDIA's history, semiconductor industry economics, and
+competitive dynamics, and found to price outcomes beyond the plausible base case.
+
+**Method 3 — Monte Carlo Simulation:** *Supporting.* The four valuation drivers were
+modeled as distributions (10,000 trials). The simulated median value of ~$238
+confirmed the base case, and the $409 price fell at the 94th percentile of the value
+distribution.
+
+| Method | Value Range ($/share) | Weight |
+|--------|----------------------|--------|
+| DCF (primary) | $240 | 60% |
+| Reverse DCF / Market-Implied | Impractical at current price | 15% |
+| Monte Carlo Simulation | $48–$543 (P10–P90) | 25% |
+| **Intrinsic Value** | **~$240** | 100% |
+
+**Triangulation:** The final intrinsic value of ~$240 per share reflects a synthesis
+of the above three methods, with primary weight (60%) on the DCF which is best suited
+to NVIDIA's growth-stage profile, and supporting weights on the market-implied and
+simulation approaches which confirm the DCF result from different angles.
+
+**Valuation horizon:** 12 months from the date of this report. **Key assumptions
+that carry the result:** terminal growth rate, target operating margin (40%), and
+cost of capital trajectory.
+
+### Risk Factors
+
+| Risk | Driver(s) Affected | Severity | Monitoring Trigger |
+|------|-------------------|----------|-------------------|
+| AMD, Intel, and hyperscaler custom silicon erode NVIDIA's AI-chip market share below 50% | Revenue growth, Operating margin | High | Market share reports (Mercury Research, Omdia); hyperscaler capex allocation shifts toward custom silicon |
+| TSMC supply disruption or geopolitical event affecting Taiwan | Revenue, Supply chain, Cost of capital | High | TSMC utilization rates; US-Taiwan defense posture; NVIDIA's Samsung/Intel foundry diversification progress |
+| AI investment cycle cools faster than expected; enterprise adoption disappoints | Revenue growth | Med | Quarterly hyperscaler capex guidance; AI startup funding velocity; GPU cloud rental price declines |
+| Cyclical semiconductor downturn compresses margins below the target | Operating margin | Med | Semiconductor industry revenue growth turning negative; NVIDIA gross margin declining quarter-over-quarter |
+| Regulatory restrictions on AI chip exports (US-China technology controls) | Revenue growth | Med | BIS entity list additions; export license denial rates; China revenue as % of total |
+
+*This list is not exhaustive. Investors should review NVIDIA's most recent 10-K and
+10-Q filings with the SEC for a comprehensive discussion of risk factors.*
+
+### General Disclaimer
+
+This report is published for informational and educational purposes only and does not
+constitute investment advice, a solicitation, or an offer to buy or sell any security.
+The analysis herein is based on publicly available information as of June 2023. The
+author makes no representation as to the accuracy or completeness of such information
+and undertakes no obligation to update this report. Past performance is not indicative
+of future results. Investing in securities involves risk, including the possible loss
+of principal. Readers should conduct their own independent due diligence and consult
+with a qualified financial advisor before making any investment decision.
+
+*Report published: June 10, 2023. Valuation assumptions as of: June 2023. All figures
+in USD unless otherwise stated. valid-as-of June 10, 2023 · revisit-by Q3 FY2024
+earnings.*

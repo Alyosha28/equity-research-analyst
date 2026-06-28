@@ -40,7 +40,7 @@ Title + rating box → opening (the core thesis/hook, impersonal) → industry �
 company → theme/driver → story-to-numbers (DCF) → SOTP (if a holding-co) → what the
 market is pricing (reverse/stub) → scenarios → evaluation of the prevailing market
 narratives → conclusion & rating rationale → report limitations / what could prove
-it wrong → key risks → disclaimer.
+it wrong → key risks → **disclosures & certifications appendix (MANDATORY)**.
 
 ## Intellectual honesty (Damodaran register)
 State a clear view, then attack it: name the assumptions that carry the result, the
@@ -83,6 +83,11 @@ reader must be able to tell a fact from a judgment.
 - [ ] States what could prove the thesis wrong (not just why it's right).
 - [ ] Every material number is tier-tagged; a **numbers ledger** closes the report.
 - [ ] A **margin-of-safety buy-band** is stated (intrinsic × (1 − MoS); `monte_carlo.py` emits it).
+- [ ] **Disclosures & Certifications appendix is COMPLETE** — all mandatory sections present:
+      (1) Analyst Certification (Reg AC), (2) Rating Distribution table, (3) Meaning of Ratings,
+      (4) Conflicts of Interest disclosure (FINRA 2241 items A–I), (5) Price Target Methodology
+      (≥2 methods + triangulation), (6) Risk Factors (specific, driver-tied, monitorable),
+      (7) General Disclaimer. For China-listed names, B.8 independence statement is present.
 - [ ] Carries a not-advice disclaimer and data dates.
 - [ ] **`python scripts/report_lint.py <report>` passes** (use `--strict` for a fresh report).
 

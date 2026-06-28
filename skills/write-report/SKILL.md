@@ -94,6 +94,18 @@ Self-falsification — the assumptions that carry the result, biases, data vinta
 ### 14. Key risks & disclaimer
 Monitorable risks + one-line not-advice disclaimer with data dates.
 
+### 15. Disclosures & Certifications appendix (MANDATORY)
+The full regulatory disclosure block as specified in `references/output-templates.md`
+Appendix B. Every Mode A report MUST include this appendix. Minimum sections:
+- **B.1 Analyst Certification** (Reg AC-compliant)
+- **B.2 Rating Distribution table** (as of most recent quarter-end)
+- **B.3 Meaning of Ratings** (with 12-month horizon definition)
+- **B.4 Conflicts of Interest disclosure** (FINRA 2241 items A through I)
+- **B.5 Price Target Methodology** (at least 2 methods + triangulation table)
+- **B.6 Risk Factors** (at least 5 specific, driver-tied, monitorable risks)
+- **B.7 General Disclaimer** (not-advice, dates, currency, valid-as-of/revisit-by)
+- **B.8 China Supplement (if applicable)** — CSRC/SAC independence statement
+
 ### Appendix: Numbers ledger
 Compact table: load-bearing figures → source → as-of date. The one permitted
 "wall of data."
@@ -107,6 +119,54 @@ Every Mode A report must contain, developed in paragraphs:
 4. Competitive landscape (named competitors, named battlefields)
 5. Accounting adjustments with actual numbers (R&D cap, SBC dilution)
 6. Historical valuation context (multiples over time)
+
+## Chart references (canonical format)
+
+Charts are placed in the report body using a **flat, ticker-prefixed naming convention**
+with no file extension in the markdown reference. The PDF renderer resolves the correct
+format (SVG then PNG) automatically.
+
+### Canonical markdown syntax
+
+```markdown
+![Monte Carlo value distribution](figs/NVDA_montecarlo)
+![Valuation football field](figs/NVDA_football)
+![Breakeven heatmap](figs/NVDA_breakeven)
+![Sensitivity tornado](figs/NVDA_tornado)
+![Terminal value share](figs/NVDA_terminal)
+```
+
+**Rules:**
+
+| Rule | Example |
+|------|---------|
+| Path is `figs/` (flat, no ticker subdirectory) | `figs/NVDA_montecarlo` |
+| Stem is `{TICKER}_{kind}` | `NVDA_montecarlo`, `9988.HK_breakeven` |
+| No file extension in the reference | `](figs/NVDA_montecarlo)` not `](figs/NVDA_montecarlo.svg)` |
+| Ticker preserves dots for exchange suffixes | `BRK.A_football`, `9988.HK_montecarlo` |
+| Kind is one of: `montecarlo`, `breakeven`, `football`, `tornado`, `terminal` | |
+
+### Chart-to-section mapping
+
+| Chart kind | Typical report section | Required? |
+|-----------|----------------------|-----------|
+| `montecarlo` | "The odds, not just the estimate" | Yes (Mode A) |
+| `football` | "Story to numbers" or opening | Yes (Mode A) |
+| `breakeven` | "What the price is pricing" | Yes (Mode A) |
+| `tornado` | "Story to numbers" (sensitivity) | Optional |
+| `terminal` | "Story to numbers" (terminal share) | Optional |
+
+### Caption
+
+Place an italic paragraph immediately after the chart reference to serve as the figure
+caption (auto-detected by the PDF renderer):
+
+```markdown
+![Monte Carlo value distribution](figs/NVDA_montecarlo)
+
+*Monte Carlo simulation of intrinsic value per share (n=20,000 trials). The price at
+$409 falls at the 94th percentile of the value distribution.*
+```
 
 ## Output
 
@@ -139,6 +199,11 @@ The write-report review is the most thorough — this IS the deliverable.
   at which thesis flips, woven into conclusion. Missing → REVISE.
 - [ ] **Disclaimer + stamps:** One-line not-advice disclaimer + valid-as-of /
   revisit-by stamps. Missing → REVISE.
+- [ ] **Disclosure appendix completeness:** All sections B.1–B.7 (plus B.8 for
+  China-listed names) from `references/output-templates.md` Appendix B are present
+  and populated — no "[XX]", "[Yes/No]", or "[TICKER]" placeholders remain.
+  Missing the appendix or an unpopulated section → REVISE. Missing multiple
+  required sections → BLOCK.
 - [ ] **Length:** ~3,500–5,000 words. <2,000 → REVISE (too thin). >7,000 → note
   (may need trimming).
 
@@ -149,6 +214,10 @@ The write-report review is the most thorough — this IS the deliverable.
 - No MoS buy-band (extract from valuation results)
 - No numbers ledger (compile from source annotations)
 - Report reads like an AI answer to a user, not a published research document
+- **Missing disclosure appendix** — the Disclosures & Certifications sections (B.1–B.7)
+  are absent, empty, or contain unresolved placeholders like "[Yes/No]" or "[XX]".
+  This is a regulatory hard-stop; the report cannot be published without it.
+- **China supplement omitted** — for A-share/CSRC-listed names, B.8 is missing.
 
 ### Verdict thresholds
 - **PASS:** All criteria met; reads like a research report for investors.
@@ -166,3 +235,5 @@ The write-report review is the most thorough — this IS the deliverable.
 - [ ] MoS buy-band stated
 - [ ] Disclaimer present with data dates
 - [ ] valid-as-of / revisit-by stamped
+- [ ] **Disclosures & Certifications appendix (B.1–B.7) present and fully populated** — no placeholders
+- [ ] **If China-listed: B.8 supplement present**

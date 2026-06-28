@@ -18,7 +18,7 @@ enforcement mechanism.
 - Draft report from step 9 (`TICKER_report.md`)
 - All prior step outputs (for fact-checking against)
 
-## The gate — two checks, both must pass
+## The gate — three checks, all must pass
 
 ### Check 1 — Mechanical (`report_lint.py`)
 
@@ -31,7 +31,10 @@ python report_lint.py ../PATH/TICKER_report.md --strict    # fresh reports: WARN
 The linter catches: second-person address ("you", "你"), emoji, banned callout
 patterns, missing disclaimer/rating/value-and-price, missing MoS buy-band,
 missing numbers ledger (`--strict`), missing valid-as-of stamp (`--strict`),
-AI-answer sentence patterns (`--strict`).
+AI-answer sentence patterns (`--strict`), AND missing/incomplete disclosure
+appendix sections (analyst certification, rating distribution, meaning of ratings,
+conflicts of interest, price target methodology, risk factors, China supplement
+where applicable — all WARN under default, FAIL under `--strict`).
 
 **Fix every FAIL.** There is no excuse for shipping a FAIL.
 
@@ -50,6 +53,23 @@ seven dimensions **Pass / Weak / Fail** with quoted evidence:
 6. **Uncertainty handling** — Distribution? Breakeven? Scenarios?
 7. **Bias & independence** — Bear case as rigorous as bull? Self-falsification?
    Numbers sourced and tiered?
+
+### Check 3 — Disclosure completeness (regulatory sufficiency)
+
+Verify the Disclosures & Certifications appendix against the mandatory checklist
+from `references/output-templates.md` Appendix B:
+
+- B.1 Analyst Certification (Reg AC) — both prongs present
+- B.2 Rating Distribution table — with as-of date
+- B.3 Meaning of Ratings — with 12-month horizon
+- B.4 Conflicts of Interest — all 9 FINRA 2241 items (A)–(I) addressed
+- B.5 Price Target Methodology — >=2 methods + triangulation table
+- B.6 Risk Factors — >=5 specific, driver-tied, monitorable risks
+- B.7 General Disclaimer — not-advice, dates, currency, stamps
+- B.8 China supplement (if China-listed) — CSRC/SAC independence statement
+
+**Any missing required section → CRITICAL → BLOCK.**
+Placeholder-filled sections → HIGH → fix before publishing.
 
 ## Severity → publish rule
 
@@ -73,9 +93,10 @@ When a CRITICAL or pattern of HIGHs is found, route to the root sub-skill:
 | Terminal/moat issues | `/durability-check` | "CAP 25 yrs vs 5-yr leader rotation" |
 | Triangulation errors | `/triangulate` | "Lenses averaged; rewrite as pattern interpretation" |
 
-**After fixing, re-run BOTH checks.** Iterate until:
+**After fixing, re-run ALL THREE checks.** Iterate until:
 - Zero FAILs on `report_lint.py` (`--strict` for fresh reports)
 - Zero CRITICALs on self-audit
+- All disclosure sections B.1–B.7 (plus B.8 if China-listed) present and populated
 - HIGHs disclosed in report limitations
 
 ## The psychological hurdle
@@ -87,6 +108,9 @@ would have found first.
 
 ## Pre-publish checklist
 - [ ] `report_lint.py` passes (FAILs cleared; `--strict` clean for fresh report)
+- [ ] **Disclosures & Certifications appendix complete** — B.1–B.7 all present
+      and populated (no "[Yes/No]" or "[XX]" placeholders)
+- [ ] **If China-listed: B.8 supplement present**
 - [ ] Seven dimensions scored on own draft with quoted evidence
 - [ ] No unresolved CRITICAL
 - [ ] HIGH issues disclosed

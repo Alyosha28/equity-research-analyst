@@ -165,3 +165,127 @@ the point of shipping it.
 financial year 2024 and illustrative; the valuation is sensitive to assumptions, the
 normalized margin and the copper price deck most of all. Revisit when the cycle
 placement changes.*
+
+---
+
+## Disclosures & Certifications
+
+### Analyst Certification
+
+I, the research analyst primarily responsible for this report, hereby certify that
+all of the views expressed in this research report accurately reflect my personal
+views about Freeport-McMoRan Inc. and its securities. I also certify that no part of
+my compensation was, is, or will be, directly or indirectly, related to the specific
+recommendations or views expressed in this report.
+
+### Rating Distribution
+
+As of the most recent quarter-end, this is an independent, unaffiliated research
+report. The firm conducts no investment banking business and has no investment banking
+clients.
+
+| Rating | % of Total Coverage | % Investment Banking Clients |
+|--------|-------------------|----------------------------|
+| Buy / Overweight | — | 0% (no IB business) |
+| Hold / Neutral | — | 0% (no IB business) |
+| Sell / Underweight / Reduce | 100% | 0% (no IB business) |
+
+### Meaning of Ratings
+
+- **Reduce (Sell-equivalent / Underweight):** The analyst expects the total return
+  (price appreciation plus dividend yield, if any) of the subject security to be below
+  the return of the coverage universe median over a 12-month investment horizon.
+- **Buy / Overweight:** The analyst expects total return to exceed the coverage
+  universe median over a 12-month horizon.
+- **Hold / Neutral / Equal-Weight:** The analyst expects total return in line with
+  the coverage universe median over a 12-month horizon.
+
+Ratings are relative to the coverage universe median. A rating is not a recommendation
+to buy, sell, or hold any security.
+
+### Conflicts of Interest Disclosure
+
+This report is independent, unaffiliated educational research. The analyst and
+publishing entity:
+
+- (A) Have no financial interest (debt, equity, options, warrants, futures, long or
+  short positions) in Freeport-McMoRan Inc. securities.
+- (B) Receive no investment-banking-revenue-based compensation.
+- (C)(i–iii) Have not managed or co-managed any public offering for Freeport, have
+  received no investment banking compensation from Freeport in the past 12 months, and
+  do not expect to seek such compensation in the next 3 months.
+- (D) Have received no non-investment-banking compensation from Freeport in the past
+  12 months.
+- (E) Freeport-McMoRan is not and has not been a client of the firm in the past 12
+  months.
+- (F) Do not beneficially own 1% or more of any class of common equity of Freeport.
+- (G) Do not make a market in Freeport securities.
+- (H) The analyst has received no compensation from Freeport in the past 12 months.
+- (I) No other material conflicts of interest are known to the analyst or associated
+  persons with the ability to influence the content of this report.
+
+### Price Target Methodology
+
+**Method 1 — Discounted Cash Flow (DCF) on Through-Cycle Normalized Inputs:**
+*Primary.* Free cash flows to the firm were projected over an explicit 10-year
+forecast period and discounted at a cost of capital starting at 10.0% (reflecting
+commodity beta and operating leverage) and drifting to 8.5%. The terminal value was
+estimated using a perpetual growth model with a terminal growth rate of 2.5%.
+Accounting adjustments applied: operating lease capitalization, normalized tax rate
+to remove one-off credits. The critical discipline: all inputs are *through-cycle
+normalized*, not spot-driven — the operating margin is a mid-cycle 25%, not the
+current print. DCF-derived intrinsic value: **$32 per share**.
+
+**Method 2 — Reverse DCF / Market-Implied:** *Secondary.* The illustrative $42 price
+was inverted to solve for the operating margin the price implies, holding other
+drivers at their normalized base case. The price-implied sustained margin of ~31%
+represents a peak-cycle margin treated as permanent — the precise error the
+through-cycle discipline exists to prevent.
+
+**Method 3 — Monte Carlo Simulation:** *Supporting.* The four normalized drivers were
+modeled as distributions (10,000 trials), yielding a simulated median value of ~$29
+and placing the $42 price at the 97th percentile of the value distribution.
+
+**Triangulation:** The final mid-cycle intrinsic value of ~$32 per share reflects a
+synthesis across methods, with primary weight on the through-cycle DCF (best suited
+to a commodity producer) and supporting confirmation from two distinct angles.
+
+| Method | Value Range ($/share) | Weight |
+|--------|----------------------|--------|
+| DCF on normalized inputs (primary) | $19–$41 (trough to peak margin) | 60% |
+| Reverse DCF / Market-Implied | $42 requires 31% margin (peak) | 15% |
+| Monte Carlo Simulation | $17–$44 (P10–P90) | 25% |
+| **Mid-Cycle Intrinsic Value** | **~$32** | 100% |
+
+**Valuation horizon:** 12 months from the date of this report. **Key assumptions
+that carry the result:** the through-cycle normalized copper price deck (and thus
+the normalized operating margin), the cost of capital, and the terminal growth rate.
+
+### Risk Factors
+
+| Risk | Driver(s) Affected | Severity | Monitoring Trigger |
+|------|-------------------|----------|-------------------|
+| Credit-cycle downturn drags copper demand and prices below the trough assumption | Operating margin, Revenue | High | Global PMI dropping below 48; copper inventory build at LME/SHFE; Chinese copper import decline >10% YoY |
+| Industry capacity added into weakening demand (capital cycle turning) | Operating margin, Price deck | High | New mine project FIDs accelerating; copper TC/RCs widening significantly; industry capex >15% of revenue |
+| Indonesia-specific operating and fiscal terms worsen at Grasberg | Revenue, Operating margin, Minority interest deduction | High | Indonesian government royalty/tax rate changes; export permit restrictions; divestment requirements |
+| Structural electrification lifts the through-cycle copper price deck permanently | Price deck (upside risk to the sell call) | High | Copper demand from grid/EV/solar exceeding supply growth for 3+ consecutive years; LME copper above $5.00/lb sustained |
+| Operating cost inflation exceeds revenue growth, compressing margins even at a normal copper price | Operating margin | Med | Unit cash cost growth exceeding CPI by >200bp for 2+ consecutive quarters |
+
+*This list is not exhaustive. Investors should review Freeport-McMoRan's most recent
+10-K and 10-Q filings with the SEC for a comprehensive discussion of risk factors.*
+
+### General Disclaimer
+
+This report is published for informational and educational purposes only and does not
+constitute investment advice, a solicitation, or an offer to buy or sell any security.
+The analysis herein is based on publicly available information as of financial year
+2024 (illustrative). The author makes no representation as to the accuracy or
+completeness of such information and undertakes no obligation to update this report.
+Past performance is not indicative of future results. Investing in securities
+involves risk, including the possible loss of principal. Readers should conduct their
+own independent due diligence and consult with a qualified financial advisor before
+making any investment decision.
+
+*Report published: illustrative date. Valuation assumptions: illustrative, based on
+through-cycle normalized inputs. All figures in USD unless otherwise stated.
+valid-as-of [date] · revisit-by when the cycle placement changes.*

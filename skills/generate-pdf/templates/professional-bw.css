@@ -1,0 +1,378 @@
+/* ==========================================================================
+   Equity Research Report — B/W Print-Optimized CSS
+
+   Variant of professional.css for guaranteed B/W-printable output.
+   All colors replaced with grayscale-safe equivalents.
+   No semantic information is lost when printed without color.
+
+   Usage: python render_pdf.py report.md --out report.pdf --style bw
+   ========================================================================== */
+
+:root {
+  --ink:        #000000;
+  --ink-light:  #333333;
+  --accent:     #000000;
+  --accent-dim: #555555;
+  --surface:    #f0f0f0;
+  --rule:       #999999;
+  --rule-light: #cccccc;
+  --up:         #000000;    /* BUY signals: bold weight, no color */
+  --down:       #000000;    /* SELL signals: bold weight, no color */
+  --neutral:    #666666;
+
+  --font-body:    "CJK Body", "Noto Serif CJK SC", "Source Serif 4",
+                  Georgia, "SimSun", serif;
+  --font-heading: "CJK Heading", "Noto Sans CJK SC", "Source Sans 3",
+                  Helvetica, "Microsoft YaHei", sans-serif;
+  --font-mono:    "Cascadia Code", "Source Code Pro", Consolas,
+                  "Courier New", monospace;
+  --font-display: "CJK Heading", "Noto Sans CJK SC", "Source Sans 3",
+                  "Microsoft YaHei", sans-serif;
+
+  --size-body:   11pt;
+  --size-h1:     18pt;
+  --size-h2:     14pt;
+  --size-h3:     12pt;
+  --size-mono:   9.5pt;
+  --size-caption: 8.5pt;
+  --size-header: 7.5pt;
+  --size-footer: 7.5pt;
+  --size-disclaimer: 8pt;
+
+  --line-body:   1.75;
+  --line-heading: 1.3;
+  --line-mono:   1.5;
+}
+
+/* ── Page Geometry ──────────────────────────────────────────────────────── */
+
+@page {
+  size: A4;
+  margin-top: 2.2cm;
+  margin-bottom: 2.4cm;
+  margin-left: 2.4cm;
+  margin-right: 2.4cm;
+  @bottom-center {
+    content: "Page " counter(page) " of " counter(pages);
+    font-family: var(--font-display);
+    font-size: var(--size-footer);
+    color: var(--neutral);
+    border-top: 1pt solid var(--rule);
+    padding-top: 6pt;
+    margin-top: 6pt;
+  }
+}
+
+@page :first {
+  @bottom-center { content: none; }
+}
+
+/* ── Running Headers ────────────────────────────────────────────────────── */
+
+h1 { string-set: report-title content(); }
+
+@page {
+  @top-right {
+    content: string(report-title);
+    font-family: var(--font-display);
+    font-size: var(--size-header);
+    color: var(--neutral);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1pt solid var(--rule);
+    padding-bottom: 6pt;
+    margin-bottom: 6pt;
+  }
+}
+
+@page :first {
+  @top-right { content: none; }
+}
+
+/* ── Base Typography ────────────────────────────────────────────────────── */
+
+html { font-size: var(--size-body); color: var(--ink); }
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--size-body);
+  line-height: var(--line-body);
+  text-align: justify;
+  hyphens: auto;
+  orphans: 3;
+  widows: 3;
+}
+
+h1 {
+  font-family: var(--font-heading);
+  font-size: var(--size-h1);
+  font-weight: 700;
+  line-height: var(--line-heading);
+  color: var(--ink);
+  margin-top: 24pt;
+  margin-bottom: 12pt;
+  page-break-after: avoid;
+}
+
+h2 {
+  font-family: var(--font-heading);
+  font-size: var(--size-h2);
+  font-weight: 700;
+  line-height: var(--line-heading);
+  color: var(--ink);
+  margin-top: 18pt;
+  margin-bottom: 8pt;
+  page-break-after: avoid;
+}
+
+h3 {
+  font-family: var(--font-heading);
+  font-size: var(--size-h3);
+  font-weight: 600;
+  line-height: var(--line-heading);
+  color: var(--ink);
+  margin-top: 14pt;
+  margin-bottom: 6pt;
+  page-break-after: avoid;
+}
+
+h4 {
+  font-family: var(--font-heading);
+  font-size: var(--size-body);
+  font-weight: 600;
+  color: var(--ink-light);
+  margin-top: 12pt;
+  margin-bottom: 4pt;
+  page-break-after: avoid;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 0.6em;
+  text-indent: 0;
+}
+
+hr {
+  border: none;
+  border-top: 1pt solid var(--rule);
+  margin: 18pt 0;
+}
+
+blockquote {
+  margin: 14pt 0 14pt 18pt;
+  padding-left: 14pt;
+  border-left: 2pt solid var(--rule);
+  color: var(--ink-light);
+  font-style: italic;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: var(--size-mono);
+  background: var(--surface);
+  padding: 1pt 4pt;
+  border-radius: 2pt;
+}
+
+pre {
+  font-family: var(--font-mono);
+  font-size: var(--size-mono);
+  line-height: var(--line-mono);
+  background: var(--surface);
+  border: 1pt solid var(--rule-light);
+  padding: 12pt 14pt;
+  page-break-inside: avoid;
+  margin: 12pt 0;
+}
+
+pre code { background: none; padding: 0; }
+
+/* ── Tables ─────────────────────────────────────────────────────────────── */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14pt 0;
+  font-size: 9.5pt;
+  line-height: 1.35;
+  page-break-inside: avoid;
+}
+
+thead { border-bottom: 2pt solid var(--ink); }
+
+thead th {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 8.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-light);
+  padding: 6pt 8pt 4pt 8pt;
+  text-align: left;
+}
+
+tbody td {
+  padding: 4pt 8pt;
+  border-bottom: 0.5pt solid var(--rule-light);
+}
+
+tbody tr:nth-child(even) { background: var(--surface); }
+
+table.wide { font-size: 8pt; }
+table.wide thead th { font-size: 7.5pt; }
+
+/* ── Rating Box (B/W) ──────────────────────────────────────────────────── */
+
+.rating-box {
+  border: 2pt solid var(--ink);
+  background: var(--surface);
+  padding: 18pt 22pt;
+  margin: 0 0 22pt 0;
+}
+
+.rating-box .company-name {
+  font-family: var(--font-display);
+  font-size: 15pt;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.rating-box .ticker {
+  font-family: var(--font-mono);
+  font-size: 11pt;
+  color: var(--ink-light);
+}
+
+.rating-box .divider {
+  border: none;
+  border-top: 1pt solid var(--rule);
+  margin: 10pt 0 14pt 0;
+}
+
+.rating-box .kv-grid {
+  display: grid;
+  grid-template-columns: 110pt 1fr;
+  gap: 4pt 14pt;
+  margin-bottom: 14pt;
+}
+
+.rating-box .kv-label {
+  font-family: var(--font-display);
+  font-size: 9.5pt;
+  font-weight: 600;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rating-box .kv-value {
+  font-family: var(--font-display);
+  font-size: 11pt;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* BUY/SELL differentiation via font-weight, not color */
+.rating-box .kv-value.up   { font-weight: 900; }
+.rating-box .kv-value.down { font-weight: 900; font-style: italic; }
+
+.rating-box .thesis-label {
+  font-family: var(--font-display);
+  font-size: 9pt;
+  font-weight: 700;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6pt;
+}
+
+.rating-box .thesis-text {
+  font-family: var(--font-body);
+  font-size: 10pt;
+  line-height: 1.55;
+  color: var(--ink);
+  margin-bottom: 10pt;
+}
+
+.rating-box .mos-band {
+  font-family: var(--font-display);
+  font-size: 9pt;
+  color: var(--ink-light);
+}
+
+/* ── Figures ────────────────────────────────────────────────────────────── */
+
+figure {
+  counter-increment: figure-counter;
+  margin: 18pt 0;
+  text-align: center;
+  page-break-inside: avoid;
+}
+
+figure img, figure svg.plot {
+  max-width: 100%;
+  height: auto;
+  filter: grayscale(100%);
+}
+
+figcaption {
+  font-family: var(--font-display);
+  font-size: var(--size-caption);
+  color: var(--neutral);
+  line-height: 1.35;
+  margin-top: 6pt;
+  text-align: left;
+}
+
+figcaption::before {
+  content: "Figure " counter(figure-counter) ": ";
+  font-weight: 600;
+  color: var(--ink-light);
+}
+
+/* ── Disclaimer ─────────────────────────────────────────────────────────── */
+
+.disclaimer {
+  margin-top: 28pt;
+  padding-top: 10pt;
+  border-top: 1pt solid var(--rule);
+}
+
+.disclaimer p {
+  font-size: var(--size-disclaimer);
+  color: var(--neutral);
+  line-height: 1.4;
+  font-style: italic;
+}
+
+/* ── Utilities ──────────────────────────────────────────────────────────── */
+
+.landscape {
+  page: landscape;
+  page-break-before: always;
+  page-break-after: always;
+}
+
+@page landscape {
+  size: A4 landscape;
+  margin-top: 2.2cm;
+  margin-bottom: 2.4cm;
+  margin-left: 2.4cm;
+  margin-right: 2.4cm;
+}
+
+.page-break-before { page-break-before: always; }
+.page-break-after  { page-break-after: always; }
+.keep-together     { page-break-inside: avoid; }
+
+.two-col {
+  column-count: 2;
+  column-gap: 18pt;
+  column-rule: 1pt solid var(--rule);
+  margin: 12pt 0;
+}
+
+.chart-missing {
+  border: 2pt solid var(--ink) !important;
+  color: var(--ink) !important;
+}

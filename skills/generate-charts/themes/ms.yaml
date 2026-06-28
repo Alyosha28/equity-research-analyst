@@ -1,0 +1,10 @@
+# Morgan Stanley aesthetic -- warmer, slightly larger
+name: ms
+extends: default
+palette:
+  ink: "#1E1E1E"
+  accent: "#1C4587"
+  up: "#006B3F"
+  down: "#C41230"
+figure:
+  dpi: 300

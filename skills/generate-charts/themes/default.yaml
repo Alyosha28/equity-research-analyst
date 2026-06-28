@@ -1,0 +1,62 @@
+# Default finance theme -- restrained, publication-grade
+name: default
+description: Standard equity research palette. Suitable for most reports.
+
+palette:
+  ink: "#1A1A1A"
+  muted: "#6B7280"
+  grid: "#D1D5DB"
+  accent: "#002D72"
+  accent_light: "#4A7AB5"
+  up: "#0E6E4D"
+  down: "#CC0000"
+  band: "#F3F4F6"
+  surface: "#FFFFFF"
+
+fonts:
+  sans_serif: ["TeX Gyre Heros", "Arial", "Helvetica Neue", "Helvetica", "sans-serif"]
+  serif: ["TeX Gyre Termes", "Times New Roman", "Georgia", "serif"]
+  monospace: ["Fira Code", "Consolas", "Courier New", "monospace"]
+  cjk: ["Noto Sans CJK SC", "Noto Sans SC", "SimHei", "Microsoft YaHei", "sans-serif"]
+
+figure:
+  default_width: 7
+  default_height: 4.2
+  dpi: 300
+  facecolor: "#FFFFFF"
+
+rcparams:
+  font.sans-serif: ["TeX Gyre Heros", "Arial", "Helvetica Neue", "Helvetica", "sans-serif"]
+  font.size: 10
+  axes.titlesize: 11
+  axes.labelsize: 9
+  axes.unicode_minus: false
+  axes.spines.top: false
+  axes.spines.right: false
+  axes.spines.left: true
+  axes.spines.bottom: true
+  axes.linewidth: 0.8
+  xtick.direction: out
+  ytick.direction: out
+  xtick.labelsize: 8
+  ytick.labelsize: 8
+  grid.alpha: 0.3
+  grid.linewidth: 0.5
+  legend.fontsize: 8
+  legend.frameon: false
+  figure.facecolor: "#FFFFFF"
+  savefig.bbox: tight
+  savefig.pad_inches: 0.15
+  savefig.format: svg
+
+chart_defaults:
+  title_fontsize: 10
+  title_fontweight: bold
+  title_loc: left
+  title_pad: 10
+  subtitle_fontsize: 7.5
+  subtitle_color: muted
+  source_fontsize: 6.5
+  source_color: muted
+  annotation_fontsize: 8
+  annotation_color: ink

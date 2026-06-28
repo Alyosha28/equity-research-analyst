@@ -63,19 +63,35 @@ def _main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Two-variable breakeven table.")
     ap.add_argument("assumptions")
     ap.add_argument("--price", type=float, default=None)
-    ap.add_argument("--rev-min", type=float, default=150_000.0, help="year-10 revenue low ($M)")
-    ap.add_argument("--rev-max", type=float, default=500_000.0, help="year-10 revenue high ($M)")
+    ap.add_argument("--rev-min", type=float, default=None,
+                    help="year-10 revenue low ($M); auto-derived from base case if omitted")
+    ap.add_argument("--rev-max", type=float, default=None,
+                    help="year-10 revenue high ($M); auto-derived from base case if omitted")
     ap.add_argument("--rev-steps", type=int, default=8)
-    ap.add_argument("--margin-min", type=float, default=0.30)
-    ap.add_argument("--margin-max", type=float, default=0.55)
+    ap.add_argument("--margin-min", type=float, default=None,
+                    help="target operating margin low; auto-derived from base case if omitted")
+    ap.add_argument("--margin-max", type=float, default=None,
+                    help="target operating margin high; auto-derived from base case if omitted")
     ap.add_argument("--margin-steps", type=int, default=6)
     ap.add_argument("--json", action="store_true",
                     help="emit the grid as JSON (for charts.py breakeven heatmap)")
     args = ap.parse_args(argv)
 
     base = load_inputs(args.assumptions)
-    revenues = _frange(args.rev_min, args.rev_max, args.rev_steps)
-    margins = _frange(args.margin_min, args.margin_max, args.margin_steps)
+    base_yN = base.revenue_path()[-1]
+
+    # Auto-derive ranges centred on the base case's own numbers (same discipline as
+    # monte_carlo.py's auto-derived distributions -- Damodaran's "simulate around the
+    # analyst's base estimate"). The previous hardcoded defaults ($150B-$500B revenue,
+    # 30-55% margin) were NVDA-specific and produced irrelevant tables for every other
+    # company.
+    rev_min = args.rev_min if args.rev_min is not None else base_yN * 0.30
+    rev_max = args.rev_max if args.rev_max is not None else base_yN * 3.00
+    margin_min = args.margin_min if args.margin_min is not None else max(0.01, base.target_operating_margin * 0.50)
+    margin_max = args.margin_max if args.margin_max is not None else min(0.95, base.target_operating_margin * 1.50)
+
+    revenues = _frange(rev_min, rev_max, args.rev_steps)
+    margins = _frange(margin_min, margin_max, args.margin_steps)
     rows = grid(base, revenues, margins)
     if args.json:
         print(json.dumps({

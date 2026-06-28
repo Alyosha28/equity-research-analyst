@@ -270,10 +270,28 @@ A loop is same-family-safe iff ALL five hold:
 | Condition | Status | Gap |
 |-----------|--------|-----|
 | 1. Gate classification | ✅ | All gates now classified in this document |
-| 2. Cross-model routing | ⚠️ | Type-B gates currently self-judged — need cross-model routing |
-| 3. Verdict artifacts | ⚠️ | Adversarial reviews not saved as artifacts |
-| 4. No same-family jury | ⚠️ | Current adversarial reviewer is same model family |
+| 2. Cross-model routing | ✅ IMPLEMENTED (tiered) | Tier 1 routes to Codex xhigh; Tier 2/3 defined in cross-model-guide.md |
+| 3. Verdict artifacts | ✅ IMPLEMENTED (verdict.py) | All Type-B verdicts saved as frozen JSON artifacts on disk |
+| 4. No same-family jury | ⚠️ PARTIAL (Tier 1 only) | Tier 1 achieves full cross-model safety; Tier 2 uses same-model with adversarial mitigations; Tier 3 skips Type-B entirely |
 | 5. Type-A external checks | ✅ | Lint, JSON, engine sanity all use external checks |
+
+### Honest disclosure: Tier 2 and Tier 3 are NOT same-family-safe
+
+Tier 2 (strengthened same-model) applies mandatory disagreement, rotated
+critique lenses, and artifact saving — but the reviewer shares the same
+underlying architecture and training distribution as the author. These
+mitigations **reduce** the risk of shared blind spots; they do **not**
+eliminate it. A same-model reviewer cannot provide the heterogeneous
+check that a cross-model reviewer provides.
+
+Tier 3 (fully automated) does not execute Type-B gates at all. The output
+is unreviewed for quality, correctness, and bias. It is a draft.
+
+**Only Tier 1 — cross-model routing to a different model family — achieves
+the same-family-safe conditions required by this protocol.** The pipeline
+MUST disclose its operational tier to the consumer of its output. When Tier
+2 or Tier 3 is active, the disclosure block defined in `cross-model-guide.md`
+must appear in both the LOOP-STATE gate history and the final report.
 
 ---
 

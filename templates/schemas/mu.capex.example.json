@@ -1,0 +1,199 @@
+{
+  "_about": "Micron Technology (MU) — semiconductor memory industry analysis with CapEx cycle data. Realistic illustrative example from /analyze-industry. Money in $B unless noted. Not a live call → METHOD demonstration only.",
+
+  "_meta": {
+    "industry": "Semiconductor Memory (DRAM / NAND Flash)",
+    "sector": "Technology / Semiconductors",
+    "analysis_date": "2026-06-14",
+    "archetype": "cyclical",
+    "target_company": "Micron Technology, Inc.",
+    "ticker": "MU",
+    "generated_by": "/analyze-industry",
+    "data_as_of": "2026-06-01"
+  },
+
+  "lifecycle": {
+    "stage": "cyclical_mature",
+    "stage_evidence": "DRAM has grown from a ~$25B market in 2010 to ~$110B in 2025. Unit bit growth has decelerated from ~45% CAGR (2010-2015) to ~20% (2020-2025). The industry is MATURE in units but still growing in revenue due to content-per-device and ASP cycles. Revenue is cyclical (peak-to-trough swings of 30-50%), not secularly declining — classic cyclical mature.",
+    "revenue_trend": "cyclical",
+    "aggregate_revenue_history": {
+      "years": [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015],
+      "values_b": [110.0, 85.0, 68.0, 125.0, 115.0, 88.0, 95.0, 130.0, 98.0, 58.0, 65.0],
+      "growth_rates": [0.294, 0.250, -0.456, 0.087, 0.307, -0.074, -0.269, 0.327, 0.690, -0.108, 0.050],
+      "_source": "WSTS, Gartner Semiconductor Forecast, company annual reports (aggregated)",
+      "_tier": "third-party-aggregator"
+    },
+    "demand_drivers": [
+      { "driver": "Data center / AI (HBM, DDR5)", "growth_rate": 0.35, "weight": 0.35, "evidence": "Hyperscaler capex ~$250B in 2025, up 40% YoY. HBM bit demand growing 60%+ — NVIDIA H200/B200 require 6-8 HBM stacks per GPU." },
+      { "driver": "Smartphone (LPDDR, UFS)", "growth_rate": 0.05, "weight": 0.25, "evidence": "Unit growth flat; content growth ~10% as AI-on-device increases DRAM per phone (12GB → 16GB)." },
+      { "driver": "PC / Notebook (DDR5, SSD)", "growth_rate": 0.02, "weight": 0.15, "evidence": "PC unit growth low single digit. AI PC transition drives content per unit (16GB → 24GB+)." },
+      { "driver": "Automotive / Industrial", "growth_rate": 0.12, "weight": 0.15, "evidence": "ADAS/autonomous driving requires 50-100GB DRAM per vehicle vs 8GB in traditional. Growing from small base." },
+      { "driver": "Consumer / Other", "growth_rate": 0.00, "weight": 0.10, "evidence": "Gaming consoles, IoT, edge devices — mature, low growth." }
+    ]
+  },
+
+  "profitability_cycle": {
+    "current_position": "at_mid_cycle",
+    "margin_history": {
+      "years": [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015],
+      "aggregate_operating_margins": [0.25, 0.10, -0.15, 0.35, 0.28, 0.15, 0.30, 0.42, 0.32, 0.05, 0.18],
+      "aggregate_gross_margins": [0.42, 0.28, 0.12, 0.52, 0.45, 0.32, 0.48, 0.58, 0.48, 0.22, 0.34],
+      "mid_cycle_estimate": 0.22,
+      "cycle_amplitude": 0.35,
+      "_source": "Company filings (Samsung, SK Hynix, Micron — aggregated), Gartner",
+      "_tier": "third-party-aggregator"
+    },
+    "cycle_drivers": [
+      { "driver": "Capacity additions (supply)", "type": "cyclical", "description": "Fabs take 2-3 years to build. Industry historically overshoots — adding capacity at peak margins, then flooding the market 2 years later when demand has slowed.", "current_state": "Capacity additions moderate: Samsung and SK Hynix prioritizing HBM over commodity DRAM, tightening commodity supply. Micron adding capacity in Boise and NY but measured pace." },
+      { "driver": "Hyperscaler AI demand (demand)", "type": "secular", "description": "AI training/inference is a structural demand driver, but hyperscaler capex is itself cyclical. If AI ROI disappoints, 2026-27 could see a digestion phase.", "current_state": "Demand still growing but pace decelerating from 60% to 30%. Watch for 'peak AI capex' narrative." },
+      { "driver": "Bit supply discipline", "type": "structural", "description": "Industry consolidation to 3 players has improved supply discipline. Post-2020, players manage wafer starts more carefully — historically, memory was boom-bust due to everyone adding capacity simultaneously.", "current_state": "Discipline holding: wafer start additions are demand-linked, not speculative. This is the consolidation thesis." },
+      { "driver": "China substitution risk", "type": "structural", "description": "Chinese memory makers (CXMT, YMTC) receiving $50B+ in state subsidies. If they achieve commercially viable DDR5, they could disrupt the 3-player oligopoly.", "current_state": "CXMT at ~5% DRAM bit share, mostly DDR4/LPDDR4. DDR5 qualification still 2+ years away per most industry estimates. Sanctions on advanced equipment slowing progress." }
+    ],
+    "cycle_duration": {
+      "typical_length_years": 3.5,
+      "current_cycle_age_years": 2.0,
+      "evidence": "Last trough: Q1 2024 (industry op margins bottomed at ~10%). Previous troughs: Q1 2019, Q2 2016, Q4 2012. Average peak-to-peak: ~3.5 years. Current upcycle started Q2 2024 — we are ~2 years in, approaching but not at peak."
+    }
+  },
+
+  "market_structure": {
+    "concentration": {
+      "current": {
+        "top3_share": 0.97,
+        "top5_share": 0.99,
+        "hhi": 3400,
+        "classification": "highly_concentrated"
+      },
+      "trend": "consolidating",
+      "history": [
+        { "year": 2015, "top3_share": 0.82, "top5_share": 0.92 },
+        { "year": 2020, "top3_share": 0.90, "top5_share": 0.96 },
+        { "year": 2025, "top3_share": 0.97, "top5_share": 0.99 }
+      ],
+      "_source": "TrendForce, IC Insights, Omdia DRAM market share reports"
+    },
+    "barriers_to_entry": [
+      { "barrier_type": "capital_intensity", "strength": 5, "description": "A new leading-edge DRAM fab costs $15-20B. No new entrant has successfully built one since the 1990s. Even established players spend ~30-35% of revenue on capex annually.", "evidence": "Micron's announced $15B Boise fab, $100B Clay NY mega-site. Samsung's Pyeongtaek campus: $100B+ cumulative." },
+      { "barrier_type": "technology_complexity", "strength": 5, "description": "DRAM process technology (1b nm, EUV) requires ~5 years of development. NAND 3D stacking (200+ layers) is a separate, equally complex challenge. The intersection of process, design, and fab operations is a tacit-knowledge moat.", "evidence": "Only 3 companies globally can produce DDR5 at scale. CXMT is ~3-4 nodes behind (1x nm vs 1b nm). EUV lithography from ASML ($200M/tool) is a single-supplier bottleneck." },
+      { "barrier_type": "ip_patents", "strength": 4, "description": "DRAM and NAND patent portfolios are dense and mutually assured destruction — cross-licensing among incumbents blocks new entrants.", "evidence": "Micron holds ~50,000 patents. Samsung and SK Hynix hold similar volumes. CXMT/IP theft cases ongoing (Micron v. UMC/JSMC, 2018; US DOJ indictments)." },
+      { "barrier_type": "scale_economies", "strength": 4, "description": "Memory is a cost-leadership business. The largest producer (Samsung) has a ~10pp cost advantage vs #3 (Micron) from scale. New entrants start far up the cost curve.", "evidence": "Industry cost-per-bit declines 20-25% annually on leading nodes. A sub-scale competitor cannot match this without massive losses." }
+    ],
+    "power_dynamics": {
+      "buyer_power": "high",
+      "buyer_concentration": "Hyperscalers (AWS, Azure, GCP, Meta) represent ~40% of DRAM demand; Apple is ~10% of mobile DRAM. Top 10 customers = ~65% of revenue. Buyers are sophisticated, negotiate aggressively, and can dual-source.",
+      "supplier_power": "high",
+      "supplier_description": "ASML has a monopoly on EUV lithography — the critical tool for sub-10nm DRAM. Applied Materials, Lam Research, and Tokyo Electron form an oligopoly in etch/deposition equipment. Supply is a single point of failure for the entire industry.",
+      "threat_of_substitutes": "low",
+      "substitute_description": "No viable substitute for DRAM as main memory or NAND as storage at scale. Emerging memories (MRAM, ReRAM, FeRAM) are niche and decades from volume. CXL and persistent memory BLUR the line but still use DRAM.",
+      "rivalry_intensity": "high"
+    }
+  },
+
+  "leader_rotation": {
+    "table": {
+      "metric": "DRAM market share by revenue",
+      "years": [2015, 2020, 2025],
+      "ranks": [
+        { "rank": 1, "company": "Samsung Electronics", "ticker": "005930.KS", "share": 0.42, "year": 2025 },
+        { "rank": 2, "company": "SK Hynix", "ticker": "000660.KS", "share": 0.30, "year": 2025 },
+        { "rank": 3, "company": "Micron Technology", "ticker": "MU", "share": 0.25, "year": 2025 },
+        { "rank": 4, "company": "Nanya / Winbond / CXMT", "ticker": "various", "share": 0.03, "year": 2025 },
+        { "rank": 1, "company": "Samsung Electronics", "ticker": "005930.KS", "share": 0.44, "year": 2020 },
+        { "rank": 2, "company": "SK Hynix", "ticker": "000660.KS", "share": 0.27, "year": 2020 },
+        { "rank": 3, "company": "Micron Technology", "ticker": "MU", "share": 0.22, "year": 2020 },
+        { "rank": 4, "company": "Nanya / Winbond / Others", "ticker": "various", "share": 0.07, "year": 2020 },
+        { "rank": 1, "company": "Samsung Electronics", "ticker": "005930.KS", "share": 0.41, "year": 2015 },
+        { "rank": 2, "company": "SK Hynix", "ticker": "000660.KS", "share": 0.27, "year": 2015 },
+        { "rank": 3, "company": "Micron Technology", "ticker": "MU", "share": 0.25, "year": 2015 },
+        { "rank": 4, "company": "Elpida / Others", "ticker": "various", "share": 0.07, "year": 2015 }
+      ]
+    },
+    "analysis": {
+      "rotation_cadence": "rare",
+      "share_gainers": [
+        { "company": "SK Hynix", "share_change_pp": 3.0, "reason": "HBM leadership — captured ~50% of NVIDIA HBM3 supply. First to HBM3E qualification. Out-invested Samsung in HBM-specific capacity." },
+        { "company": "Micron", "share_change_pp": 0.0, "reason": "Share roughly stable from 2015-2025. Gains in HBM (HBM3E qualified at NVIDIA) offset by losses in commodity DRAM where Korean competitors have scale cost advantage." }
+      ],
+      "share_losers": [
+        { "company": "Samsung", "share_change_pp": -2.0, "reason": "Lost share from 2020 peak (~44%) due to HBM missteps — was slow to qualify HBM3E at NVIDIA. Still #1 overall but gap narrowing." },
+        { "company": "Others (Nanya, Winbond, etc.)", "share_change_pp": -4.0, "reason": "Consolidation — smaller players cannot afford leading-edge capex. CXMT is the only new entrant of note, growing from 0% to ~5% (mostly low-end DDR4/LPDDR4)." }
+      ],
+      "moat_durability_signal": "strong"
+    }
+  },
+
+  "capex_analysis": {
+    "capex_intensity": {
+      "industry_capex_to_revenue": 0.38,
+      "range_10yr": { "low": 0.22, "high": 0.55, "median": 0.36 },
+      "classification": "extreme_capital_intensive",
+      "history": [
+        { "year": 2025, "capex_b": 42.0, "revenue_b": 110.0, "capex_to_revenue": 0.38, "rd_to_revenue": 0.10 },
+        { "year": 2024, "capex_b": 35.0, "revenue_b": 85.0, "capex_to_revenue": 0.41, "rd_to_revenue": 0.12 },
+        { "year": 2023, "capex_b": 38.0, "revenue_b": 68.0, "capex_to_revenue": 0.56, "rd_to_revenue": 0.18 },
+        { "year": 2022, "capex_b": 48.0, "revenue_b": 125.0, "capex_to_revenue": 0.38, "rd_to_revenue": 0.09 },
+        { "year": 2021, "capex_b": 42.0, "revenue_b": 115.0, "capex_to_revenue": 0.37, "rd_to_revenue": 0.10 },
+        { "year": 2020, "capex_b": 30.0, "revenue_b": 88.0, "capex_to_revenue": 0.34, "rd_to_revenue": 0.11 },
+        { "year": 2019, "capex_b": 28.0, "revenue_b": 95.0, "capex_to_revenue": 0.29, "rd_to_revenue": 0.10 },
+        { "year": 2018, "capex_b": 38.0, "revenue_b": 130.0, "capex_to_revenue": 0.29, "rd_to_revenue": 0.08 },
+        { "year": 2017, "capex_b": 28.0, "revenue_b": 98.0, "capex_to_revenue": 0.29, "rd_to_revenue": 0.10 },
+        { "year": 2016, "capex_b": 13.0, "revenue_b": 58.0, "capex_to_revenue": 0.22, "rd_to_revenue": 0.12 }
+      ]
+    },
+    "capex_cycle": {
+      "current_phase": "expansion",
+      "evidence": "Samsung: $35B capex in 2025/26 for Pyeongtaek HBM lines. SK Hynix: $25B for HBM capacity in Cheongju. Micron: $15B Boise fab, $100B NY mega-site announced (phased over 20 years). Capacity additions are HBM-weighted, not commodity DRAM-weighted — this constrains commodity supply and supports pricing.",
+      "capacity_utilization": 0.88,
+      "capacity_additions_pipeline": "HBM: industry quadrupling capacity from 2024 to 2027. Commodity DRAM: wafer starts increasing ~5-8% annually, demand-linked, not speculative. NAND: moderate additions, still digesting 2023 overcapacity.",
+      "lead_time_months": 30,
+      "cycle_risk": "moderate"
+    },
+    "capacity_outlook": {
+      "demand_growth_next_3yr": 0.18,
+      "supply_growth_next_3yr": 0.15,
+      "balance_assessment": "tight",
+      "key_watchpoints": [
+        "Hyperscaler AI capex budgets for 2027 — first signs of deceleration would shift balance to oversupply",
+        "CXMT DDR5 qualification timeline — if accelerated by <2 years, supply growth meaningfully higher",
+        "HBM yield ramps at Samsung/SK Hynix — if both reach 85%+ quickly, HBM supply could overshoot",
+        "China stimulus-driven demand — $50B+ semiconductor self-sufficiency push adds demand but unclear timing"
+      ]
+    }
+  },
+
+  "valuation_context": {
+    "ev_ebitda_history": {
+      "current": 5.2,
+      "range_5yr": { "low": 3.5, "high": 12.0, "median": 6.8 },
+      "range_10yr": { "low": 2.8, "high": 14.0, "median": 6.2 },
+      "annual": [
+        { "year": 2025, "value": 5.2 }, { "year": 2024, "value": 7.8 }, { "year": 2023, "value": 12.0 },
+        { "year": 2022, "value": 4.5 }, { "year": 2021, "value": 5.0 }, { "year": 2020, "value": 6.8 },
+        { "year": 2019, "value": 5.5 }, { "year": 2018, "value": 4.2 }, { "year": 2017, "value": 5.8 },
+        { "year": 2016, "value": 9.5 }, { "year": 2015, "value": 7.0 }
+      ],
+      "_source": "Bloomberg, Capital IQ — Micron historical EV/EBITDA"
+    },
+    "pe_history": {
+      "current": 27.7,
+      "range_5yr": { "low": 6.5, "high": 145.0, "median": 18.2 },
+      "range_10yr": { "low": 6.5, "high": 280.0, "median": 15.0 },
+      "_source": "Bloomberg consensus",
+      "_caveat": "P/E is near-useless for memory at cycle troughs. EV/EBITDA is the standard cyclical valuation multiple. Normalized P/E (on $8 mid-cycle EPS) is ~15.7×."
+    },
+    "ev_sales_history": {
+      "current": 2.2,
+      "range_5yr": { "low": 1.2, "high": 3.5, "median": 2.0 }
+    },
+    "current_target_position": {
+      "target_ev_ebitda": 5.2,
+      "target_pe": 27.7,
+      "target_ev_sales": 2.2,
+      "vs_industry_median": {
+        "ev_ebitda_premium": -0.235,
+        "pe_premium": 0.520
+      },
+      "assessment": "fair_vs_history"
+    }
+  }
+}

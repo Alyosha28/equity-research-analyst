@@ -63,9 +63,12 @@ For each driver, produce: **current value → target value → convergence path 
    - Reinvestment = ΔRevenue ÷ sales-to-capital
    - Capital-light path requires justification
 
-4. **Cost of capital**
-   - Riskfree rate + β × ERP + country/geography adjustments
-   - Initial at sector average, glides to mature market average
+4. **Cost of capital** — uses CURRENT implied ERP from Damodaran data page (never hardcoded)
+   - Riskfree rate + beta x ERP + country/geography adjustments
+   - Riskfree rate adjusted for sovereign default spread if sovereign is not Aaa-rated (Damodaran Jul 2025 methodology)
+   - Country risk premium applied where operations warrant (fetched from ctryprem.xlsx)
+   - Trust-deficit / institutional-risk overlay evaluated and documented as named, separate premium (0.25-1.00%) if active
+   - Initial at sector average (from wacc.xls), glides to mature market average per life-cycle phase
    - For financials: cost of equity only (Ke)
    - For young companies: consider failure probability
 
@@ -139,6 +142,9 @@ For other archetypes, use the appropriate template from `templates/`:
 - [ ] **Margin justification:** Target margin justified against company history AND
   peer group. Premium to peers requires moat justification explicitly stated.
 - [ ] **Growth decline:** Growth explicitly declines to ≤ riskfree by terminal year.
+- [ ] **Data freshness:** All market data (riskfree, ERP, CRP, betas) carries the date it was fetched. Hardcoded ERP or riskfree → REVISE.
+- [ ] **Trust-deficit overlay:** Evaluated and documented (named, separate premium if applied; explicitly declined with reason if not).
+- [ ] **Life-cycle phase integration:** Driver paths (margin shape, growth deceleration, CoC glide timing, terminal structure) are consistent with the assigned life-cycle phase.
 - [ ] **Terminal sanity:** Terminal growth ≤ riskfree rate. Terminal ROC ≤ current
   ROIC (unless defended). Terminal-value % of total stated.
 - [ ] **JSON validity:** Output JSON is valid and matches the archetype's template
@@ -164,7 +170,11 @@ For other archetypes, use the appropriate template from `templates/`:
 - [ ] Revenue built bottom-up by segment, growth declines to ≤ riskfree
 - [ ] Margin target justified vs history and peers
 - [ ] Sales-to-capital grounded in history
-- [ ] Cost of capital reflects sector, geography, cyclicality
+- [ ] Cost of capital uses current implied ERP (fetched, dated) not hardcoded
+- [ ] Riskfree rate adjusted for sovereign default spread if applicable
+- [ ] Country risk premiums applied where operations warrant (fetched, dated)
+- [ ] Trust-deficit overlay evaluated and documented (or explicitly declined with reason)
+- [ ] Life-cycle phase informs CoC glide timing, margin path shape, terminal structure
 - [ ] Every non-trivial input has a one-line basis and a low/base/high range
 - [ ] JSON is valid and matches the archetype's template structure
 - [ ] Quick sanity: `python scripts/dcf_valuation.py TICKER_assumptions.json` produces positive value

@@ -20,12 +20,23 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 
 EDGAR_TICKERS = "https://www.sec.gov/files/company_tickers.json"
 EDGAR_FACTS = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010d}.json"
-# SEC requires a descriptive User-Agent; this is a research/educational tool.
-UA = {"User-Agent": "equity-research-analyst skill (educational; contact: analyst@example.com)"}
+
+# SEC requires a descriptive User-Agent identifying the organization and including
+# contact info (name + email).  Set the SEC_EDGAR_UA environment variable, e.g.:
+#   export SEC_EDGAR_UA="Your Name your.email@company.com"
+# Without this the SEC may rate-limit or block requests.
+_SEC_EDGAR_UA = os.environ.get("SEC_EDGAR_UA", "")
+if _SEC_EDGAR_UA:
+    UA = {"User-Agent": _SEC_EDGAR_UA}
+else:
+    # Declared identity — no fake / placeholder email.  The SEC will still serve
+    # requests but may throttle more aggressively than for a fully-identified UA.
+    UA = {"User-Agent": "equity-research-analyst (educational/research; no email configured — set SEC_EDGAR_UA)"}
 
 TODO = "FILL-IN: judgment input, not mechanically fetchable"
 
@@ -109,6 +120,12 @@ def _try_yfinance(ticker, skel, financials):
 
 def _try_edgar(ticker, skel, financials):
     import urllib.request
+    if not _SEC_EDGAR_UA:
+        sys.stderr.write(
+            "# WARNING: SEC_EDGAR_UA env var not set — using unauthenticated User-Agent.\n"
+            "# The SEC may rate-limit or throttle requests without contact info.\n"
+            "# Set it: export SEC_EDGAR_UA=\"Your Name your.email@company.com\"\n"
+        )
     try:
         cik = _edgar_cik(ticker)
         if cik is None:

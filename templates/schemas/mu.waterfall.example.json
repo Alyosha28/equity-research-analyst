@@ -1,0 +1,242 @@
+{
+  "_about": "Micron Technology (MU) valuation waterfall — realistic illustrative example from /run-valuation. Money in $M, shares in M, rates as decimals. Based on a through-cycle normalized DCF. Not a live call — METHOD demonstration only.",
+
+  "_meta": {
+    "company": "Micron Technology, Inc.",
+    "ticker": "MU",
+    "valuation_date": "2026-06-15",
+    "archetype": "cyclical",
+    "price": 125.40,
+    "currency": "USD",
+    "units": "millions",
+    "generated_by": "/run-valuation",
+    "engine_version": "phase0-gate1"
+  },
+
+  "assumptions_snapshot": {
+    "base_revenue": 32100.0,
+    "revenue_growth": [0.150, 0.120, 0.095, 0.070, 0.055, 0.045, 0.035, 0.030, 0.030, 0.030],
+    "base_operating_margin": 0.277,
+    "target_operating_margin": 0.220,
+    "margin_convergence_year": 4,
+    "sales_to_capital": 0.80,
+    "tax_rate": 0.15,
+    "effective_tax_rate": 0.12,
+    "tax_convergence_year": 5,
+    "cost_of_capital_initial": 0.102,
+    "cost_of_capital_terminal": 0.082,
+    "coc_glide_start_year": 5,
+    "coc_glide_end_year": 10,
+    "terminal_growth": 0.030,
+    "terminal_roc": 0.120,
+    "horizon": 10,
+    "cash": 10300.0,
+    "debt": 13800.0,
+    "minority_interests": 0.0,
+    "nonoperating_assets": 0.0,
+    "shares_outstanding": 1105.0,
+    "failure_probability": 0.025,
+    "failure_value_per_share": 30.0
+  },
+
+  "dcf_waterfall": {
+    "years": [
+      { "year": 1,  "revenue": 36915, "growth": 0.150, "operating_margin": 0.263, "ebit": 9702,  "after_tax_ebit": 8538,  "reinvestment": 6019,  "fcff": 2519,  "cost_of_capital": 0.102, "discount_factor": 0.9074, "pv_fcff": 2286 },
+      { "year": 2,  "revenue": 41345, "growth": 0.120, "operating_margin": 0.249, "ebit": 10278, "after_tax_ebit": 8941,  "reinvestment": 5537,  "fcff": 3404,  "cost_of_capital": 0.102, "discount_factor": 0.8235, "pv_fcff": 2803 },
+      { "year": 3,  "revenue": 45273, "growth": 0.095, "operating_margin": 0.234, "ebit": 10609, "after_tax_ebit": 9123,  "reinvestment": 4910,  "fcff": 4213,  "cost_of_capital": 0.102, "discount_factor": 0.7473, "pv_fcff": 3148 },
+      { "year": 4,  "revenue": 48442, "growth": 0.070, "operating_margin": 0.220, "ebit": 10657, "after_tax_ebit": 9069,  "reinvestment": 3961,  "fcff": 5108,  "cost_of_capital": 0.102, "discount_factor": 0.6781, "pv_fcff": 3464 },
+      { "year": 5,  "revenue": 51106, "growth": 0.055, "operating_margin": 0.220, "ebit": 11243, "after_tax_ebit": 9567,  "reinvestment": 3330,  "fcff": 6237,  "cost_of_capital": 0.098, "discount_factor": 0.6176, "pv_fcff": 3852 },
+      { "year": 6,  "revenue": 53406, "growth": 0.045, "operating_margin": 0.220, "ebit": 11749, "after_tax_ebit": 9987,  "reinvestment": 2875,  "fcff": 7112,  "cost_of_capital": 0.094, "discount_factor": 0.5647, "pv_fcff": 4016 },
+      { "year": 7,  "revenue": 55275, "growth": 0.035, "operating_margin": 0.220, "ebit": 12161, "after_tax_ebit": 10337, "reinvestment": 2336,  "fcff": 8001,  "cost_of_capital": 0.090, "discount_factor": 0.5178, "pv_fcff": 4143 },
+      { "year": 8,  "revenue": 56933, "growth": 0.030, "operating_margin": 0.220, "ebit": 12525, "after_tax_ebit": 10647, "reinvestment": 2073,  "fcff": 8574,  "cost_of_capital": 0.086, "discount_factor": 0.4768, "pv_fcff": 4088 },
+      { "year": 9,  "revenue": 58641, "growth": 0.030, "operating_margin": 0.220, "ebit": 12901, "after_tax_ebit": 10966, "reinvestment": 2135,  "fcff": 8831,  "cost_of_capital": 0.082, "discount_factor": 0.4406, "pv_fcff": 3891 },
+      { "year": 10, "revenue": 60401, "growth": 0.030, "operating_margin": 0.220, "ebit": 13288, "after_tax_ebit": 11295, "reinvestment": 2199,  "fcff": 9096,  "cost_of_capital": 0.082, "discount_factor": 0.4073, "pv_fcff": 3705 }
+    ],
+    "summary": {
+      "pv_fcff_sum": 35396,
+      "terminal_value": 117760,
+      "pv_terminal_value": 47968,
+      "terminal_pct_of_operating_value": 0.575,
+      "operating_asset_value": 83364,
+      "equity_value": 79864,
+      "value_per_share": 138.50,
+      "going_concern_value_per_share": 142.05,
+      "failure_adjusted_value_per_share": 138.50
+    }
+  },
+
+  "terminal_value_bridge": {
+    "terminal_revenue": 62213,
+    "terminal_operating_margin": 0.220,
+    "terminal_ebit": 13687,
+    "after_tax_ebit": 11634,
+    "terminal_growth": 0.030,
+    "terminal_roc": 0.120,
+    "reinvestment_rate": 0.250,
+    "terminal_fcff": 8725,
+    "terminal_coc": 0.082,
+    "terminal_value": 117760,
+    "final_year_discount_factor": 0.4073,
+    "pv_terminal_value": 47968
+  },
+
+  "equity_bridge": {
+    "operating_asset_value": 83364,
+    "plus_cash": 10300,
+    "plus_nonoperating_assets": 0,
+    "less_debt": -13800,
+    "less_minority_interests": 0,
+    "equity_value": 79864,
+    "shares_outstanding": 1105,
+    "value_per_share": 72.28,
+    "failure_probability": 0.025,
+    "failure_adjusted_value_per_share": 70.43
+  },
+
+  "monte_carlo": {
+    "trials": 20000,
+    "skipped": 142,
+    "seed": 42,
+    "varied_drivers": [
+      { "driver": "terminal_revenue", "distribution_type": "lognormal", "params": { "median": 60401, "sigma": 0.28 } },
+      { "driver": "target_operating_margin", "distribution_type": "triangular", "params": { "low": 0.14, "mode": 0.22, "high": 0.32 } },
+      { "driver": "sales_to_capital", "distribution_type": "triangular", "params": { "low": 0.55, "mode": 0.80, "high": 1.20 } },
+      { "driver": "cost_of_capital_initial", "distribution_type": "triangular", "params": { "low": 0.082, "mode": 0.102, "high": 0.140 } }
+    ],
+    "distribution": {
+      "mean": 147.80,
+      "median": 142.30,
+      "std_dev": 52.40,
+      "min": 38.20,
+      "max": 385.60,
+      "percentiles": {
+        "p5": 63.80,
+        "p10": 72.50,
+        "p25": 102.40,
+        "p50": 142.30,
+        "p75": 187.60,
+        "p90": 238.00,
+        "p95": 268.40,
+        "p99": 325.10
+      }
+    },
+    "price_position": {
+      "price": 125.40,
+      "price_percentile": 0.38,
+      "p_value_ge_price": 0.62,
+      "interpretation": "price_in_plausible_range"
+    },
+    "mos_band": {
+      "median": 142.30,
+      "dispersion": 1.164,
+      "mos": 0.50,
+      "buy_below": 71.15,
+      "fair_range_low": 71.15,
+      "fair_range_high": 213.45,
+      "rich_above": 213.45
+    }
+  },
+
+  "breakeven": {
+    "price": 125.40,
+    "revenues": [30000, 37500, 45000, 52500, 60000, 67500, 75000, 82500],
+    "margins": [0.12, 0.16, 0.20, 0.24, 0.28, 0.32],
+    "grid": [
+      [42.5, 63.2, 83.5, 103.9, 124.3, 144.6],
+      [58.3, 79.0, 99.4, 119.9, 140.3, 160.8],
+      [74.1, 94.8, 115.4, 135.9, 156.5, 177.0],
+      [90.2, 111.0, 131.7, 152.3, 173.0, 193.6],
+      [106.5, 127.5, 148.3, 169.1, 189.9, 210.7],
+      [123.0, 144.2, 165.2, 186.3, 207.3, 228.3],
+      [139.7, 161.2, 182.5, 203.8, 225.1, 246.4],
+      [156.6, 178.3, 200.0, 221.5, 243.1, 264.6]
+    ],
+    "justifies_price_cells": [
+      { "y10_revenue_b": 67.5, "margin": 0.12, "value_per_share": 139.7 },
+      { "y10_revenue_b": 60.0, "margin": 0.16, "value_per_share": 127.5 },
+      { "y10_revenue_b": 52.5, "margin": 0.20, "value_per_share": 131.7 },
+      { "y10_revenue_b": 45.0, "margin": 0.28, "value_per_share": 156.5 }
+    ],
+    "narrative": "To justify $125/share: Y10 revenue of $52.5B at 20% margin OR $45B at 28% margin. The base case ($60B at 22%) generates $148 — well above. Price requires a plausible combination: the market is not pricing heroics."
+  },
+
+  "reverse_dcf": {
+    "price": 125.40,
+    "base_value": 138.50,
+    "solved_drivers": [
+      {
+        "driver": "terminal_revenue",
+        "base_value": 60401.0,
+        "implied_value": 58015.0,
+        "gap_pct": -0.040,
+        "converged": true,
+        "plausibility": "plausible",
+        "implied_cagr": 0.061
+      },
+      {
+        "driver": "target_operating_margin",
+        "base_value": 0.220,
+        "implied_value": 0.205,
+        "gap_pct": -0.068,
+        "converged": true,
+        "plausibility": "plausible"
+      },
+      {
+        "driver": "cost_of_capital_initial",
+        "base_value": 0.102,
+        "implied_value": 0.112,
+        "gap_pct": 0.098,
+        "converged": true,
+        "plausibility": "plausible"
+      }
+    ],
+    "no_solution_note": null
+  },
+
+  "comps_summary": {
+    "peer_median_multiples": {
+      "ev_sales": 2.8,
+      "ev_ebitda": 6.5,
+      "pe": 18.2,
+      "peg": 1.15,
+      "pb": 1.9
+    },
+    "implied_value_per_share": {
+      "ev_sales": 132.0,
+      "ev_ebitda": 125.0,
+      "pe": 145.0,
+      "peg": 128.0,
+      "pb": 78.0
+    },
+    "range": {
+      "low": 95.0,
+      "high": 155.0,
+      "median_of_implied": 128.5
+    },
+    "peer_set": ["005930.KS", "000660.KS", "WDC", "2382.TW"],
+    "caveat": "P/E on current (cyclically elevated) earnings suggests richness; but on normalized through-cycle EPS (~$8), P/E is ~16× — in line with peers. Use EV/EBITDA for cyclical names. Memory peers currently at 5.2× EV/EBITDA vs 5-year median of 6.8× — slightly below mid-cycle."
+  },
+
+  "charts": {
+    "monte_carlo_histogram": {
+      "png": "../figs/mu_montecarlo.png",
+      "svg": "../figs/mu_montecarlo.svg"
+    },
+    "football_field": {
+      "png": "../figs/mu_football.png",
+      "svg": "../figs/mu_football.svg"
+    },
+    "breakeven_heatmap": {
+      "png": "../figs/mu_breakeven.png",
+      "svg": "../figs/mu_breakeven.svg"
+    },
+    "tornado": {
+      "png": "../figs/mu_tornado.png",
+      "svg": "../figs/mu_tornado.svg"
+    },
+    "terminal_pie": {
+      "png": "../figs/mu_terminal.png",
+      "svg": "../figs/mu_terminal.svg"
+    }
+  }
+}

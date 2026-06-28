@@ -1,0 +1,13 @@
+# Goldman Sachs aesthetic -- cooler, more restrained
+name: goldman
+extends: default
+palette:
+  ink: "#1C1C1C"
+  accent: "#003A70"
+  up: "#007A4D"
+  down: "#B31B1B"
+figure:
+  dpi: 300
+rcparams:
+  font.size: 9.5
+  grid.alpha: 0.2

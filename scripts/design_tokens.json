@@ -1,0 +1,73 @@
+{
+  "_description": "Shared design tokens for equity-research-analyst. Single source of truth for charts (Python matplotlib), PDF (WeasyPrint/CSS), and any HTML surfaces. Charts YAML and PDF CSS previously used DIFFERENT hex values for accent/ink/up/down — resolved by preferring the chart-tested values below.",
+  "_resolution": {
+    "accent": "Charts #002D72 vs PDF #1a3a6b → kept #002D72 (more authoritative blue, better contrast on white)",
+    "ink": "Charts #1A1A1A vs PDF #1a1e2b → kept #1A1A1A (neutral black, avoids blue cast in PDF body text)",
+    "up": "Charts #0E6E4D vs PDF #15803d → kept #0E6E4D (darker green, better legibility in small chart annotations)",
+    "down": "Charts #CC0000 vs PDF #b91c1c → kept #CC0000 (pure red, higher urgency signal in waterfall / risk tables)"
+  },
+  "colors": {
+    "ink": "#1A1A1A",
+    "muted": "#6B7280",
+    "grid": "#D1D5DB",
+    "accent": "#002D72",
+    "accent_light": "#E8EDF5",
+    "up": "#0E6E4D",
+    "up_light": "#E6F4EE",
+    "down": "#CC0000",
+    "down_light": "#FDE8E8",
+    "band": "#F3F4F6",
+    "surface": "#FFFFFF",
+    "border": "#E5E7EB",
+    "warning": "#D97706",
+    "warning_light": "#FFF7ED"
+  },
+  "fonts": {
+    "body": "'Noto Serif SC', 'STSong', 'SimSun', 'Georgia', serif",
+    "heading": "'Noto Sans SC', 'Microsoft YaHei', 'SimHei', sans-serif",
+    "mono": "'Fira Code', 'Consolas', 'Courier New', monospace",
+    "cjk_sans": "'Noto Sans SC', 'Microsoft YaHei', 'SimHei', 'PingFang SC', 'Noto Sans CJK SC', sans-serif",
+    "cjk_serif": "'Noto Serif SC', 'STSong', 'SimSun', 'Noto Serif CJK SC', serif"
+  },
+  "spacing": {
+    "xs": "0.25rem",
+    "sm": "0.5rem",
+    "md": "1rem",
+    "lg": "1.5rem",
+    "xl": "2rem",
+    "2xl": "3rem",
+    "3xl": "4rem"
+  },
+  "radius": {
+    "sm": "4px",
+    "md": "6px",
+    "lg": "8px"
+  },
+  "shadow": {
+    "card": "0 1px 3px rgba(0, 0, 0, 0.08)",
+    "elevated": "0 4px 12px rgba(0, 0, 0, 0.1)"
+  },
+  "chart": {
+    "default_width_inches": 7.0,
+    "default_height_inches": 4.2,
+    "dpi": 300,
+    "svg_fonttype": "path"
+  },
+  "page": {
+    "size": "A4",
+    "margin_top_cm": 2.2,
+    "margin_bottom_cm": 2.4,
+    "margin_left_cm": 2.4,
+    "margin_right_cm": 2.4
+  },
+  "typography": {
+    "body_size_pt": 10.5,
+    "body_line_height": 1.85,
+    "h1_size_pt": 18,
+    "h2_size_pt": 13,
+    "h3_size_pt": 11,
+    "table_size_pt": 9,
+    "caption_size_pt": 8,
+    "footer_size_pt": 8
+  }
+}

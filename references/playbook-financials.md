@@ -131,6 +131,127 @@ Each vector paired with the metric that **cracks first**:
 - **Double-counting** growth and payout (retention funds growth; you cannot spend it twice).
 - Applying EV/EBITDA or sales-to-capital — **enterprise-value lenses to an equity story.**
 
+## 10. Stress Testing and Margin of Safety
+
+The standard Monte Carlo (`monte_carlo.py`) samples value drivers as if they
+were independent — fine for an industrial company's revenue growth, margins, and
+sales-to-capital. For financials that assumption is **wrong**. A bank's drivers
+are **regime-dependent**: the same macro environment cannot simultaneously
+produce strongly rising NIM **and** severely spiking credit losses.
+
+### Why random sampling breaks for financials
+
+- **NIM and credit losses are inversely coupled.** NIM widens when the central
+  bank hikes rates (asset repricing > deposit cost); credit losses peak when
+  the central bank is already cutting (recession response). Both spiking
+  simultaneously requires contradictory macro regimes — a Monte Carlo that
+  draws them independently will generate economically impossible outcomes.
+- **Cost of equity moves with stress, not orthogonally.** Equity risk premia
+  rise alongside credit losses in a recession; a draw of "low credit cost +
+  high CoE" makes no regime sense.
+- **Payout ratios are not free parameters.** Regulators constrain dividends
+  and buybacks in stress; a draw of "high credit losses + high payout" is a
+  capital-rule violation.
+
+### Grid-based scenario analysis (replaces random-sampling Monte Carlo)
+
+Instead of tens of thousands of independent draws, define a **small set of
+internally-consistent scenarios** that span the economically-meaningful outcome
+space. Each scenario is a coherent macro regime — rates, credit, and risk premia
+move together in the direction that regime implies.
+
+Engine: `scripts/financial_stress.py`
+
+```bash
+cd scripts
+python financial_stress.py ../templates/financials.example.json
+python financial_stress.py ../templates/financials.example.json --output stress.json
+```
+
+The script defines five scenarios (hardcoded in `SCENARIO_SPECS`; tune for the
+specific company):
+
+| Scenario | Probability | NIM | Credit loss | CoE | Payout |
+|---|---|---|---|---|---|
+| **Base** | 50% | through-cycle | through-cycle | base | base |
+| **Optimistic** | 15% | wider (steep curve) | below-trend | lower | higher |
+| **Pessimistic** | 15% | compressed (flat/inverted) | above-trend | higher | lower |
+| **Credit Crunch** | 10% | compressed (Fed cutting) | severe | spiking | slashed |
+| **Rate Shock** | 10% | wider (hiking cycle) | modestly elevated | higher | constrained |
+
+Key design principle: **Credit Crunch has NIM compressing because the Fed cuts
+in a crisis. Rate Shock has NIM widening because the Fed hikes. Neither
+scenario has high NIM + high credit losses simultaneously** — the script
+filters that combination with an explicit implausibility guard.
+
+### Key stress dimensions
+
+Each scenario adjusts these five dimensions (all flowing through to ROE, CoE,
+and terminal assumptions in the residual-income engine):
+
+| Dimension | What it captures | How it flows to the engine |
+|---|---|---|
+| **NIM** | asset/liability repricing gap, yield-curve shape | `base_roe`, `target_roe` |
+| **Fee income growth** | capital-markets activity, wealth management, deal flow | `base_roe`, `target_roe` |
+| **Credit loss rate** | NPL formation, reserve build/release, coverage ratio | `base_roe`, `target_roe` (drag) |
+| **Cost/income ratio** | operating leverage, branch efficiency, tech spend | `base_roe`, `target_roe` (drag) |
+| **Cost of equity** | risk-free rate, equity risk premium, bank-sector beta | `cost_of_equity_initial`, `cost_of_equity_terminal` |
+| **Regulatory capital** | CET1 headroom, payout constraints | `payout_ratio`, `failure_probability`, convergence horizon |
+
+The script maps each dimension delta to the `FinancialInputs` dataclass fields,
+runs `financial_valuation.value()` for each scenario, and collects the results.
+
+### Implausibility guard
+
+Two thresholds are checked before each scenario runs (defined as constants at
+the top of the script):
+
+- `IMPLAUSIBLE_NIM_THRESHOLD = 0.010` (NIM contribution to ROE > +100 bp)
+- `IMPLAUSIBLE_CREDIT_THRESHOLD = 0.020` (credit-loss drag > +200 bp)
+
+If both are exceeded in the same scenario, it is flagged as implausible and
+excluded from the weighted distribution. The warning reads:
+
+> IMPLAUSIBLE: NIM delta +X% and credit-loss delta +Y% cannot coexist — rising
+> rates (high NIM) and severe credit losses imply contradictory macro regimes.
+
+### Computing the scenario-weighted MoS band
+
+1. Run all non-implausible scenarios through the residual-income engine.
+2. Compute the **weighted-mean** value-per-share: `sum(p_i × v_i) / sum(p_i)`.
+3. Sort scenarios by value; build a discrete cumulative-probability
+   distribution to extract percentiles (5th, 10th, 25th, 50th, 75th, 90th, 95th).
+4. Compute dispersion: `(max - min) / median`.
+5. MoS = `clamp(K × dispersion, 10%, 50%)` with `K = 0.35` (narrower than the
+   Monte Carlo `K = 0.5` because a small scenario set overstates true spread).
+6. Output the **buy-below / fair / rich-above** band, compatible with
+   `charts.py` (`scenarios` and `football` chart kinds).
+
+### Combining with the tangible-book floor
+
+The scenario-weighted MoS band answers "what do I think it is worth across
+regimes." The tangible-book floor (section 6, item 5; section 7, item 4) answers
+"what is the hard asset value if everything goes wrong." Use both together:
+
+- **Accumulate below:** the lower of (scenario MoS buy-below, 1.0× stressed
+  tangible book).
+- **Rich above:** scenario MoS rich-above.
+- The gap between stressed tangible book and the pessimistic/credit-crunch
+  scenario values tells you whether the market is pricing in tail risk or
+  ignoring it.
+
+### Self-check gate (additions for the stress-test section)
+
+- [ ] The five scenarios are coherent regimes — no scenario has high NIM
+      and high credit losses simultaneously (implausibility guard is clean).
+- [ ] The scenario-weighted MoS band is stated alongside the tangible-book
+      floor, not instead of it.
+- [ ] Each scenario's DDM cross-check is within 5% of the RIM value (the
+      engine prints both; a gap > 5% signals an input/derivation error).
+- [ ] The probability weights sum to 100% (Base 50% + Optimistic 15% +
+      Pessimistic 15% + Credit Crunch 10% + Rate Shock 10%).
+
 > Worked template: `templates/financials.example.json` → `financial_valuation.py`.
+> Stress engine: `scripts/financial_stress.py` → `financial_valuation.py` (per scenario).
 > Classifier & other archetypes: `SKILL.md` (Mode A step 2). Voice & numbers ledger:
 > `references/report-voice.md`.

@@ -108,6 +108,13 @@ class ValuationInputs:
                 f"exceed terminal_growth ({self.terminal_growth}).")
         if self.margin_convergence_year < 1:
             raise ValueError("margin_convergence_year must be >= 1.")
+        if self.coc_glide_start_year < 1:
+            raise ValueError("coc_glide_start_year must be >= 1.")
+        if self.coc_glide_end_year <= self.coc_glide_start_year:
+            raise ValueError(
+                f"coc_glide_end_year ({self.coc_glide_end_year}) must exceed "
+                f"coc_glide_start_year ({self.coc_glide_start_year}); otherwise "
+                f"the CoC path degenerates to a step function instead of a glide.")
         if not (0.0 <= self.tax_rate < 1.0):
             raise ValueError("tax_rate must be in [0, 1).")
 

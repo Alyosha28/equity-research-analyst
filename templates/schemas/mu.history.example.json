@@ -1,0 +1,354 @@
+{
+  "_about": "Micron Technology (MU) historical financial data skeleton — illustrative data for schema demonstration. Money in $M, shares in M, rates as decimals. THIRD-PARTY DATA — CONFIRM AGAINST FILINGS BEFORE USE. Generated as a realistic schema example, not a live data pull.",
+
+  "_meta": {
+    "company": "Micron Technology, Inc.",
+    "ticker": "MU",
+    "exchange": "NASDAQ",
+    "sector": "Technology",
+    "industry": "Semiconductors — Memory (DRAM / NAND)",
+    "data_as_of": "2026-06-15",
+    "fiscal_year_end": "08-31",
+    "currency": "USD",
+    "units": "millions",
+    "archetype": "cyclical",
+    "data_quality_warning": "THIRD-PARTY DATA — CONFIRM AGAINST FILINGS BEFORE USE. All values are unverified aggregator-tier until manually confirmed.",
+    "generated_by": "/fetch-data"
+  },
+
+  "company_profile": {
+    "business_description": "Micron Technology is one of the world's largest semiconductor memory manufacturers, producing DRAM (~70% of revenue), NAND flash (~25%), and emerging memory technologies (~5%). Products serve data center, PC, mobile, automotive, and industrial end markets.",
+    "founded": 1978,
+    "headquarters": "Boise, Idaho, USA",
+    "employees": 48000,
+    "website": "https://www.micron.com"
+  },
+
+  "income_statement": {
+    "fiscal_years": ["FY2025", "FY2024", "FY2023", "FY2022", "FY2021", "FY2020", "FY2019", "FY2018"],
+    "metrics": {
+      "revenue": {
+        "values": [32100, 25110, 15540, 30760, 27710, 21440, 23410, 30390],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "cost_of_revenue": {
+        "values": [22150, 20010, 16470, 16920, 17460, 15210, 13260, 13680],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "gross_profit": {
+        "values": [9950, 5100, -930, 13840, 10250, 6230, 10150, 16710],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "gross_margin": {
+        "values": [0.310, 0.203, -0.060, 0.450, 0.370, 0.291, 0.434, 0.550]
+      },
+      "r_and_d": {
+        "values": [2890, 2780, 2640, 2950, 2720, 2590, 2660, 2540],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "sga": {
+        "values": [1050, 980, 910, 1020, 890, 820, 840, 870],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "operating_income": {
+        "values": [6010, 1340, -4480, 9870, 6690, 2820, 6680, 13330],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "operating_margin": {
+        "values": [0.187, 0.053, -0.288, 0.321, 0.241, 0.132, 0.285, 0.439]
+      },
+      "r_and_d_adjusted_operating_margin": {
+        "values": [0.277, 0.164, -0.118, 0.417, 0.340, 0.252, 0.399, 0.522],
+        "_note": "R&D capitalized: (OpInc + R&D) / Revenue. Shows true economic margin when R&D is treated as investment."
+      },
+      "d_and_a": {
+        "values": [7520, 7380, 7160, 6480, 6100, 5610, 4980, 4310],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "ebitda": {
+        "values": [13530, 8720, 2680, 16350, 12790, 8430, 11660, 17640]
+      },
+      "ebitda_margin": {
+        "values": [0.421, 0.347, 0.172, 0.531, 0.461, 0.393, 0.498, 0.580]
+      },
+      "interest_expense": {
+        "values": [480, 450, 390, 340, 230, 180, 250, 310],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "pretax_income": {
+        "values": [5680, 1080, -4740, 9680, 6580, 2740, 6530, 13100],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "effective_tax_rate": {
+        "values": [0.120, 0.090, 0.190, 0.110, 0.095, 0.105, 0.100, 0.095]
+      },
+      "net_income": {
+        "values": [5000, 980, -3840, 8610, 5960, 2450, 5880, 11860],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "net_margin": {
+        "values": [0.156, 0.039, -0.247, 0.280, 0.215, 0.114, 0.251, 0.390]
+      },
+      "eps_diluted": {
+        "values": [4.52, 0.89, -3.50, 7.75, 5.33, 2.19, 5.26, 10.56],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "sbc": {
+        "values": [580, 520, 490, 560, 450, 380, 350, 320],
+        "_source": "SEC EDGAR 10-K filings (Note: stock-based compensation)",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "sbc_pct_of_revenue": {
+        "values": [0.018, 0.021, 0.032, 0.018, 0.016, 0.018, 0.015, 0.011]
+      },
+      "revenue_growth_yoy": {
+        "values": [0.278, 0.616, -0.495, 0.110, 0.293, -0.084, -0.230, 0.498]
+      }
+    }
+  },
+
+  "balance_sheet": {
+    "fiscal_years": ["FY2025", "FY2024", "FY2023", "FY2022", "FY2021", "FY2020", "FY2019", "FY2018"],
+    "metrics": {
+      "total_assets": {
+        "values": [68500, 63200, 60700, 63500, 55700, 49100, 47200, 43800],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "cash_and_equivalents": {
+        "values": [8100, 7800, 9200, 8600, 7800, 8500, 7900, 9800],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "marketable_securities": {
+        "values": [2200, 1900, 1600, 2100, 2400, 1800, 2100, 2500],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "total_debt": {
+        "values": [13800, 12500, 11800, 10800, 9500, 8200, 7600, 7200],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "net_debt": {
+        "values": [3500, 2800, 1000, 100, -700, -2100, -2400, -5100]
+      },
+      "shareholders_equity": {
+        "values": [45200, 42800, 42500, 46200, 39000, 34300, 33300, 29800],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "invested_capital": {
+        "values": [48700, 45600, 43300, 46100, 37800, 30400, 28900, 21800],
+        "_method": "Debt + Equity - Cash - Marketable Securities, adjusted for R&D asset (5yr straight-line)"
+      },
+      "ppe_net": {
+        "values": [39200, 36800, 35600, 34100, 30100, 28000, 25800, 22200],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "goodwill_and_intangibles": {
+        "values": [1280, 1280, 1280, 1280, 1250, 1200, 1180, 1150],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "working_capital": {
+        "values": [11800, 11200, 10500, 9800, 10200, 9600, 8900, 8500],
+        "_method": "Inventory + Receivables - Payables (non-debt, non-cash)"
+      },
+      "book_value_per_share": {
+        "values": [40.90, 38.73, 38.60, 41.70, 34.90, 30.65, 29.68, 26.42]
+      },
+      "tangible_book_value_per_share": {
+        "values": [39.74, 37.57, 37.44, 40.54, 33.78, 29.58, 28.63, 25.40]
+      }
+    }
+  },
+
+  "cash_flow": {
+    "fiscal_years": ["FY2025", "FY2024", "FY2023", "FY2022", "FY2021", "FY2020", "FY2019", "FY2018"],
+    "metrics": {
+      "operating_cash_flow": {
+        "values": [12100, 8300, 2100, 14900, 11500, 8500, 12500, 17800],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "capex": {
+        "values": [10500, 9800, 9200, 11200, 9800, 8100, 9500, 8800],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "capex_pct_of_revenue": {
+        "values": [0.327, 0.390, 0.592, 0.364, 0.354, 0.378, 0.406, 0.290]
+      },
+      "free_cash_flow": {
+        "values": [1600, -1500, -7100, 3700, 1700, 400, 3000, 9000]
+      },
+      "fcf_margin": {
+        "values": [0.050, -0.060, -0.457, 0.120, 0.061, 0.019, 0.128, 0.296]
+      },
+      "dividends": {
+        "values": [510, 500, 490, 480, 460, 0, 0, 0],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "share_buybacks": {
+        "values": [1200, 900, 400, 1800, 1200, 0, 2500, 4800],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      },
+      "depreciation_and_amortization": {
+        "values": [7520, 7380, 7160, 6480, 6100, 5610, 4980, 4310],
+        "_source": "SEC EDGAR 10-K filings",
+        "_tier": "audited",
+        "_date": "2025-10-15",
+        "_estimate": false
+      }
+    }
+  },
+
+  "segments": {
+    "_note": "Segment data manually collected from FY2025 10-K. Micron reports by technology (DRAM / NAND) not by end market.",
+    "as_of_year": "FY2025",
+    "breakdown": [
+      {
+        "name": "DRAM",
+        "revenue": 22470,
+        "revenue_pct": 0.70,
+        "operating_income": 5580,
+        "margin": 0.248,
+        "_source": "MU FY2025 10-K, segment footnote"
+      },
+      {
+        "name": "NAND Flash",
+        "revenue": 8025,
+        "revenue_pct": 0.25,
+        "operating_income": 960,
+        "margin": 0.120,
+        "_source": "MU FY2025 10-K, segment footnote"
+      },
+      {
+        "name": "Other (3D XPoint, NOR, etc.)",
+        "revenue": 1605,
+        "revenue_pct": 0.05,
+        "operating_income": -530,
+        "margin": -0.330,
+        "_source": "MU FY2025 10-K, segment footnote"
+      }
+    ]
+  },
+
+  "market_data": {
+    "current_price": {
+      "value": 125.40,
+      "date": "2026-06-15",
+      "_source": "NASDAQ real-time"
+    },
+    "shares_outstanding": {
+      "basic": 1105,
+      "diluted": 1120,
+      "dilution_pct": 0.014,
+      "_source": "MU FY2025 10-K + Q2 FY2026 10-Q",
+      "_tier": "audited",
+      "_date": "2026-04-15",
+      "_estimate": false
+    },
+    "market_cap": 138570,
+    "enterprise_value": 141070,
+    "beta": {
+      "value": 1.35,
+      "period": "5Y monthly vs S&P 500",
+      "_source": "Bloomberg / yfinance"
+    },
+    "historical_pe_range": {
+      "low_5yr": 6.5,
+      "high_5yr": 145.0,
+      "median_5yr": 18.2,
+      "current": 27.7,
+      "_source": "Bloomberg consensus",
+      "_note": "P/E is near-useless for memory at cycle troughs (E near zero → P/E spikes). EV/EBITDA is the standard cyclical multiple. Current P/E on trough earnings looks high; on normalized EPS (~$8) it's ~15.7×."
+    },
+    "historical_ev_ebitda_range": {
+      "low_5yr": 3.5,
+      "high_5yr": 12.0,
+      "median_5yr": 6.8,
+      "current": 5.2,
+      "_source": "Bloomberg / Capital IQ"
+    },
+    "dividend_yield": {
+      "value": 0.0037,
+      "_source": "NASDAQ"
+    },
+    "short_interest": {
+      "pct_of_float": 0.032,
+      "days_to_cover": 2.1,
+      "_source": "NASDAQ short interest report",
+      "_date": "2026-06-01"
+    }
+  },
+
+  "peers": [
+    { "ticker": "005930.KS", "name": "Samsung Electronics", "rationale": "#1 in DRAM (~42% share) and NAND; HBM leader" },
+    { "ticker": "000660.KS", "name": "SK Hynix", "rationale": "#2 in DRAM (~28% share); key HBM supplier to NVIDIA" },
+    { "ticker": "WDC", "name": "Western Digital", "rationale": "NAND peer; comparable capital intensity and cycle exposure" },
+    { "ticker": "2382.TW", "name": "Nanya Technology", "rationale": "Specialty DRAM — smaller but pure-play memory" },
+    { "ticker": "INTC", "name": "Intel", "rationale": "Broader semiconductor peer for cost-of-capital context" }
+  ]
+}

@@ -1,0 +1,437 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://equity-research-analyst/schemas/capex",
+  "title": "Industry Analysis & CapEx Cycle Data",
+  "description": "Industry-level analysis produced by /analyze-industry. Captures lifecycle stage, profitability cycles, market structure (concentration, barriers), leader rotation over 10+ years, historical valuation multiples, and CapEx intensity patterns. Provides the macro context for the valuation.",
+  "type": "object",
+  "required": ["_meta", "lifecycle", "profitability_cycle", "market_structure", "leader_rotation", "capex_analysis", "valuation_context"],
+  "properties": {
+    "_meta": {
+      "type": "object",
+      "required": ["industry", "sector", "analysis_date", "archetype"],
+      "properties": {
+        "industry": { "type": "string", "description": "Industry name, e.g. 'Semiconductor Memory (DRAM/NAND)'" },
+        "sector": { "type": "string", "description": "Broader sector, e.g. 'Technology / Semiconductors'" },
+        "analysis_date": { "type": "string", "format": "date" },
+        "archetype": { "type": "string" },
+        "target_company": { "type": "string", "description": "The company being valued" },
+        "ticker": { "type": "string" },
+        "generated_by": { "type": "string", "default": "/analyze-industry" },
+        "data_as_of": { "type": "string", "format": "date" }
+      }
+    },
+
+    "lifecycle": {
+      "type": "object",
+      "description": "Industry lifecycle stage with aggregate revenue evidence.",
+      "required": ["stage", "revenue_trend", "aggregate_revenue_history"],
+      "properties": {
+        "stage": {
+          "type": "string",
+          "enum": ["emerging", "high_growth", "maturing", "mature", "declining", "cyclical_mature"],
+          "description": "Damodaran lifecycle stage"
+        },
+        "stage_evidence": { "type": "string", "description": "Why this stage, backed by data" },
+        "revenue_trend": {
+          "type": "string",
+          "enum": ["accelerating", "decelerating", "stable", "cyclical"],
+          "description": "Growth rate direction over the last 5-10 years"
+        },
+        "aggregate_revenue_history": {
+          "type": "object",
+          "required": ["years", "values_b", "growth_rates", "_source"],
+          "properties": {
+            "years": {
+              "type": "array",
+              "minItems": 7,
+              "maxItems": 15,
+              "items": { "type": "integer" },
+              "description": "Calendar or fiscal years, most recent first"
+            },
+            "values_b": {
+              "type": "array",
+              "items": { "type": "number" },
+              "description": "Aggregate industry revenue in $billions"
+            },
+            "growth_rates": {
+              "type": "array",
+              "items": { "type": "number" },
+              "description": "Year-over-year growth (decimal)"
+            },
+            "_source": { "type": "string", "description": "e.g. 'WSTS, Gartner, SEMI, company filings aggregate'" },
+            "_tier": { "type": "string", "enum": ["audited", "third-party-aggregator", "own-estimate"] }
+          }
+        },
+        "demand_drivers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["driver", "growth_rate", "weight"],
+            "properties": {
+              "driver": { "type": "string", "description": "e.g. 'Data center / AI', 'Smartphone', 'PC', 'Automotive'" },
+              "growth_rate": { "type": "number", "description": "Expected growth (decimal)" },
+              "weight": { "type": "number", "description": "Share of industry demand (0-1)" },
+              "evidence": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "profitability_cycle": {
+      "type": "object",
+      "description": "Industry margin cycles — where are we and what drives them.",
+      "required": ["current_position", "margin_history", "cycle_drivers"],
+      "properties": {
+        "current_position": {
+          "type": "string",
+          "enum": ["above_mid_cycle", "at_mid_cycle", "below_mid_cycle", "trough", "peak"],
+          "description": "Where margins sit relative to normalised mid-cycle"
+        },
+        "margin_history": {
+          "type": "object",
+          "required": ["years", "aggregate_operating_margins", "aggregate_gross_margins", "_source"],
+          "properties": {
+            "years": { "type": "array", "items": { "type": "integer" }, "minItems": 7 },
+            "aggregate_operating_margins": {
+              "type": "array",
+              "items": { "type": "number" },
+              "description": "Decimal. Industry aggregate op margin per year"
+            },
+            "aggregate_gross_margins": {
+              "type": "array",
+              "items": { "type": "number" },
+              "description": "Decimal"
+            },
+            "mid_cycle_estimate": { "type": "number", "description": "Through-cycle normalized operating margin (decimal)" },
+            "cycle_amplitude": { "type": "number", "description": "Typical peak-to-trough swing in margins (decimal)" },
+            "_source": { "type": "string" },
+            "_tier": { "type": "string" }
+          }
+        },
+        "cycle_drivers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["driver", "type", "description"],
+            "properties": {
+              "driver": { "type": "string", "description": "e.g. 'Capacity additions', 'Demand shocks', 'Input costs'" },
+              "type": { "type": "string", "enum": ["structural", "cyclical", "secular"] },
+              "description": { "type": "string" },
+              "current_state": { "type": "string", "description": "e.g. 'New fabs coming online', 'AI demand absorbing supply'" }
+            }
+          }
+        },
+        "cycle_duration": {
+          "type": "object",
+          "properties": {
+            "typical_length_years": { "type": "number", "description": "Typical peak-to-peak cycle length" },
+            "current_cycle_age_years": { "type": "number", "description": "Years since last trough" },
+            "evidence": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "market_structure": {
+      "type": "object",
+      "description": "Concentration, barriers, and competitive dynamics.",
+      "required": ["concentration", "barriers_to_entry", "power_dynamics"],
+      "properties": {
+        "concentration": {
+          "type": "object",
+          "required": ["current", "trend"],
+          "properties": {
+            "current": {
+              "type": "object",
+              "properties": {
+                "top3_share": { "type": "number", "description": "Decimal (0.95 = 95% share)" },
+                "top5_share": { "type": "number" },
+                "hhi": { "type": "number", "description": "Herfindahl-Hirschman Index (0-10000)" },
+                "classification": { "type": "string", "enum": ["highly_concentrated", "moderately_concentrated", "fragmented"] }
+              }
+            },
+            "trend": {
+              "type": "string",
+              "enum": ["consolidating", "stable", "fragmenting"],
+              "description": "Direction over last 5-10 years"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "year": { "type": "integer" },
+                  "top3_share": { "type": "number" },
+                  "top5_share": { "type": "number" }
+                }
+              }
+            },
+            "_source": { "type": "string" }
+          }
+        },
+        "barriers_to_entry": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["barrier_type", "strength", "description"],
+            "properties": {
+              "barrier_type": { "type": "string", "enum": ["capital_intensity", "ip_patents", "regulation", "network_effects", "scale_economies", "switching_costs", "brand", "distribution", "raw_material_access", "technology_complexity"] },
+              "strength": { "type": "integer", "minimum": 1, "maximum": 5 },
+              "description": { "type": "string" },
+              "evidence": { "type": "string" }
+            }
+          }
+        },
+        "power_dynamics": {
+          "type": "object",
+          "properties": {
+            "buyer_power": {
+              "type": "string",
+              "enum": ["low", "moderate", "high"],
+              "description": "Can buyers force prices down?"
+            },
+            "buyer_concentration": { "type": "string", "description": "e.g. 'Hyperscalers (AWS/Azure/GCP) are ~50% of demand'" },
+            "supplier_power": {
+              "type": "string",
+              "enum": ["low", "moderate", "high"]
+            },
+            "supplier_description": { "type": "string", "description": "e.g. 'ASML monopoly on EUV lithography'" },
+            "threat_of_substitutes": {
+              "type": "string",
+              "enum": ["low", "moderate", "high"]
+            },
+            "substitute_description": { "type": "string" },
+            "rivalry_intensity": {
+              "type": "string",
+              "enum": ["low", "moderate", "high", "ferocious"]
+            }
+          }
+        }
+      }
+    },
+
+    "leader_rotation": {
+      "type": "object",
+      "description": "Who led, who lost, and why — the Damodaran signature for moat durability evidence.",
+      "required": ["table", "analysis"],
+      "properties": {
+        "table": {
+          "type": "object",
+          "required": ["years", "ranks", "metric"],
+          "properties": {
+            "metric": { "type": "string", "description": "e.g. 'Revenue', 'Market share', 'Unit shipments'" },
+            "years": {
+              "type": "array",
+              "minItems": 3,
+              "items": { "type": "integer" },
+              "description": "Snapshots e.g. [2015, 2020, 2025]"
+            },
+            "ranks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["rank", "company", "share", "year"],
+                "properties": {
+                  "rank": { "type": "integer", "minimum": 1 },
+                  "company": { "type": "string" },
+                  "ticker": { "type": "string" },
+                  "share": { "type": "number", "description": "Market share (decimal)" },
+                  "year": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "analysis": {
+          "type": "object",
+          "required": ["rotation_cadence", "share_gainers", "share_losers"],
+          "properties": {
+            "rotation_cadence": {
+              "type": "string",
+              "enum": ["frequent", "occasional", "rare", "none"],
+              "description": "How often the #1 spot changes — lower cadence = stronger moats"
+            },
+            "share_gainers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "company": { "type": "string" },
+                  "share_change_pp": { "type": "number", "description": "Percentage point change in market share" },
+                  "reason": { "type": "string" }
+                }
+              }
+            },
+            "share_losers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "company": { "type": "string" },
+                  "share_change_pp": { "type": "number" },
+                  "reason": { "type": "string" }
+                }
+              }
+            },
+            "moat_durability_signal": {
+              "type": "string",
+              "enum": ["strong", "moderate", "weak"],
+              "description": "What the rotation pattern says about industry moat durability"
+            }
+          }
+        }
+      }
+    },
+
+    "capex_analysis": {
+      "type": "object",
+      "description": "Industry capital expenditure intensity, cycles, and capacity dynamics.",
+      "required": ["capex_intensity", "capex_cycle", "capacity_outlook"],
+      "properties": {
+        "capex_intensity": {
+          "type": "object",
+          "required": ["industry_capex_to_revenue", "history"],
+          "properties": {
+            "industry_capex_to_revenue": { "type": "number", "description": "Current industry aggregate capex / revenue (decimal)" },
+            "range_10yr": {
+              "type": "object",
+              "properties": {
+                "low": { "type": "number" },
+                "high": { "type": "number" },
+                "median": { "type": "number" }
+              }
+            },
+            "classification": {
+              "type": "string",
+              "enum": ["capital_light", "moderate_capital", "capital_intensive", "extreme_capital_intensive"],
+              "description": "Based on capex/revenue ratio"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["year", "capex_b", "revenue_b", "capex_to_revenue"],
+                "properties": {
+                  "year": { "type": "integer" },
+                  "capex_b": { "type": "number", "description": "Industry aggregate capex ($billions)" },
+                  "revenue_b": { "type": "number" },
+                  "capex_to_revenue": { "type": "number", "description": "Decimal" },
+                  "rd_to_revenue": { "type": "number", "description": "R&D/revenue — for tech industries, R&D is economic capex" }
+                }
+              }
+            }
+          }
+        },
+        "capex_cycle": {
+          "type": "object",
+          "description": "Where is the industry in its capacity investment cycle.",
+          "required": ["current_phase"],
+          "properties": {
+            "current_phase": {
+              "type": "string",
+              "enum": ["under_investing", "normal_replacement", "expansion", "overbuilding", "digesting_overcapacity"],
+              "description": "Current position in the capacity cycle"
+            },
+            "evidence": { "type": "string" },
+            "capacity_utilization": { "type": "number", "description": "Current utilization rate (decimal)" },
+            "capacity_additions_pipeline": {
+              "type": "string",
+              "description": "What new capacity is coming online in the next 2-3 years"
+            },
+            "lead_time_months": { "type": "number", "description": "How long to bring new capacity online" },
+            "cycle_risk": {
+              "type": "string",
+              "enum": ["low", "moderate", "high"],
+              "description": "Risk of overcapacity-driven margin compression in next 2-3 years"
+            }
+          }
+        },
+        "capacity_outlook": {
+          "type": "object",
+          "properties": {
+            "demand_growth_next_3yr": { "type": "number", "description": "Expected annual demand growth (decimal)" },
+            "supply_growth_next_3yr": { "type": "number", "description": "Expected annual supply growth from announced capacity (decimal)" },
+            "balance_assessment": {
+              "type": "string",
+              "enum": ["tight", "balanced", "loosening", "oversupplied"],
+              "description": "Supply-demand balance outlook"
+            },
+            "key_watchpoints": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "valuation_context": {
+      "type": "object",
+      "description": "Historical industry valuation multiples — where does the target sit?",
+      "required": ["ev_ebitda_history", "pe_history", "current_target_position"],
+      "properties": {
+        "ev_ebitda_history": {
+          "type": "object",
+          "required": ["current", "range_5yr", "range_10yr", "_source"],
+          "properties": {
+            "current": { "type": "number" },
+            "range_5yr": { "type": "object", "properties": { "low": { "type": "number" }, "high": { "type": "number" }, "median": { "type": "number" } } },
+            "range_10yr": { "type": "object", "properties": { "low": { "type": "number" }, "high": { "type": "number" }, "median": { "type": "number" } } },
+            "annual": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "year": { "type": "integer" },
+                  "value": { "type": "number" }
+                }
+              }
+            },
+            "_source": { "type": "string" }
+          }
+        },
+        "pe_history": {
+          "type": "object",
+          "required": ["current", "range_5yr", "_source"],
+          "properties": {
+            "current": { "type": "number" },
+            "range_5yr": { "type": "object", "properties": { "low": { "type": "number" }, "high": { "type": "number" }, "median": { "type": "number" } } },
+            "range_10yr": { "type": "object", "properties": { "low": { "type": "number" }, "high": { "type": "number" }, "median": { "type": "number" } } },
+            "annual": { "type": "array", "items": { "type": "object", "properties": { "year": { "type": "integer" }, "value": { "type": "number" } } } },
+            "_source": { "type": "string" },
+            "_caveat": { "type": "string", "description": "For memory: P/E is meaningless at cycle trough (E → 0). Use EV/EBITDA." }
+          }
+        },
+        "ev_sales_history": {
+          "type": "object",
+          "properties": {
+            "current": { "type": "number" },
+            "range_5yr": { "type": "object", "properties": { "low": { "type": "number" }, "high": { "type": "number" }, "median": { "type": "number" } } }
+          }
+        },
+        "current_target_position": {
+          "type": "object",
+          "required": ["target_ev_ebitda", "vs_industry_median", "assessment"],
+          "properties": {
+            "target_ev_ebitda": { "type": "number" },
+            "target_pe": { "type": "number" },
+            "target_ev_sales": { "type": "number" },
+            "vs_industry_median": {
+              "type": "object",
+              "properties": {
+                "ev_ebitda_premium": { "type": "number", "description": "Target multiple / industry median - 1" },
+                "pe_premium": { "type": "number" }
+              }
+            },
+            "assessment": {
+              "type": "string",
+              "enum": ["cheap_vs_history", "fair_vs_history", "rich_vs_history", "at_cycle_extreme"],
+              "description": "Where the target's multiples sit vs its own and the industry's history"
+            }
+          }
+        }
+      }
+    }
+  }
+}
