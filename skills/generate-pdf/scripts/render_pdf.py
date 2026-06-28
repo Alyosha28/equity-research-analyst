@@ -78,11 +78,18 @@ RATING_LINE_RE = re.compile(r'^\*\*Rating:\s*(.+?)\*\*', re.IGNORECASE)
 # ── Engine Detection ───────────────────────────────────────────────────────
 
 def _python_import_ok(module_name: str) -> bool:
-    """Check if a Python module can be imported."""
+    """Check if a Python module can be imported AND loaded.
+
+    Catches Exception (not just ImportError) because some packages import but
+    fail to load native dependencies at import time. WeasyPrint on Windows
+    raises OSError ("cannot load library 'libpango-1.0-0'") when GTK/Pango is
+    not installed — that must be treated as 'unavailable' so the engine chain
+    falls back to Playwright instead of crashing dependency detection.
+    """
     try:
         __import__(module_name)
         return True
-    except ImportError:
+    except Exception:
         return False
 
 
@@ -341,6 +348,30 @@ def md_to_html(md_text: str, figs_dir: str = "figs",
     return html_body
 
 
+def _img_to_data_uri(img_path: Path) -> Optional[str]:
+    """Return a base64 data URI for an image file, or None on failure.
+
+    Why base64 (not a file:// path): Chromium's print pipeline silently fails
+    to load images referenced by relative or file:// paths when the working
+    directory contains non-ASCII characters (e.g. D:\\研报生成). The chart then
+    renders blank with no error. Base64 data URIs have zero path dependency and
+    always render. WeasyPrint also accepts data URIs, so this is engine-neutral.
+    """
+    mime_by_ext = {
+        ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+        ".svg": "image/svg+xml", ".gif": "image/gif",
+    }
+    mime = mime_by_ext.get(img_path.suffix.lower())
+    if mime is None:
+        return None
+    try:
+        b64 = base64.b64encode(img_path.read_bytes()).decode("ascii")
+        return f"data:{mime};base64,{b64}"
+    except OSError as exc:
+        sys.stderr.write(f"[WARN] Failed to read image {img_path}: {exc}\n")
+        return None
+
+
 def _resolve_charts(md_text: str, figs_dir: str,
                     inline_svg: bool = True) -> str:
     """Find ![](figs/...) references and resolve them.
@@ -349,7 +380,8 @@ def _resolve_charts(md_text: str, figs_dir: str,
       1. Try .svg first (preferred — vector)
       2. Fall back to .png
       3. If inline_svg=True and SVG found, inline the raw <svg> content
-      4. Otherwise, use standard <img> tag
+      4. Otherwise, embed as a base64 data URI <img> (NEVER a bare file path —
+         non-ASCII working dirs make file:// paths fail silently in Chromium)
       5. If neither found, insert a red placeholder note.
     """
     figs_path = Path(figs_dir)
@@ -411,11 +443,21 @@ def _resolve_charts(md_text: str, figs_dir: str,
                     f"[WARN] Failed to inline SVG {img_path}: {exc}\n"
                 )
 
-        # Standard img tag
-        rel_path = str(img_path).replace("\\", "/")
+        # Embed as a base64 data URI (path-independent — survives non-ASCII dirs)
+        data_uri = _img_to_data_uri(img_path)
+        if data_uri is None:
+            # Last-resort fallback: bare path (may fail on non-ASCII dirs)
+            rel_path = str(img_path).replace("\\", "/")
+            data_uri = rel_path
+            sys.stderr.write(
+                f"[WARN] Could not base64-embed {img_path.name}; "
+                f"falling back to a path reference that may not load in "
+                f"Chromium on non-ASCII directories.\n"
+            )
         return (
+            f'<!-- chart: {img_path.name} -->\n'
             f'<figure class="chart">\n'
-            f'<img src="{rel_path}" alt="{alt_text}" />\n'
+            f'<img src="{data_uri}" alt="{alt_text}" />\n'
             f'<figcaption>{alt_text}</figcaption>\n</figure>'
         )
 
@@ -724,11 +766,48 @@ def build_html_document(html_body: str, css: str,
 
 # ── PDF Rendering ──────────────────────────────────────────────────────────
 
+def _inject_weasyprint_logo(html: str, logo: str,
+                            logo_height_cm: float = 1.2) -> str:
+    """Inject a recurring logo into HTML for WeasyPrint via a running element.
+
+    WeasyPrint supports CSS Paged Media `position: running()` + `element()`,
+    which is the correct way to repeat a logo in the @page margin box. (This is
+    the inverse of Chromium, which needs headerTemplate and does NOT support
+    `element()`.) The logo is removed from normal flow and painted in @top-left.
+    The @page top margin auto-grows with the logo so it never overlaps text.
+    """
+    lp = Path(logo)
+    if not lp.exists():
+        sys.stderr.write(f"[WARN] Logo not found: {logo}\n")
+        return html
+    logo_uri = _img_to_data_uri(lp)
+    if logo_uri is None:
+        return html
+    top_margin_cm = max(2.6, logo_height_cm + 1.4)
+    inject_css = (
+        ".report-logo{position:running(logoRun);}"
+        f"@page{{margin-top:{top_margin_cm}cm;@top-left{{content:element(logoRun);}}}}"
+    )
+    logo_div = (
+        f'<div class="report-logo"><img src="{logo_uri}" '
+        f'style="height:{logo_height_cm}cm;width:auto;"></div>'
+    )
+    if "</style>" in html:
+        html = html.replace("</style>", inject_css + "</style>", 1)
+    if "<body>" in html:
+        html = html.replace("<body>", "<body>" + logo_div, 1)
+    return html
+
+
 def render_weasyprint(html: str, pdf_path: str,
-                      timeout: int = 120) -> Optional[str]:
+                      timeout: int = 120,
+                      logo: Optional[str] = None,
+                      logo_height_cm: float = 1.2) -> Optional[str]:
     """Render HTML to PDF using WeasyPrint."""
     try:
         from weasyprint import HTML
+        if logo:
+            html = _inject_weasyprint_logo(html, logo, logo_height_cm)
         HTML(string=html).write_pdf(pdf_path)
         return pdf_path
     except ImportError:
@@ -739,9 +818,28 @@ def render_weasyprint(html: str, pdf_path: str,
         return None
 
 
-def render_playwright(html: str, pdf_path: str) -> Optional[str]:
-    """Render HTML to PDF using Playwright headless Chromium."""
+def render_playwright(html: str, pdf_path: str,
+                      logo: Optional[str] = None,
+                      logo_height_cm: float = 0.95) -> Optional[str]:
+    """Render HTML to PDF using Playwright headless Chromium.
+
+    Logo handling (CRITICAL): a recurring company logo MUST go in Chromium's
+    native headerTemplate — NOT a CSS `position: fixed` element. In Chromium's
+    print pipeline a fixed element anchors to the CONTENT box (inside the print
+    margins), so it lands on top of the first line of body text on every page.
+    The headerTemplate renders inside the reserved top-margin box, physically
+    separated from body text. The top margin is auto-grown to fit the logo plus
+    a clearance band, so enlarging the logo never reintroduces overlap.
+    """
     import asyncio
+
+    logo_uri = None
+    if logo:
+        lp = Path(logo)
+        if lp.exists():
+            logo_uri = _img_to_data_uri(lp)
+        else:
+            sys.stderr.write(f"[WARN] Logo not found: {logo}\n")
 
     async def _render():
         try:
@@ -761,7 +859,8 @@ def render_playwright(html: str, pdf_path: str) -> Optional[str]:
                 return None
             page = await browser.new_page()
             await page.set_content(html, wait_until="networkidle")
-            await page.pdf(
+
+            pdf_kwargs = dict(
                 path=pdf_path,
                 format="A4",
                 margin={
@@ -771,6 +870,29 @@ def render_playwright(html: str, pdf_path: str) -> Optional[str]:
                 print_background=True,
                 display_header_footer=False,
             )
+
+            if logo_uri:
+                # Logo in the top-margin box; page number in the footer.
+                # Top margin = logo height + 1.4cm clearance band (>= 2.5cm) so
+                # the body text never collides with the logo, at any logo size.
+                top_margin_cm = max(2.5, logo_height_cm + 1.4)
+                header_template = (
+                    '<div style="width:100%; margin:0; padding:0 0 0 1.0cm; '
+                    '-webkit-print-color-adjust:exact;">'
+                    f'<img src="{logo_uri}" style="height:{logo_height_cm}cm; width:auto;" />'
+                    '</div>'
+                )
+                footer_template = (
+                    '<div style="width:100%; font-size:8px; color:#999; '
+                    'text-align:center; font-family:Georgia,serif;">'
+                    '— <span class="pageNumber"></span> —</div>'
+                )
+                pdf_kwargs["margin"]["top"] = f"{top_margin_cm}cm"
+                pdf_kwargs["display_header_footer"] = True
+                pdf_kwargs["header_template"] = header_template
+                pdf_kwargs["footer_template"] = footer_template
+
+            await page.pdf(**pdf_kwargs)
             await browser.close()
         return pdf_path
 
@@ -821,6 +943,7 @@ def render_pandoc_weasyprint(md_path: str, pdf_path: str,
 def _render_with_fallback(
     md_path_abs: Path, pdf_path: str, html_doc: str, css: str,
     toc: bool = False, start_from: Optional[str] = None,
+    logo: Optional[str] = None, logo_height_cm: float = 0.95,
 ) -> Optional[str]:
     """Try engines in fallback order; return result on first success.
 
@@ -835,6 +958,12 @@ def _render_with_fallback(
         chain = chain[idx:]
 
     for engine_name in chain:
+        # pandoc-weasyprint renders straight from markdown and cannot inject a
+        # logo running element — skip it when a logo is required so the logo is
+        # never silently dropped.
+        if logo and engine_name == "pandoc-weasyprint":
+            print("Skipping pandoc-weasyprint (no logo support); using a logo-capable engine.")
+            continue
         print(f"Trying engine: {engine_name}")
         result = None
         if engine_name == "pandoc-weasyprint":
@@ -842,9 +971,13 @@ def _render_with_fallback(
                 str(md_path_abs), pdf_path, css, toc=toc,
             )
         elif engine_name == "weasyprint":
-            result = render_weasyprint(html_doc, pdf_path)
+            # WeasyPrint running element renders slightly smaller; nudge up so
+            # both engines yield a visually similar logo size.
+            result = render_weasyprint(html_doc, pdf_path, logo=logo,
+                                       logo_height_cm=logo_height_cm + 0.25)
         elif engine_name == "playwright":
-            result = render_playwright(html_doc, pdf_path)
+            result = render_playwright(html_doc, pdf_path, logo=logo,
+                                       logo_height_cm=logo_height_cm)
         elif engine_name == "pandoc-only":
             html_out_path = pdf_path.replace(".pdf", ".html")
             cmd = [
@@ -908,7 +1041,10 @@ def render(md_path: str, pdf_path: str,
            lang: str = "en",
            chart_index: Optional[str] = None,
            no_inline_svg: bool = False,
-           max_inline_size: float = 1.0) -> Optional[str]:
+           max_inline_size: float = 1.0,
+           logo: Optional[str] = None,
+           logo_height_cm: float = 0.95,
+           verify_visual: bool = False) -> Optional[str]:
     """Main rendering function.
 
     Args:
@@ -924,6 +1060,13 @@ def render(md_path: str, pdf_path: str,
         lang: Language code for HTML lang attribute.
         chart_index: Optional path to chart-index.json for Type-A
                      programmatic chart coverage verification.
+        logo: Optional path to a company logo image. Rendered in the page
+              top-margin on every page (Chromium headerTemplate / WeasyPrint
+              running element). NEVER a CSS position:fixed element.
+        verify_visual: If True, render the first pages of the output PDF to PNG
+              previews (requires PyMuPDF) so the layout can actually be
+              inspected — the only reliable way to catch logo overlap, oversized
+              charts, and tofu. Blind CSS tweaks without looking are a trap.
 
     Returns:
         pdf_path on success, None on failure.
@@ -1037,6 +1180,7 @@ def render(md_path: str, pdf_path: str,
     result = _render_with_fallback(
         md_path_abs, pdf_path, html_doc, css, toc=toc,
         start_from=None if engine == "auto" else engine,
+        logo=logo, logo_height_cm=logo_height_cm,
     )
 
     # Step 7: Verify output
@@ -1052,7 +1196,48 @@ def render(md_path: str, pdf_path: str,
                 "Consider using SVG charts or enabling font subsetting.\n"
             )
 
+        # Step 8: Visual self-verification (catches logo overlap / oversized
+        # charts / tofu that file-size checks never will).
+        if verify_visual:
+            previews = render_pdf_previews(result, n_pages=3)
+            if previews:
+                print("Visual previews (INSPECT THESE — do not tweak CSS blind):")
+                for p in previews:
+                    print(f"  {p}")
+
     return result
+
+
+def render_pdf_previews(pdf_path: str, n_pages: int = 3,
+                        dpi: int = 110) -> list[str]:
+    """Render the first *n_pages* of a PDF to PNG previews for inspection.
+
+    Returns the list of PNG paths written (empty if PyMuPDF is unavailable).
+    This exists to enforce the hard-won lesson: ALWAYS look at the rendered
+    output. A logo overlapping the title, an oversized chart, or CJK tofu are
+    invisible to size/exit-code checks but obvious in a 1-second glance at a PNG.
+    """
+    try:
+        import fitz  # PyMuPDF
+    except ImportError:
+        sys.stderr.write(
+            "[WARN] PyMuPDF (fitz) not installed — cannot render visual "
+            "previews. Install with: pip install pymupdf\n"
+        )
+        return []
+    out_paths = []
+    try:
+        doc = fitz.open(pdf_path)
+        stem = Path(pdf_path).with_suffix("")
+        for i in range(min(n_pages, len(doc))):
+            pix = doc[i].get_pixmap(dpi=dpi)
+            out = f"{stem}_preview_p{i + 1}.png"
+            pix.save(out)
+            out_paths.append(out)
+        doc.close()
+    except Exception as exc:
+        sys.stderr.write(f"[WARN] Preview rendering failed: {exc}\n")
+    return out_paths
 
 
 def _extract_title(md_path: Path) -> Optional[str]:
@@ -1175,6 +1360,23 @@ Examples:
              "PRE-RENDER FAIL. Optional charts missing -> WARNING.",
     )
     ap.add_argument(
+        "--logo", dest="logo",
+        help="Path to a company logo image. Rendered in the page top-margin on "
+             "every page (Chromium headerTemplate / WeasyPrint running element). "
+             "Embedded as base64 — survives non-ASCII working directories.",
+    )
+    ap.add_argument(
+        "--logo-height", dest="logo_height", type=float, default=0.95,
+        help="Logo height in cm (default: 0.95). The top page margin auto-grows "
+             "to logo height + 1.4cm so a larger logo never overlaps body text.",
+    )
+    ap.add_argument(
+        "--verify-visual", dest="verify_visual", action="store_true",
+        help="After rendering, write PNG previews of the first pages (needs "
+             "PyMuPDF) so the layout can be visually inspected. Strongly "
+             "recommended whenever a logo or new chart layout is involved.",
+    )
+    ap.add_argument(
         "--check-deps", action="store_true",
         help="Check and print dependency status, then exit.",
     )
@@ -1208,6 +1410,9 @@ Examples:
         chart_index=args.chart_index,
         no_inline_svg=args.no_inline_svg,
         max_inline_size=args.max_inline_size,
+        logo=args.logo,
+        logo_height_cm=args.logo_height,
+        verify_visual=args.verify_visual,
     )
 
     if result:

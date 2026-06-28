@@ -32,3 +32,13 @@ venv/
 # Output
 figs/*.png
 figs/*.svg
+
+# Logos and proprietary images — never commit client/session-specific artwork.
+# Template reference images (under templates/) are exempted.
+*.jpg
+*.jpeg
+*.png
+!templates/**/*.png
+!templates/**/*.svg
+!templates/**/*.jpg
+!templates/**/*.jpeg
