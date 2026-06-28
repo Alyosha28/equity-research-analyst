@@ -449,7 +449,9 @@ split across a page break. The only reliable check is to **render the output PDF
 back to images and look at them.**
 
 `render_pdf.py --verify-visual` renders the first pages of the finished PDF to
-PNG previews (via PyMuPDF / `fitz`) next to the output file:
+PNG previews (via PyMuPDF / `fitz`, dpi=110). **Inspect at least the first 3
+pages** — logo/title overlap, oversized charts, and CJK tofu are most likely on
+pages 1-3, and a single-page glance often misses the bug:
 
 ```bash
 python render_pdf.py report.md --out report.pdf --logo logo.jpg --verify-visual
