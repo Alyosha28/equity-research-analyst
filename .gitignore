@@ -42,3 +42,4 @@ figs/*.svg
 !templates/**/*.svg
 !templates/**/*.jpg
 !templates/**/*.jpeg
+*.bak_*
