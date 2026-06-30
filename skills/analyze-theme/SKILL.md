@@ -25,7 +25,7 @@ A **thematic analysis** that sizes the opportunity and maps the competitive fiel
 
 1. **The big swing factor**
    - What is the one or two drivers that will determine this company's fate over
-     the next 5–10 years?
+     the next 5鈥?0 years?
    - Is the change *revolutionary* (creates new TAM) or *incremental* (shifts share)?
    - Why now? What catalyzed this theme?
 
@@ -34,13 +34,13 @@ A **thematic analysis** that sizes the opportunity and maps the competitive fiel
    - Who are the suppliers, complements, customers, and substitutes?
    - Who captures the surplus if the theme plays out?
 
-3. **Segment TAM × market share build** (non-negotiable — Damodaran requirement)
-   - For each segment: TAM today → TAM in year 5 → TAM in year 10
-   - For each segment: company share today → defensible share year 10
-   - TAM sizing basis: third-party research (cite), bottoms-up units×ASP, or
+3. **Segment TAM 脳 market share build** (non-negotiable 鈥?Damodaran requirement)
+   - For each segment: TAM today 鈫?TAM in year 5 鈫?TAM in year 10
+   - For each segment: company share today 鈫?defensible share year 10
+   - TAM sizing basis: third-party research (cite), bottoms-up units脳ASP, or
      customer-capex bridge
-   - **Two independent revenue paths**: (a) top-down TAM × share AND (b) bottom-up
-     units × ASP capped by supply/capacity ceiling. Where they differ = information.
+   - **Two independent revenue paths**: (a) top-down TAM 脳 share AND (b) bottom-up
+     units 脳 ASP capped by supply/capacity ceiling. Where they differ = information.
 
 4. **Competitive landscape**
    - Who competes on which battlefield?
@@ -51,8 +51,8 @@ A **thematic analysis** that sizes the opportunity and maps the competitive fiel
 5. **Growth trajectory**
    - Segment-by-segment growth rates over the forecast horizon
    - Growth declines from current toward the riskfree rate by year 10
-   - Sanity check: does the absolute TAM × share revenue pass the "big market
-     delusion" test? (Sum all credible players' implied revenues — do they exceed
+   - Sanity check: does the absolute TAM 脳 share revenue pass the "big market
+     delusion" test? (Sum all credible players' implied revenues 鈥?do they exceed
      a plausible total market?)
 
 ### Output format
@@ -64,16 +64,16 @@ A **thematic analysis** that sizes the opportunity and maps the competitive fiel
 [Prose: what drives this company's fate over the next decade]
 
 ### Value chain
-[Prose + simple chain: upstream → company → downstream, with surplus dynamics]
+[Prose + simple chain: upstream 鈫?company 鈫?downstream, with surplus dynamics]
 
-### TAM × share build
+### TAM 脳 share build
 | Segment | TAM today | TAM Y5 | TAM Y10 | Share today | Share Y10 | Revenue Y10 |
 |---------|-----------|--------|---------|-------------|-----------|-------------|
 | ...     |           |        |         |             |           |             |
 
-**Top-down path:** Σ(TAM × share) = $X B
-**Bottom-up path:** units × ASP = $Y B (ceiling: capacity constraint Z)
-**Gap:** $|X-Y| B → [interpret what this means]
+**Top-down path:** 危(TAM 脳 share) = $X B
+**Bottom-up path:** units 脳 ASP = $Y B (ceiling: capacity constraint Z)
+**Gap:** $|X-Y| B 鈫?[interpret what this means]
 
 ### Competitive landscape
 | Competitor | Battlefield | Capability | Threat level | Our response |
@@ -83,11 +83,11 @@ A **thematic analysis** that sizes the opportunity and maps the competitive fiel
 ### Growth trajectory
 [Prose: how growth glides from current rate toward riskfree, with segment detail]
 **"Big Market Delusion" check:** all credible players' implied Y10 revenues sum
-to $X B vs plausible TAM of $Y B → [PASS / WARN: gap of Z%]
+to $X B vs plausible TAM of $Y B 鈫?[PASS / WARN: gap of Z%]
 ```
 
 ## Data sources
-- WebSearch for TAM estimates (Gartner, IDC, McKinsey, industry associations)
+- web search for TAM estimates (Gartner, IDC, McKinsey, industry associations)
 - For capex-bridge: hyperscaler/enterprise capex guidance from earnings calls
 - Supply ceiling: capacity data from industry publications (SemiAnalysis-style)
 - Cite every TAM figure with source and date
@@ -100,19 +100,19 @@ to $X B vs plausible TAM of $Y B → [PASS / WARN: gap of Z%]
 ## Adversarial Review Gate
 
 ### Review criteria
-- [ ] **Bottom-up build:** Revenue built by segment (TAM × share), NOT one blended
-  growth rate. Single growth rate on total revenue → REVISE.
-- [ ] **Two revenue paths:** Both top-down (TAM × share) AND bottom-up (units × ASP
+- [ ] **Bottom-up build:** Revenue built by segment (TAM 脳 share), NOT one blended
+  growth rate. Single growth rate on total revenue 鈫?REVISE.
+- [ ] **Two revenue paths:** Both top-down (TAM 脳 share) AND bottom-up (units 脳 ASP
   capped by capacity) attempted. The GAP between them is interpreted. Missing one
-  path → REVISE (note: bottom-up may be infeasible for some companies; state why).
+  path 鈫?REVISE (note: bottom-up may be infeasible for some companies; state why).
 - [ ] **TAM sourcing:** Every TAM figure cited with source and date. Round-number
-  TAMs with no source → REVISE.
+  TAMs with no source 鈫?REVISE.
 - [ ] **Competitive specificity:** Named competitors on named battlefields with
-  capability assessment. "There are competitors" → REVISE.
+  capability assessment. "There are competitors" 鈫?REVISE.
 - [ ] **Big Market Delusion:** Sum of all credible players' implied revenues
-  checked against plausible market total. Missing → REVISE.
-- [ ] **Growth decline:** Growth explicitly declines to ≤ riskfree by terminal year.
-  Perpetual high growth → REVISE.
+  checked against plausible market total. Missing 鈫?REVISE.
+- [ ] **Growth decline:** Growth explicitly declines to 鈮?riskfree by terminal year.
+  Perpetual high growth 鈫?REVISE.
 
 ### Common failure modes
 - One blended growth rate instead of segment build
@@ -134,4 +134,4 @@ to $X B vs plausible TAM of $Y B → [PASS / WARN: gap of Z%]
 - [ ] TAM sources are cited with dates
 - [ ] Competitive landscape is specific (named competitors, named battlefields)
 - [ ] "Big Market Delusion" check is run
-- [ ] Growth declines to ≤ riskfree rate by terminal year
+- [ ] Growth declines to 鈮?riskfree rate by terminal year

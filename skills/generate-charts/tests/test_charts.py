@@ -9,8 +9,8 @@ import os
 import json
 import tempfile
 
-_scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
-sys.path.insert(0, _scripts_dir)
+_package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, _package_dir)
 
 import pytest
 import matplotlib
@@ -67,7 +67,7 @@ def _render_and_check(render_fn, data, kind_name):
 class TestMonteCarlo:
     def test_render(self):
         import numpy as np
-        from chart_montecarlo import render
+        from scripts.chart_montecarlo import render
         data = {
             "values": list(np.random.normal(145, 30, 1000)),
             "percentiles": {"p5": 95, "p25": 125, "p50": 145, "p75": 165, "p95": 195},
@@ -85,7 +85,7 @@ class TestMonteCarlo:
 
 class TestFootball:
     def test_render(self):
-        from chart_football import render
+        from scripts.chart_football import render
         data = {
             "price": 95.0,
             "lenses": [
@@ -99,7 +99,7 @@ class TestFootball:
 
 class TestBreakeven:
     def test_render(self):
-        from chart_breakeven import render
+        from scripts.chart_breakeven import render
         revenues = [50000, 75000, 100000, 125000, 150000]
         margins = [0.10, 0.15, 0.20, 0.25, 0.30]
         grid = [[r * m for m in margins] for r in revenues]
@@ -114,7 +114,7 @@ class TestBreakeven:
 
 class TestTerminal:
     def test_render(self):
-        from chart_terminal import render
+        from scripts.chart_terminal import render
         data = {
             "terminal_pct_of_value": 0.72,
             "explicit_pct": 0.28,
@@ -129,7 +129,7 @@ class TestTerminal:
 
 class TestTornado:
     def test_render(self):
-        from chart_tornado import render
+        from scripts.chart_tornado import render
         data = {
             "base": 145.0,
             "drivers": [
@@ -143,7 +143,7 @@ class TestTornado:
 
 class TestRevenueTraj:
     def test_render(self):
-        from chart_revenue_traj import render
+        from scripts.chart_revenue_traj import render
         data = {
             "years": [2025, 2026, 2027, 2028, 2029],
             "revenue": [9350, 10285, 11314, 12445, 13690],
@@ -159,7 +159,7 @@ class TestRevenueTraj:
 
 class TestRoicSpread:
     def test_render(self):
-        from chart_roic_spread import render
+        from scripts.chart_roic_spread import render
         data = {
             "years": list(range(1, 6)),
             "roic": [0.18, 0.19, 0.20, 0.19, 0.17],
@@ -172,7 +172,7 @@ class TestRoicSpread:
 
 class TestScenarios:
     def test_render(self):
-        from chart_scenarios import render
+        from scripts.chart_scenarios import render
         data = {
             "scenarios": [
                 {"name": "Bear", "value_low": 75, "value_high": 105,
@@ -189,7 +189,7 @@ class TestScenarios:
 
 class TestPriceVsValue:
     def test_render(self):
-        from chart_price_vs_value import render
+        from scripts.chart_price_vs_value import render
         data = {
             "dates": ["2023-12-31", "2024-06-30", "2024-12-31"],
             "price": [85, 78, 95],
@@ -203,7 +203,7 @@ class TestPriceVsValue:
 
 class TestWaterfall:
     def test_render(self):
-        from chart_waterfall import render
+        from scripts.chart_waterfall import render
         data = {
             "price": 95.0,
             "intrinsic_value": 145.0,
@@ -220,7 +220,7 @@ class TestWaterfall:
 
 class TestCapexCycle:
     def test_render(self):
-        from chart_capex_cycle import render
+        from scripts.chart_capex_cycle import render
         data = {
             "years": [2020, 2021, 2022, 2023, 2024],
             "demand_growth": [3.0, 3.5, 4.0, 4.5, 5.0],
@@ -234,7 +234,7 @@ class TestCapexCycle:
 
 class TestRiskMatrix:
     def test_render(self):
-        from chart_risk_matrix import render
+        from scripts.chart_risk_matrix import render
         data = {
             "risks": [
                 {"name": "Regulatory crackdown", "probability": 0.15,

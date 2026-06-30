@@ -220,7 +220,7 @@ The format is defined by `verdict.py` and is the same for all tiers — the
 {
   "gate": "self-audit-7dim",
   "type": "B",
-  "reviewer_model": "codex-xhigh",
+  "reviewer_model": "external-reviewer",
   "reviewer_family": "openai",
   "timestamp": "2026-06-28T02:00:00Z",
   "overall_verdict": "PASS-WITH-NOTES",

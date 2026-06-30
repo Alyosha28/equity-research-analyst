@@ -30,7 +30,7 @@ elements (each backed by data, not assertion):
    - What's the revenue growth rate trend (accelerating / decelerating / flat)?
 
 2. **Profitability cycle**
-   - Aggregate industry margins over 10+ years — where are they in the cycle?
+   - Aggregate industry margins over 10+ years 鈥?where are they in the cycle?
    - What drives margin cycles (capacity adds, demand shocks, regulation)?
    - Are margins currently above/below/at mid-cycle?
 
@@ -39,20 +39,20 @@ elements (each backed by data, not assertion):
    - Barriers to entry (capital, IP, regulation, network effects, scale)
    - Buyer/supplier power dynamics
 
-4. **Leader rotation table** (non-negotiable — the Damodaran signature)
+4. **Leader rotation table** (non-negotiable 鈥?the Damodaran signature)
    - Who led in 2015 / 2020 / today by revenue?
    - Who gained/lost share and why?
    - What does the rotation pattern say about moat durability?
 
 5. **Valuation context**
    - Historical industry multiples (EV/Revenue, EV/EBITDA, P/E) over 10+ years
-   - Current vs. historical — stretched, compressed, or normal?
+   - Current vs. historical 鈥?stretched, compressed, or normal?
    - Where does the target company's multiple sit vs the industry range?
 
 ### Output format
 
-Produce a structured analysis document (~800–1500 words of prose-ready content
-organized under clear headings). Every claim must reference data — use WebSearch
+Produce a structured analysis document (~800鈥?500 words of prose-ready content
+organized under clear headings). Every claim must reference data 鈥?use web search
 if needed to pull industry data.
 
 ```markdown
@@ -81,7 +81,7 @@ if needed to pull industry data.
 ```
 
 ## Data sources
-- Use WebSearch for current industry data
+- Use web search for current industry data
 - Use `scripts/fetch_financials.py` for the target company's own history
 - Cite sources and dates for every quantitative claim
 
@@ -89,23 +89,23 @@ if needed to pull industry data.
 - This output feeds `/analyze-company` (company positioning within the industry)
 - This output feeds `/analyze-theme` (TAM sizing, competitive dynamics)
 - This output feeds `/build-assumptions` (industry-average margins, cost of capital)
-- Keep it reusable — the same industry analysis can serve multiple company valuations
+- Keep it reusable 鈥?the same industry analysis can serve multiple company valuations
 
 ## Adversarial Review Gate
 
 ### Review criteria
 - [ ] **Data depth:** Revenue/margin data spans 10+ years, not just 2-3. Reviewer:
-  count the years — if <7 data points, REVISE.
+  count the years 鈥?if <7 data points, REVISE.
 - [ ] **Leader rotation table:** Populated with real companies and real shifts.
-  Empty or generic table → REVISE.
+  Empty or generic table 鈫?REVISE.
 - [ ] **Sourcing:** Every quantitative claim has a source or is marked as estimate.
-  Unsourced round numbers → REVISE.
+  Unsourced round numbers 鈫?REVISE.
 - [ ] **Lifecycle evidence:** The lifecycle stage is argued FROM data, not asserted
-  without evidence. "Mature industry" with no data → REVISE.
+  without evidence. "Mature industry" with no data 鈫?REVISE.
 - [ ] **Multiples history:** Industry multiples shown historically (10+ year range),
-  not just "current P/E is X." Missing historical context → REVISE.
+  not just "current P/E is X." Missing historical context 鈫?REVISE.
 - [ ] **Consistency with archetype:** Industry analysis must be consistent with
-  the locked archetype. Cyclical archetype without margin cycle data → REVISE.
+  the locked archetype. Cyclical archetype without margin cycle data 鈫?REVISE.
 
 ### Common failure modes
 - Industry analysis that reads like a Wikipedia summary (no quantitative depth)
@@ -117,7 +117,7 @@ if needed to pull industry data.
 - **PASS:** All 6 criteria met; data is sourced and spans 10+ years.
 - **REVISE:** Missing depth on 1-2 criteria; specific gaps identified.
 - **BLOCK:** No quantitative data, fabricated numbers, or completely generic.
-  (Rare — typically a REVISE, not a BLOCK.)
+  (Rare 鈥?typically a REVISE, not a BLOCK.)
 
 ### Self-check (run before submitting to review)
 - [ ] Revenue/margin data spans 10+ years, not just 2-3

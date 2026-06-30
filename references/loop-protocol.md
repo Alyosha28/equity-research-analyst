@@ -63,10 +63,10 @@ verdict artifact — it does not re-judge it.
 Every Type-B gate routes its verdict to a **different model family**:
 
 ```
-Claude runs the pipeline → Type-B gate reached →
-    → Route to Codex (reasoning_effort: xhigh) for verdict
-    → Codex returns verdict artifact (JSON)
-    → Claude reads artifact, continues or loops back
+Primary Codex agent runs the pipeline → Type-B gate reached →
+    → Route to a different-family reviewer or human reviewer for verdict
+    → Reviewer returns verdict artifact (JSON)
+    → Orchestrator reads artifact, continues or loops back
 ```
 
 ### Verdict artifact format
@@ -77,7 +77,7 @@ Every cross-model verdict is a JSON file saved to disk:
 {
   "gate": "self-audit-7dim",
   "type": "B",
-  "reviewer_model": "codex-xhigh",
+  "reviewer_model": "external-reviewer",
   "reviewer_family": "openai",
   "timestamp": "2026-06-28T02:00:00Z",
   "dimensions": {
@@ -137,18 +137,18 @@ subskill_agent: self-audit
 ## Gate history
 | # | Step | Gate | Type | Verdict | Reviewer | Artifact |
 |---|------|------|------|---------|----------|----------|
-| 1 | classify | adversarial-review | B | PASS | claude | - |
-| 2 | industry | adversarial-review | B | PASS | claude | - |
-| 3 | company | adversarial-review | B | PASS | claude | - |
-| 4 | theme | adversarial-review | B | PASS | claude | - |
-| 5 | assumptions | adversarial-review | B | PASS | claude | - |
+| 1 | classify | adversarial-review | B | PASS | codex-primary | - |
+| 2 | industry | adversarial-review | B | PASS | codex-primary | - |
+| 3 | company | adversarial-review | B | PASS | codex-primary | - |
+| 4 | theme | adversarial-review | B | PASS | codex-primary | - |
+| 5 | assumptions | adversarial-review | B | PASS | codex-primary | - |
 | 6 | assumptions | engine-sanity | A | PASS | script | - |
-| 7 | valuation | adversarial-review | B | PASS | claude | - |
-| 8 | durability | adversarial-review | B | PASS | claude | - |
-| 9 | triangulate | adversarial-review | B | PASS | claude | - |
-| 10 | write-report | adversarial-review | B | PASS | claude | - |
+| 7 | valuation | adversarial-review | B | PASS | codex-primary | - |
+| 8 | durability | adversarial-review | B | PASS | codex-primary | - |
+| 9 | triangulate | adversarial-review | B | PASS | codex-primary | - |
+| 10 | write-report | adversarial-review | B | PASS | codex-primary | - |
 | 11 | self-audit | lint-check | A | PASS | script | - |
-| 12 | self-audit | 7-dim-critique | B | PENDING | codex-xhigh | verdicts/self-audit-001.json |
+| 12 | self-audit | 7-dim-critique | B | PENDING | external-reviewer | verdicts/self-audit-001.json |
 
 ## Revision history
 | Round | Step | Issue | Fixed? |
@@ -270,7 +270,7 @@ A loop is same-family-safe iff ALL five hold:
 | Condition | Status | Gap |
 |-----------|--------|-----|
 | 1. Gate classification | ✅ | All gates now classified in this document |
-| 2. Cross-model routing | ✅ IMPLEMENTED (tiered) | Tier 1 routes to Codex xhigh; Tier 2/3 defined in cross-model-guide.md |
+| 2. Cross-model routing | ✅ IMPLEMENTED (tiered) | Tier 1 routes to a different-family or human reviewer; Tier 2/3 defined in cross-model-guide.md |
 | 3. Verdict artifacts | ✅ IMPLEMENTED (verdict.py) | All Type-B verdicts saved as frozen JSON artifacts on disk |
 | 4. No same-family jury | ⚠️ PARTIAL (Tier 1 only) | Tier 1 achieves full cross-model safety; Tier 2 uses same-model with adversarial mitigations; Tier 3 skips Type-B entirely |
 | 5. Type-A external checks | ✅ | Lint, JSON, engine sanity all use external checks |

@@ -2,7 +2,8 @@
 name: equity-research-analyst/self-audit
 description: >
   The pre-publish quality gate. Check 1 (Type-A): report_lint.py mechanical.
-  Check 2 (Type-B): 7-dimension self-critique — routes to cross-model (Codex xhigh)
+  Check 2 (Type-B): 7-dimension self-critique — routes to a different-family
+  reviewer or human reviewer
   for verdict. CRITICAL findings BLOCK and route back to root sub-skill.
   Step 10 of Mode A.
 license: MIT
@@ -147,20 +148,20 @@ would have found first.
 | Check | Type | Reviewer | Rationale |
 |-------|------|----------|-----------|
 | `report_lint.py` | **Type-A** | Same-model (script) | Machine-checkable: exit code, grep counts |
-| 7-dim self-critique | **Type-B** | **Cross-model (Codex xhigh)** | Requires taste/judgment of reasoning quality |
+| 7-dim self-critique | **Type-B** | **Different-family reviewer or human review** | Requires taste/judgment of reasoning quality |
 
 ### Cross-model verdict routing (Check 2)
 
 The 7-dim self-critique is a Type-B gate. The loop CANNOT self-acquit:
 
 ```
-Claude runs self-audit → produces draft audit scores →
-  → Route to Codex (reasoning: xhigh) with:
+Primary Codex agent runs self-audit → produces draft audit scores →
+  → Route to a different-family reviewer or human reviewer with:
     - The draft report text
     - The 7-dim critique rubric (references/report-critique-rubric.md)
-    - Claude's self-assessment scores
-  → Codex returns verdict artifact: verdicts/audit.json
-  → Claude reads artifact:
+    - The author's self-assessment scores
+  → Reviewer returns verdict artifact: verdicts/audit.json
+  → Orchestrator reads artifact:
     - PASS → proceed to PDF
     - REVISE → route to root sub-skill, re-run from there
     - BLOCK → escalate to orchestrator
@@ -172,23 +173,23 @@ Claude runs self-audit → produces draft audit scores →
 {
   "gate": "self-audit-7dim",
   "type": "B",
-  "reviewer_model": "codex-xhigh",
+  "reviewer_model": "external-reviewer",
   "reviewer_family": "openai",
   "dimensions": {
-    "structural_completeness": {"score": "PASS", "claude_score": "PASS", "agrees": true},
-    "input_defensibility": {"score": "PASS", "claude_score": "WEAK", "agrees": false, "note": "..."},
-    "internal_consistency": {"score": "PASS", "claude_score": "PASS", "agrees": true},
-    "accounting_integrity": {"score": "PASS", "claude_score": "PASS", "agrees": true},
-    "terminal_value_scrutiny": {"score": "WEAK", "claude_score": "PASS", "agrees": false, "note": "Terminal 82% not flagged; HIGH"},
-    "uncertainty_handling": {"score": "PASS", "claude_score": "PASS", "agrees": true},
-    "bias_and_independence": {"score": "PASS", "claude_score": "PASS", "agrees": true}
+    "structural_completeness": {"score": "PASS", "author_score": "PASS", "agrees": true},
+    "input_defensibility": {"score": "PASS", "author_score": "WEAK", "agrees": false, "note": "..."},
+    "internal_consistency": {"score": "PASS", "author_score": "PASS", "agrees": true},
+    "accounting_integrity": {"score": "PASS", "author_score": "PASS", "agrees": true},
+    "terminal_value_scrutiny": {"score": "WEAK", "author_score": "PASS", "agrees": false, "note": "Terminal 82% not flagged; HIGH"},
+    "uncertainty_handling": {"score": "PASS", "author_score": "PASS", "agrees": true},
+    "bias_and_independence": {"score": "PASS", "author_score": "PASS", "agrees": true}
   },
   "overall_verdict": "PASS_WITH_HIGH",
   "critical_count": 0,
   "high_count": 1,
   "high_details": ["Terminal value 82% of total not flagged prominently enough — disclose in limitations"],
-  "claude_self_assessment_honest": false,
-  "claude_inflated_dimensions": ["terminal_value_scrutiny"],
+  "author_self_assessment_honest": false,
+  "author_inflated_dimensions": ["terminal_value_scrutiny"],
   "recommendation": "PUBLISH_WITH_DISCLOSURE"
 }
 ```
@@ -196,8 +197,8 @@ Claude runs self-audit → produces draft audit scores →
 ### Meta-review criteria
 - [ ] **Cross-model verdict obtained:** Verdict artifact exists and is from a different
   model family. Missing artifact → BLOCK.
-- [ ] **Self-assessment honesty checked:** Codex explicitly flags whether Claude's
-  self-scores were inflated. If Claude gave PASS on a dimension Codex scored WEAK →
+- [ ] **Self-assessment honesty checked:** The reviewer explicitly flags whether the
+  author's self-scores were inflated. If the author gave PASS on a dimension the reviewer scored WEAK →
   the self-audit was dishonest → record this.
 - [ ] **Lint actually run:** Spot-check by Codex — does any "you"/"你" exist that lint
   didn't flag?

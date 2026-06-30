@@ -4,8 +4,8 @@ import sys
 import os
 
 # Ensure we can import from the scripts directory
-_scripts_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
-sys.path.insert(0, _scripts_dir)
+_package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, _package_dir)
 
 import pytest
 
@@ -15,7 +15,7 @@ class TestLoadTheme:
 
     def test_load_default_theme(self):
         """Default theme should load without error."""
-        from theme import load_theme
+        from scripts.theme import load_theme
         theme = load_theme("default")
         assert theme is not None
         assert "name" in theme
@@ -26,7 +26,7 @@ class TestLoadTheme:
 
     def test_load_goldman_theme(self):
         """Goldman theme should extend default."""
-        from theme import load_theme
+        from scripts.theme import load_theme
         theme = load_theme("goldman")
         assert theme is not None
         assert "name" in theme
@@ -37,7 +37,7 @@ class TestLoadTheme:
 
     def test_load_ms_theme(self):
         """Morgan Stanley theme should extend default."""
-        from theme import load_theme
+        from scripts.theme import load_theme
         theme = load_theme("ms")
         assert theme is not None
         assert theme["name"] == "ms"
@@ -45,7 +45,7 @@ class TestLoadTheme:
 
     def test_load_cjk_theme(self):
         """CJK theme should extend default with larger fonts."""
-        from theme import load_theme
+        from scripts.theme import load_theme
         theme = load_theme("cjk")
         assert theme is not None
         assert theme["name"] == "cjk"
@@ -53,13 +53,13 @@ class TestLoadTheme:
 
     def test_unknown_theme_raises(self):
         """Loading a nonexistent theme should raise ValueError."""
-        from theme import load_theme
+        from scripts.theme import load_theme
         with pytest.raises(ValueError, match="Theme 'nonexistent' not found"):
             load_theme("nonexistent")
 
     def test_all_themes_have_palette(self):
         """Every theme should have a palette with ink and accent."""
-        from theme import load_theme
+        from scripts.theme import load_theme
         for name in ("default", "goldman", "ms", "cjk"):
             theme = load_theme(name)
             assert "ink" in theme["palette"], f"{name} missing ink"
@@ -70,7 +70,7 @@ class TestDeepMerge:
     """Tests for theme._deep_merge()."""
 
     def test_simple_override(self):
-        from theme import _deep_merge
+        from scripts.theme import _deep_merge
         base = {"a": 1, "b": 2}
         override = {"b": 3}
         result = _deep_merge(base, override)
@@ -78,7 +78,7 @@ class TestDeepMerge:
         assert result["b"] == 3
 
     def test_nested_merge(self):
-        from theme import _deep_merge
+        from scripts.theme import _deep_merge
         base = {"palette": {"ink": "#000", "accent": "#001"}}
         override = {"palette": {"accent": "#002"}}
         result = _deep_merge(base, override)
@@ -87,7 +87,7 @@ class TestDeepMerge:
 
     def test_original_unmodified(self):
         """Deep merge should not mutate the original dict."""
-        from theme import _deep_merge
+        from scripts.theme import _deep_merge
         base = {"palette": {"ink": "#000"}}
         original_base = {"palette": {"ink": "#000"}}
         override = {"palette": {"accent": "#001"}}
@@ -100,19 +100,19 @@ class TestCjkFonts:
 
     def test_configure_returns_value(self):
         """configure_cjk_fonts should return a font name or None."""
-        from cjk_fonts import configure_cjk_fonts
+        from scripts.cjk_fonts import configure_cjk_fonts
         result = configure_cjk_fonts("zh-CN")
         # result may be None if no CJK font installed, which is fine
         assert result is None or isinstance(result, str)
 
     def test_detect_best_cjk_returns_optional(self):
         """_detect_best_cjk should return a string or None."""
-        from cjk_fonts import _detect_best_cjk
+        from scripts.cjk_fonts import _detect_best_cjk
         result = _detect_best_cjk("zh-CN")
         assert result is None or isinstance(result, str)
 
     def test_available_fonts_is_set(self):
         """_available_fonts should return a set."""
-        from cjk_fonts import _available_fonts
+        from scripts.cjk_fonts import _available_fonts
         fonts = _available_fonts()
         assert isinstance(fonts, set)

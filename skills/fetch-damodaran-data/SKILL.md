@@ -12,16 +12,16 @@ license: MIT
 
 **Pipeline position:** STEP 0.1 of Mode A Phase 0. Runs BEFORE `/classify-archetype`.
 Fetches all market-data inputs from Damodaran's public NYU Stern data pages so that
-every downstream step uses current, dated cost-of-capital parameters — never hardcoded.
+every downstream step uses current, dated cost-of-capital parameters 鈥?never hardcoded.
 
 This is a **fetch utility**, not an analysis sub-skill. Its job is to pull current
-numbers accurately and date them. No judgment, no interpretation, no adjustment —
+numbers accurately and date them. No judgment, no interpretation, no adjustment 鈥?
 just clean date-stamped retrieval.
 
 ## Why this exists
 
 Cost of capital is the most consequential input in any valuation. A 1pp error in
-the discount rate changes intrinsic value by 10–25% for most companies. Without this
+the discount rate changes intrinsic value by 10鈥?5% for most companies. Without this
 sub-skill, every analysis either hardcodes stale numbers or DIY-fetches inconsistently.
 
 This sub-skill is the **single point of truth** for all cost-of-capital inputs in the
@@ -49,7 +49,7 @@ Optional inputs that improve accuracy:
 | **Riskfree Rate Guidance** | `pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/ratings.html` | Periodic | HTML table (sovereign ratings for default spread) |
 | **Sovereign Default Spreads** | `pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/ctryprem.html` (same source as CRP) | Semi-annual | HTML table |
 
-All data is hosted on the public Damodaran site. Data is pulled via `WebFetch` (single-page HTML tables). No API key, no login, no authentication required.
+All data is hosted on the public Damodaran site. Data is pulled via `web fetch` (single-page HTML tables). No API key, no login, no authentication required.
 
 ## What you produce
 
@@ -68,7 +68,7 @@ A single `damodaran_data.json` file with all fetched data, dates, and source URL
     "historical_erp_method": "Geometric average 1928-2023 vs 10yr T-bond",
     "source_url": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/impliedERP.html",
     "data_vintage": "2024-06-01",
-    "notes": "Implied ERP from S&P 500 aggregate — forward-looking, updated monthly. Preferred for cost of equity."
+    "notes": "Implied ERP from S&P 500 aggregate 鈥?forward-looking, updated monthly. Preferred for cost of equity."
   },
 
   "riskfree_rate": {
@@ -78,7 +78,7 @@ A single `damodaran_data.json` file with all fetched data, dates, and source URL
     "sovereign_default_spread": 0.00,
     "sovereign_moodys_rating": "Aaa",
     "sovereign_default_spread_source": "Damodaran sovereign ratings page",
-    "notes": "US is Aaa-rated — no sovereign default spread. For non-Aaa domiciled companies: riskfree rate = US 10yr + sovereign default spread.",
+    "notes": "US is Aaa-rated 鈥?no sovereign default spread. For non-Aaa domiciled companies: riskfree rate = US 10yr + sovereign default spread.",
     "non_aaa_adjustment_rule": "If the company's domicile sovereign is not Aaa-rated, the riskfree rate MUST be adjusted upward by the sovereign default spread from Damodaran's ratings table. See Damodaran July 2025 methodology update."
   },
 
@@ -138,11 +138,11 @@ A single `damodaran_data.json` file with all fetched data, dates, and source URL
   "trust_deficit_signals": {
     "evaluated_at": "2024-06-15",
     "sovereign_downgrade_risk": false,
-    "sovereign_downgrade_note": "US Moody's Aaa, stable outlook — no downgrade active",
+    "sovereign_downgrade_note": "US Moody's Aaa, stable outlook 鈥?no downgrade active",
     "usd_trend_weakening": false,
-    "usd_trend_note": "DXY within 2-year range — no sharp depreciation signal",
+    "usd_trend_note": "DXY within 2-year range 鈥?no sharp depreciation signal",
     "gold_price_surge": false,
-    "gold_price_note": "Gold at $2,320/oz — elevated but not in acute breakout vs 2-year trend",
+    "gold_price_note": "Gold at $2,320/oz 鈥?elevated but not in acute breakout vs 2-year trend",
     "cb_independence_concern": false,
     "cb_independence_note": "No recent legislative or executive action threatening Fed independence",
     "governance_institutional_risk": false,
@@ -159,9 +159,9 @@ A single `damodaran_data.json` file with all fetched data, dates, and source URL
 ### 1. Fetch implied ERP (most current)
 
 ```bash
-# Use WebFetch on the HTML page
+# Use web fetch on the HTML page
 # The implied ERP is the "Implied Premium (FCFE)" row in the main table
-# It is updated monthly — use the most recent row
+# It is updated monthly 鈥?use the most recent row
 ```
 
 **What to extract:**
@@ -169,14 +169,14 @@ A single `damodaran_data.json` file with all fetched data, dates, and source URL
 - Date of the estimate (month/year header)
 - Historical ERP for reference (from the histimpl page or the same page's sidebar)
 
-**Primary ERP rule:** Use the **implied ERP** (forward-looking, updated monthly) as the primary ERP input. The historical ERP (1928–present geometric average) is provided for reference but is NOT the primary ERP for the valuation. This is consistent with Damodaran's own practice.
+**Primary ERP rule:** Use the **implied ERP** (forward-looking, updated monthly) as the primary ERP input. The historical ERP (1928鈥損resent geometric average) is provided for reference but is NOT the primary ERP for the valuation. This is consistent with Damodaran's own practice.
 
 ### 2. Fetch riskfree rate
 
 **Riskfree rate = 10-year US Treasury bond yield + sovereign default spread (if domicile sovereign is not Aaa-rated).**
 
 ```bash
-# Get the current 10-year US Treasury yield (from any financial data source — WebSearch is fine)
+# Get the current 10-year US Treasury yield (from any financial data source 鈥?web search is fine)
 # Cross-reference with the Fed's H.15 release if possible
 ```
 
@@ -184,7 +184,7 @@ A single `damodaran_data.json` file with all fetched data, dates, and source URL
 - Look up the sovereign's Moody's rating from `ratings.html`
 - Find the corresponding default spread from `ctryprem.html`
 - Riskfree rate = US 10yr + sovereign default spread
-- Example: China (A1) → default spread ~0.69% → riskfree = 4.25% + 0.69% = 4.94%
+- Example: China (A1) 鈫?default spread ~0.69% 鈫?riskfree = 4.25% + 0.69% = 4.94%
 
 **This is a CRITICAL adjustment.** Companies domiciled in non-Aaa-rated sovereigns
 have a higher riskfree rate. Using the US 10-year without adjustment systematically
@@ -194,7 +194,7 @@ methodology note on this topic.
 ### 3. Fetch country risk premiums
 
 ```bash
-# WebFetch ctryprem.html
+# web fetch ctryprem.html
 # Extract: country name, Moody's rating, default spread, equity risk premium, country risk premium
 ```
 
@@ -202,7 +202,7 @@ methodology note on this topic.
 - CRP is an ADDITIONAL premium on top of the base ERP
 - CRP is applied to companies with significant operations in higher-risk countries
 - If a US company derives 60% of revenue from China, a portion of China's CRP is blended into the cost of equity
-- The CRP application methodology is in `/build-assumptions` — this sub-skill only fetches the data
+- The CRP application methodology is in `/build-assumptions` 鈥?this sub-skill only fetches the data
 
 **This sub-skill fetches CRP for ALL countries** (not just the domicile), so
 `/build-assumptions` can compute revenue-weighted CRP baskets.
@@ -210,7 +210,7 @@ methodology note on this topic.
 ### 4. Fetch industry betas
 
 ```bash
-# WebFetch Betas.html
+# web fetch Betas.html
 # Extract: industry name, beta, unlevered beta, D/E ratio, number of firms
 ```
 
@@ -228,7 +228,7 @@ regression betas.
 ### 5. Fetch industry cost of capital
 
 ```bash
-# WebFetch wacc.html
+# web fetch wacc.html
 # Extract: industry name, cost of equity, cost of capital
 ```
 
@@ -242,7 +242,7 @@ regression betas.
 **What is a trust-deficit signal?** (Damodaran concept)
 A reduction in trust in institutions (central bank independence, sovereign credit,
 currency stability, governance) that is NOT yet priced into sovereign credit ratings.
-When active, it warrants an additional premium on cost of capital (25–100 bps).
+When active, it warrants an additional premium on cost of capital (25鈥?00 bps).
 
 **Signal checklist:**
 
@@ -256,8 +256,8 @@ When active, it warrants an additional premium on cost of capital (25–100 bps)
 
 **If any signal is active:**
 - Note it in the output under `trust_deficit_signals`
-- `/build-assumptions` will evaluate whether to apply a trust-deficit premium (25–100 bps)
-- The premium, if applied, must be separately named and justified — never silently folded
+- `/build-assumptions` will evaluate whether to apply a trust-deficit premium (25鈥?00 bps)
+- The premium, if applied, must be separately named and justified 鈥?never silently folded
   into the ERP
 
 ### 7. Output damodaran_data.json
@@ -270,8 +270,8 @@ that can be reused across same-day valuations.
 
 | Data | Acceptable age | Action if stale |
 |------|---------------|-----------------|
-| Implied ERP | < 2 months | Fetch latest (monthly) — the most critical freshness requirement |
-| Riskfree rate | < 1 week | Fetch latest — Treasury yields move daily |
+| Implied ERP | < 2 months | Fetch latest (monthly) 鈥?the most critical freshness requirement |
+| Riskfree rate | < 1 week | Fetch latest 鈥?Treasury yields move daily |
 | Country risk premiums | < 7 months | Fetch latest (semi-annual Jan/Jul update) |
 | Industry betas | < 13 months | Fetch latest (annual update, typically Jan) |
 | Industry WACC | < 13 months | Fetch latest (annual update, typically Jan) |
@@ -283,55 +283,55 @@ assumptions narrative.
 
 ## Output
 
-- `damodaran_data.json` — complete cost-of-capital data package
+- `damodaran_data.json` 鈥?complete cost-of-capital data package
 - The output feeds `/build-assumptions` (Step 5) directly
 
 ## Integration notes
 
-- **Invoked first in Mode A Phase 0** — before `/classify-archetype`
-- **Data freshness is critical** — the valuation date is pinned by the data dates
-- **No judgment in this sub-skill** — fetch accurately, date everything, let the
+- **Invoked first in Mode A Phase 0** 鈥?before `/classify-archetype`
+- **Data freshness is critical** 鈥?the valuation date is pinned by the data dates
+- **No judgment in this sub-skill** 鈥?fetch accurately, date everything, let the
   downstream skills interpret
 - **For Mode C refreshes:** re-run this sub-skill to check if ERP, riskfree rate,
   or CRP have moved meaningfully since the prior valuation date
-- **The trust-deficit evaluation is descriptive** — this sub-skill reports what it
+- **The trust-deficit evaluation is descriptive** 鈥?this sub-skill reports what it
   sees; `/build-assumptions` decides whether to apply a premium
 
 ## Adversarial Review Gate
 
 ### Review criteria
 - [ ] **All data fields fetched:** Implied ERP, riskfree rate, CRP (all countries),
-  industry betas, industry WACC. Missing a data class → REVISE.
+  industry betas, industry WACC. Missing a data class 鈫?REVISE.
 - [ ] **Every number dated:** ERP date, riskfree rate date, CRP vintage, beta vintage,
-  WACC vintage all explicitly stated. Undated number → REVISE.
+  WACC vintage all explicitly stated. Undated number 鈫?REVISE.
 - [ ] **Source URLs recorded:** Every data class has its source URL in the output.
-  Missing URL → REVISE.
+  Missing URL 鈫?REVISE.
 - [ ] **Data recency check:** Reviewer checks each data class against acceptable age
-  table. Stale data flagged prominently. Using stale data silently → REVISE.
+  table. Stale data flagged prominently. Using stale data silently 鈫?REVISE.
 - [ ] **Riskfree rate adjustment:** If the sovereign is not Aaa-rated, the riskfree
   rate includes the sovereign default spread per Damodaran methodology. Missing
-  adjustment → REVISE (CRITICAL — this systematically undervalues cost of capital).
+  adjustment 鈫?REVISE (CRITICAL 鈥?this systematically undervalues cost of capital).
 - [ ] **Implied ERP used as primary:** Implied ERP (not historical) is the primary
-  ERP with the correct date. Using historical as primary → REVISE.
+  ERP with the correct date. Using historical as primary 鈫?REVISE.
 - [ ] **Trust-deficit signals evaluated:** All 5 signals checked with dated evidence.
-  Missing signal evaluation → REVISE.
-- [ ] **CRP fetched for all countries:** Not just the domicile — all countries.
-  Only domicile CRP → REVISE (downstream can't compute revenue-weighted baskets).
+  Missing signal evaluation 鈫?REVISE.
+- [ ] **CRP fetched for all countries:** Not just the domicile 鈥?all countries.
+  Only domicile CRP 鈫?REVISE (downstream can't compute revenue-weighted baskets).
 - [ ] **JSON validity:** Output is valid JSON. Validate with `python -c "import json; json.load(open('file'))"`.
 - [ ] **No hardcoded numbers:** All numbers trace to the fetched pages, not to
-  embedded constants. Hardcoded ERP/CRP/riskfree → REVISE (CRITICAL).
+  embedded constants. Hardcoded ERP/CRP/riskfree 鈫?REVISE (CRITICAL).
 
 ### Common failure modes
-- **Stale ERP used without flagging** — most common. Reviewer: check the ERP date
+- **Stale ERP used without flagging** 鈥?most common. Reviewer: check the ERP date
   against the current month. If >2 months old, REVISE.
-- **Historical ERP used as primary** — the implied ERP page has both; grabbing the
+- **Historical ERP used as primary** 鈥?the implied ERP page has both; grabbing the
   wrong row. Historical ERP is for reference only.
-- **Riskfree rate unadjusted for sovereign default spread** — using US 10yr for a
+- **Riskfree rate unadjusted for sovereign default spread** 鈥?using US 10yr for a
   Chinese company. This is the most common CRITICAL error in non-US valuations.
-- **CRP fetched only for domicile** — downstream can't build revenue-weighted baskets.
-- **Trust-deficit signals skipped entirely** — the checklist exists; evaluate it.
-- **Numbers without source URLs** — downstream has no way to verify.
-- **Data from the wrong Damodaran page** — e.g., using old data files instead of the
+- **CRP fetched only for domicile** 鈥?downstream can't build revenue-weighted baskets.
+- **Trust-deficit signals skipped entirely** 鈥?the checklist exists; evaluate it.
+- **Numbers without source URLs** 鈥?downstream has no way to verify.
+- **Data from the wrong Damodaran page** 鈥?e.g., using old data files instead of the
   current monthly update.
 
 ### Verdict thresholds
@@ -351,4 +351,4 @@ assumptions narrative.
 - [ ] All 5 trust-deficit signals evaluated with dated evidence
 - [ ] Every number has: value, date, source URL
 - [ ] JSON is valid
-- [ ] No hardcoded constants — all numbers are fetched
+- [ ] No hardcoded constants 鈥?all numbers are fetched

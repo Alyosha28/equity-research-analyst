@@ -2,16 +2,16 @@
 name: equity-research-analyst/fetch-data
 description: >
   Shared utility: fetch financial data for a company and pre-fill an assumptions
-  skeleton. Uses yfinance, EDGAR, or Wind MCP. Data is third-party tier — must be
+  skeleton. Uses yfinance, EDGAR, or Wind MCP. Data is third-party tier 鈥?must be
   confirmed before use in valuation. Callable by any sub-skill.
 license: MIT
 ---
 
 # Fetch Data (Shared Utility)
 
-**Pipeline position:** Shared — callable at any point when raw financial data is
+**Pipeline position:** Shared 鈥?callable at any point when raw financial data is
 needed. Typically invoked early in Mode A, or by `/build-assumptions` to ground
-a number. Not a required pipeline step — skip if data is already in hand.
+a number. Not a required pipeline step 鈥?skip if data is already in hand.
 
 ## Input
 - Company ticker (e.g., `NVDA`, `0700.HK`, `600519.SS`)
@@ -19,8 +19,8 @@ a number. Not a required pipeline step — skip if data is already in hand.
 
 ## What you produce
 
-A **data skeleton** — a pre-filled JSON file with third-party data, explicitly
-marked as **UNCONFIRMED — VERIFY BEFORE USE**.
+A **data skeleton** 鈥?a pre-filled JSON file with third-party data, explicitly
+marked as **UNCONFIRMED 鈥?VERIFY BEFORE USE**.
 
 ## Data sources (priority order)
 
@@ -29,7 +29,7 @@ marked as **UNCONFIRMED — VERIFY BEFORE USE**.
 | 1 | Company filings (10-K, 20-F) | EDGAR / HKEX / SSE | Audited financials |
 | 2 | Wind Financial Terminal | Wind MCP (`wind-find-finance-skill`) | A-shares, HK, industry data |
 | 3 | yfinance | `scripts/fetch_financials.py` | Quick US-listed skeleton |
-| 4 | Web search | WebSearch | Segment data, recent quarters, guidance |
+| 4 | Web search | web search | Segment data, recent quarters, guidance |
 
 ## Usage
 
@@ -43,7 +43,7 @@ Pulls from yfinance: revenue, operating income, R&D, shares, cash, debt, growth.
 
 ### Manual collection (A-shares, HK, unlisted)
 1. Use Wind MCP if available: `wind-find-finance-skill` / `wind-mcp-skill`
-2. Use WebSearch + WebFetch for: latest annual report, segment breakdown,
+2. Use web search + web fetch for: latest annual report, segment breakdown,
    historical growth (5-10 years), beta, peer multiples
 3. Fill the appropriate template from `templates/`
 
@@ -68,16 +68,16 @@ A JSON skeleton (e.g., `NVDA_skel.json`) with:
 - All available fields populated
 - Source annotation for each value (`_source`, `_tier`, `_date`)
 - Estimated fields marked `"_estimate": true`
-- Clear header warning: "THIRD-PARTY DATA — CONFIRM BEFORE USE"
+- Clear header warning: "THIRD-PARTY DATA 鈥?CONFIRM BEFORE USE"
 
 ## Data confidence tiers
 
 Every number tagged:
-- `audited` — From company filings (10-K, annual report)
-- `management-guidance` — Company's own forward guidance
-- `sell-side-consensus` — Consensus estimates
-- `third-party-aggregator` — yfinance, Wind, Bloomberg data
-- `own-estimate` — Your judgment
+- `audited` 鈥?From company filings (10-K, annual report)
+- `management-guidance` 鈥?Company's own forward guidance
+- `sell-side-consensus` 鈥?Consensus estimates
+- `third-party-aggregator` 鈥?yfinance, Wind, Bloomberg data
+- `own-estimate` 鈥?Your judgment
 
 ## Critical warnings
 
@@ -99,20 +99,20 @@ Every number tagged:
 
 ### Review criteria
 - [ ] **Source annotations:** Every data field has `_source`, `_tier`, `_date`.
-  Missing annotation → REVISE.
+  Missing annotation 鈫?REVISE.
 - [ ] **Recency:** Data is from the most recent available filing/quarter. Data
-  older than 2 years on key metrics → REVISE (flag as potentially stale).
+  older than 2 years on key metrics 鈫?REVISE (flag as potentially stale).
 - [ ] **Confidence tier accuracy:** `audited` tier only for data from actual filings.
-  yfinance data tagged as `audited` → REVISE (it's `third-party-aggregator`).
+  yfinance data tagged as `audited` 鈫?REVISE (it's `third-party-aggregator`).
 - [ ] **Financials metrics correct:** If Financials archetype, the right metrics
-  are collected (book value, ROE, NIM, etc.) — NOT standard P&L. Wrong metrics → REVISE.
-- [ ] **Warnings present:** The output skeleton clearly warns "THIRD-PARTY DATA —
-  CONFIRM BEFORE USE." Missing warning → REVISE.
+  are collected (book value, ROE, NIM, etc.) 鈥?NOT standard P&L. Wrong metrics 鈫?REVISE.
+- [ ] **Warnings present:** The output skeleton clearly warns "THIRD-PARTY DATA 鈥?
+  CONFIRM BEFORE USE." Missing warning 鈫?REVISE.
 - [ ] **JSON validity:** Output is valid JSON.
 
 ### Common failure modes
 - yfinance data tagged as `audited` (it's aggregator-tier)
-- Segment data missing (not in yfinance — must be manual)
+- Segment data missing (not in yfinance 鈥?must be manual)
 - Financials skeleton using standard metrics instead of bank/insurance metrics
 - Stale data (last fiscal year not yet filed in yfinance)
 - Source annotation format inconsistent

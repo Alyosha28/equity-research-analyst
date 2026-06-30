@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Equity Research Source Card",
+  "type": "object",
+  "required": [
+    "source_id",
+    "title",
+    "publisher",
+    "publication_date",
+    "access_date",
+    "source_tier",
+    "coverage",
+    "usable_for",
+    "not_usable_for"
+  ],
+  "properties": {
+    "source_id": { "type": "string" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "author": { "type": "string" },
+    "publication_date": { "type": "string" },
+    "access_date": { "type": "string" },
+    "source_tier": {
+      "type": "string",
+      "enum": [
+        "filing",
+        "damodaran",
+        "industry-report",
+        "sell-side",
+        "news",
+        "aggregator",
+        "own-estimate"
+      ]
+    },
+    "coverage": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "known_bias": { "type": "string" },
+    "usable_for": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "not_usable_for": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "cross_references": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

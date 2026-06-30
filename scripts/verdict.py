@@ -8,7 +8,7 @@ re-judges them.
 
 CLI usage:
     python verdict.py --save PATH --gate self-audit --type B \\
-        --verdict PASS --reviewer codex-xhigh --notes "TV sensitivity checked"
+        --verdict PASS --reviewer external-reviewer --notes "TV sensitivity checked"
     python verdict.py --load PATH
 """
 
@@ -114,9 +114,9 @@ def is_same_family_safe(verdicts: list[Verdict]) -> bool:
 
     A set of verdicts is same-family-safe iff **every** Type-B verdict was
     issued by a cross-model reviewer (i.e. reviewer_family differs from the
-    pipeline's home family, which is "anthropic" for the Claude pipeline).
+    pipeline's home family, which is "openai" for the Codex runtime).
     """
-    HOME_FAMILY = "anthropic"
+    HOME_FAMILY = "openai"
     type_b_verdicts = [v for v in verdicts if v.type == "B"]
     if not type_b_verdicts:
         # No Type-B gates at all — trivially safe (Type-A only pipeline).

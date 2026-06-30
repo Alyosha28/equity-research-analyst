@@ -1,7 +1,7 @@
 ---
 name: equity-research-analyst/research
 description: >
-  Shared research agent — the single point for all web research, data gathering,
+  Shared research agent 鈥?the single point for all web research, data gathering,
   and fact-checking in the equity-research-analyst pipeline. Invoked by any sub-skill
   that needs sourced, dated information. Centralizes research methodology so analysis
   sub-skills focus on analysis, not data hunting.
@@ -10,13 +10,13 @@ license: MIT
 
 # Research Agent (Shared Utility)
 
-**Pipeline position:** Shared — invoked by any sub-skill that needs external data.
+**Pipeline position:** Shared 鈥?invoked by any sub-skill that needs external data.
 Centralizes all web research so analysis sub-skills stay focused on analysis.
 
 ## Why a dedicated research agent
 
 Without this, every analysis sub-skill duplicates research instructions ("use
-WebSearch," "cite sources," "date every fact"). That leads to inconsistent
+web search," "cite sources," "date every fact"). That leads to inconsistent
 sourcing quality and makes it hard to upgrade research methodology.
 
 This agent is the **single point** for:
@@ -44,9 +44,9 @@ The calling sub-skill provides a **research brief**:
 
 | Depth | When to use | Tools | Expected output |
 |-------|------------|-------|----------------|
-| **quick** | Single fact check, current price, latest quarter revenue | WebSearch × 1-2 | 1-2 sourced data points |
-| **standard** | Sub-skill research (industry data, company history, TAM) | WebSearch × 3-5 + WebFetch × 1-2 | Multiple sourced data points with cross-references |
-| **deep** | Material facts for valuation drivers, contested claims | `deep-research` skill + WebSearch verification | Comprehensive, multi-source, cross-verified |
+| **quick** | Single fact check, current price, latest quarter revenue | web search 脳 1-2 | 1-2 sourced data points |
+| **standard** | Sub-skill research (industry data, company history, TAM) | web search 脳 3-5 + web fetch 脳 1-2 | Multiple sourced data points with cross-references |
+| **deep** | Material facts for valuation drivers, contested claims | deep research workflow if available + web search verification | Comprehensive, multi-source, cross-verified |
 
 ## Research workflow
 
@@ -59,26 +59,26 @@ The calling sub-skill provides a **research brief**:
 
 **Standard path (most sub-skill research):**
 ```
-WebSearch × 2-3 (different angles)
-    ↓
+web search 脳 2-3 (different angles)
+    鈫?
 Identify primary sources (filings, earnings calls, industry reports)
-    ↓
-WebFetch primary sources for exact numbers
-    ↓
+    鈫?
+web fetch primary sources for exact numbers
+    鈫?
 Cross-reference: do two independent sources agree on the key numbers?
-    ↓
+    鈫?
 If numbers diverge >10%: flag the divergence, use the more reliable source
 ```
 
 **Deep path (valuation-critical facts):**
 ```
-Invoke deep-research skill with the specific question
-    ↓
+Invoke deep research workflow if available with the specific question
+    鈫?
 Extract the key data points + source list
-    ↓
-WebSearch to independently verify the 2-3 most critical numbers
-    ↓
-Flag any deep-research claims that can't be independently confirmed
+    鈫?
+web search to independently verify the 2-3 most critical numbers
+    鈫?
+Flag any deep research claims that can't be independently confirmed
 ```
 
 ### 3. Annotate every finding
@@ -97,18 +97,18 @@ Every data point returned MUST carry:
 }
 ```
 
-**Source tiers (mandatory — same as the main skill's data confidence system):**
-- `audited` — From company filings (10-K, 20-F, annual report)
-- `management-guidance` — Company's forward guidance (earnings call, investor day)
-- `sell-side-consensus` — Consensus estimates (Visible Alpha, Bloomberg consensus)
-- `third-party-aggregator` — yfinance, Wind, Capital IQ, Statista
-- `industry-report` — Gartner, IDC, McKinsey, SemiAnalysis, etc.
-- `news-reporting` — Reuters, Bloomberg, CNBC, Caixin, etc.
-- `own-estimate` — Your inference/judgment (explicitly labeled)
+**Source tiers (mandatory 鈥?same as the main skill's data confidence system):**
+- `audited` 鈥?From company filings (10-K, 20-F, annual report)
+- `management-guidance` 鈥?Company's forward guidance (earnings call, investor day)
+- `sell-side-consensus` 鈥?Consensus estimates (Visible Alpha, Bloomberg consensus)
+- `third-party-aggregator` 鈥?yfinance, Wind, Capital IQ, Statista
+- `industry-report` 鈥?Gartner, IDC, McKinsey, SemiAnalysis, etc.
+- `news-reporting` 鈥?Reuters, Bloomberg, CNBC, Caixin, etc.
+- `own-estimate` 鈥?Your inference/judgment (explicitly labeled)
 
 ### 4. Flag what's NOT found
 
-Research that finds nothing useful is still useful — it tells the analyst the
+Research that finds nothing useful is still useful 鈥?it tells the analyst the
 data gap exists. Always report:
 - What was searched for but NOT found
 - What data exists but is stale (beyond acceptable vintage)
@@ -157,20 +157,20 @@ further confirmation, what low/base/high range is supported by the data]
 
 ### Review criteria
 - [ ] **Every data point annotated:** value, unit, source, tier, as-of date.
-  Missing annotation → REVISE.
+  Missing annotation 鈫?REVISE.
 - [ ] **Cross-referencing attempted:** At least 2 independent sources for
   valuation-critical numbers (>5% of intrinsic value sensitivity). Single-source
-  critical data → REVISE (flag as single-source risk).
+  critical data 鈫?REVISE (flag as single-source risk).
 - [ ] **Recency:** Data is within the acceptable vintage for the brief.
-  Stale data → flag prominently, do not silently use.
+  Stale data 鈫?flag prominently, do not silently use.
 - [ ] **Tier accuracy:** `audited` only for actual filing data. Aggregator data
-  tagged as `audited` → REVISE.
+  tagged as `audited` 鈫?REVISE.
 - [ ] **Data gaps reported:** What was searched for but not found is stated.
-  Silent omission → REVISE.
+  Silent omission 鈫?REVISE.
 - [ ] **Source reliability:** Paywalled, biased, or secondary sources flagged.
 
 ### Common failure modes
-- Numbers without sources (most common — "the AI market is $500B")
+- Numbers without sources (most common 鈥?"the AI market is $500B")
 - Aggregator data passed off as audited
 - Stale data used without flagging
 - Single-source critical numbers without cross-reference

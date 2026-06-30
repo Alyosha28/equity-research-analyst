@@ -33,8 +33,7 @@ def load_theme(name="default"):
             f"Theme '{name}' not found. Available: {sorted(themes.keys())}"
         )
 
-    # Resolve inheritance chain
-    resolved = {}
+    # Resolve inheritance chain from parent to child so child values win.
     chain = []
     current = name
     while current:
@@ -44,9 +43,11 @@ def load_theme(name="default"):
         t = themes.get(current)
         if not t:
             break
-        # Deep merge (child overrides parent)
-        resolved = _deep_merge(resolved, t)
         current = t.get("extends")
+
+    resolved = {}
+    for theme_name in reversed(chain):
+        resolved = _deep_merge(resolved, themes[theme_name])
 
     return resolved
 
