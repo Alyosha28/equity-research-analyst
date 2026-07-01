@@ -325,7 +325,7 @@ figcaption {
 }
 
 figcaption::before {
-  content: "Figure " counter(figure-counter) ": ";
+  content: "图 " counter(figure-counter) "：";
   font-weight: 600;
   color: var(--ink-light);
 }

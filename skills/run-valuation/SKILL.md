@@ -14,6 +14,7 @@ Runs the full engine suite and collects all numerical outputs.
 
 ## Input
 - `assumptions.json` from step 5 (path to file)
+- `cyclical_inputs.json` from step 5 when archetype is Cyclical
 - Current stock price (for Monte Carlo percentile, breakeven, reverse DCF)
 - Archetype from step 1 (determines which scripts to run)
 
@@ -23,7 +24,7 @@ Runs the full engine suite and collects all numerical outputs.
 |-----------|---------------|---------|
 | Default | `dcf_valuation.py`, `monte_carlo.py`, `breakeven.py`, `reverse_dcf.py`, `comps.py` | value/share, distribution, breakeven grid, implied expectations |
 | Financials | `financial_valuation.py`, `comps.py` | RIM value, DDM cross-check, implied P/B |
-| Cyclical | `dcf_valuation.py`, `monte_carlo.py`, `breakeven.py`, `reverse_dcf.py` | same as Default but on normalized inputs |
+| Cyclical | `dcf_valuation.py`, `monte_carlo.py`, `breakeven.py`, `reverse_dcf.py`, `cyclical_valuation.py` | normalized DCF plus explicit price-deck DCF, mid-cycle EV/EBITDA, asset NPV, and implied commodity/panel price |
 | Young | `dcf_valuation.py`, `monte_carlo.py`, `breakeven.py` | value with/without failure branch |
 | Mature | `dcf_valuation.py`, `breakeven.py`, `reverse_dcf.py` | near-term cash dominated value |
 | Holding-co | `sotp.py`, `dcf_valuation.py` (core only), `comps.py` | SOTP bridge, stub multiple |
@@ -46,7 +47,11 @@ python breakeven.py ../PATH/assumptions.json --price CURRENT_PRICE
 
 # Reverse DCF (what's priced in)
 python reverse_dcf.py ../PATH/assumptions.json --price CURRENT_PRICE --solve-for terminal_revenue
-python reverse_dcf.py ../PATH/assumptions.json --price CURRENT_PRICE --solve-for terminal_margin
+python reverse_dcf.py ../PATH/assumptions.json --price CURRENT_PRICE --solve-for target_operating_margin
+
+# Cyclical reverse DCF (what commodity / panel price is priced in)
+python cyclical_valuation.py ../PATH/TICKER_cyclical_inputs.json --output ../PATH/TICKER_cyclical_valuation.json
+python reverse_dcf.py ../PATH/assumptions.json --price CURRENT_PRICE --solve-for commodity_price --cyclical-inputs ../PATH/TICKER_cyclical_inputs.json --json > ../PATH/TICKER_reverse_commodity_price.json
 
 # Comps
 python comps.py ../PATH/comps.json
@@ -85,6 +90,7 @@ A **valuation results package** containing:
 4. **Reverse DCF**
    - Implied year-10 revenue at current price
    - Implied operating margin at current price
+   - For cyclicals: implied normalized commodity/panel price and gap vs base deck
    - Gap vs base case (in % and absolute)
    - Plausibility assessment
 
@@ -97,6 +103,7 @@ A **valuation results package** containing:
    - Monte Carlo histogram (PNG + SVG)
    - Football field chart (valuation range comparison)
    - Breakeven heatmap (optional)
+   - For cyclicals: commodity price deck, cost-curve position, cycle-position dashboard, and mid-cycle valuation bridge when `TICKER_cyclical_valuation.json` exists
 
 ## Output format
 
@@ -162,6 +169,9 @@ A **valuation results package** containing:
   extracted from MC output and stated. Missing → REVISE.
 - [ ] **Reverse DCF comparison:** Price-implied driver values compared to base case
   with gap in % and absolute terms. Missing comparison → REVISE.
+- [ ] **Cyclical triangulation:** For cyclical archetypes, `cyclical_valuation.py`
+  ran and produced price-deck DCF, mid-cycle EV/EBITDA, asset NPV if applicable,
+  and implied normalized commodity/panel price. Missing → REVISE.
 - [ ] **Breakeven table:** 2-variable table (Y10 rev × margin) with cells that reach
   price marked. Missing → REVISE.
 - [ ] **JSON outputs saved:** For chart generation and reproducibility.

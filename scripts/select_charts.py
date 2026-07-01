@@ -39,6 +39,10 @@ ALL_CHART_KINDS: tuple[str, ...] = (
     "waterfall",
     "capex_cycle",
     "risk_matrix",
+    "commodity_price_deck",
+    "cost_curve_position",
+    "cycle_position_dashboard",
+    "midcycle_multiple_bridge",
 )
 
 # ---------------------------------------------------------------------------
@@ -57,6 +61,10 @@ CHART_DATA_MAP: dict[str, tuple[str, ...]] = {
     "waterfall": ("{ticker}_waterfall.json",),
     "capex_cycle": ("{ticker}_capex.json",),
     "risk_matrix": ("{ticker}_risks.json",),
+    "commodity_price_deck": ("{ticker}_cyclical_valuation.json",),
+    "cost_curve_position": ("{ticker}_cyclical_valuation.json",),
+    "cycle_position_dashboard": ("{ticker}_cyclical_valuation.json",),
+    "midcycle_multiple_bridge": ("{ticker}_cyclical_valuation.json",),
 }
 
 # ---------------------------------------------------------------------------
@@ -69,27 +77,38 @@ BASELINE_RULES: dict[str, dict[str, tuple[str, ...]]] = {
     "young_growth": {
         "required": ("montecarlo", "breakeven", "terminal", "price_vs_value"),
         "optional": ("football", "tornado", "scenarios", "revenue_traj"),
-        "skip": ("roic_spread", "waterfall", "capex_cycle", "risk_matrix"),
+        "skip": ("roic_spread", "waterfall", "capex_cycle", "risk_matrix",
+                 "commodity_price_deck", "cost_curve_position",
+                 "cycle_position_dashboard", "midcycle_multiple_bridge"),
     },
     "high_growth": {
         "required": ("revenue_traj", "tornado", "terminal", "price_vs_value"),
         "optional": ("montecarlo", "football", "breakeven", "scenarios", "waterfall"),
-        "skip": ("roic_spread", "capex_cycle", "risk_matrix"),
+        "skip": ("roic_spread", "capex_cycle", "risk_matrix",
+                 "commodity_price_deck", "cost_curve_position",
+                 "cycle_position_dashboard", "midcycle_multiple_bridge"),
     },
     "mature": {
         "required": ("tornado", "revenue_traj", "roic_spread", "waterfall", "terminal"),
         "optional": ("montecarlo", "scenarios", "football", "price_vs_value"),
-        "skip": ("breakeven", "capex_cycle", "risk_matrix"),
+        "skip": ("breakeven", "capex_cycle", "risk_matrix",
+                 "commodity_price_deck", "cost_curve_position",
+                 "cycle_position_dashboard", "midcycle_multiple_bridge"),
     },
     "cyclical": {
-        "required": ("montecarlo", "tornado", "breakeven", "capex_cycle"),
-        "optional": ("football", "scenarios", "risk_matrix", "revenue_traj", "price_vs_value"),
+        "required": ("montecarlo", "tornado", "breakeven", "capex_cycle",
+                     "commodity_price_deck", "cycle_position_dashboard",
+                     "midcycle_multiple_bridge"),
+        "optional": ("football", "scenarios", "risk_matrix", "revenue_traj",
+                     "price_vs_value", "cost_curve_position"),
         "skip": ("roic_spread", "terminal", "waterfall"),
     },
     "financial": {
         "required": ("roic_spread", "scenarios", "tornado", "risk_matrix"),
         "optional": ("montecarlo", "price_vs_value", "revenue_traj"),
-        "skip": ("breakeven", "capex_cycle", "football", "terminal", "waterfall"),
+        "skip": ("breakeven", "capex_cycle", "football", "terminal", "waterfall",
+                 "commodity_price_deck", "cost_curve_position",
+                 "cycle_position_dashboard", "midcycle_multiple_bridge"),
     },
     "declining": {
         "required": ("breakeven", "waterfall", "terminal"),
@@ -100,6 +119,10 @@ BASELINE_RULES: dict[str, dict[str, tuple[str, ...]]] = {
             "football",
             "montecarlo",
             "revenue_traj",
+            "commodity_price_deck",
+            "cost_curve_position",
+            "cycle_position_dashboard",
+            "midcycle_multiple_bridge",
         ),
     },
 }
@@ -227,6 +250,18 @@ def _resolve_archetype(raw: str) -> str:
     key = raw.strip().lower().replace("-", "_")
     if key in ARCHETYPE_ALIASES:
         return ARCHETYPE_ALIASES[key]
+    if "cyclical" in key or "commodity" in key or "cycle" in key:
+        return "cyclical"
+    if "financial" in key or "bank" in key or "insurance" in key:
+        return "financial"
+    if "young" in key or "startup" in key:
+        return "young_growth"
+    if "high_growth" in key or "growth" in key:
+        return "high_growth"
+    if "declining" in key or "distress" in key:
+        return "declining"
+    if "mature" in key:
+        return "mature"
     raise ValueError(
         f"Unknown archetype '{raw}'. Expected one of: "
         f"{', '.join(sorted(set(ARCHETYPE_ALIASES.values())))}"
@@ -472,7 +507,12 @@ def select(
         classification = json.load(fh)
 
     # ---- 2. Resolve archetype ----------------------------------------------
-    raw_archetype = classification.get("archetype", "")
+    raw_archetype = (
+        classification.get("archetype")
+        or classification.get("primary_archetype")
+        or classification.get("secondary_archetype")
+        or ""
+    )
     canonical = _resolve_archetype(raw_archetype)
     lifecycle_phase = classification.get("lifecycle_phase", canonical)
 

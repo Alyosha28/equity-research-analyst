@@ -193,6 +193,10 @@ is honest.** Keep it to that; do not drift into macro portfolio construction.
       implies a margin of X%, which is the [peak / mid / trough]").
 - [ ] A **margin-of-safety band** is given around the normalized value (cyclicals deserve a
       wide band — see `monte_carlo.py` over margin and the price deck).
+- [ ] The final report follows `references/publishing-contract.md`: it states the
+      cycle position, current vs normalized vs peak/trough margin, price deck,
+      cost-curve/capacity position, and reverse-DCF implied cycle point in the
+      report language.
 
 ## 9. Common traps
 - **Peak-margin extrapolation** — running the current top-of-cycle margin to terminal, so

@@ -58,6 +58,28 @@ def test_report_lint_bad_blocks():
     assert len(fails) >= 5
 
 
+def test_chinese_report_blocks_english_template_labels():
+    report = """
+# 云铝股份研究报告
+
+**Rating:** REDUCE
+
+THESIS
+
+本报告以机构投资者为读者，围绕铝价周期、氧化铝成本、电力成本、权益产能、资产负债表韧性和安全边际展开。
+报告语言应保持中文，评级、内在价值、当前价格、下行空间、核心结论和图表标题均应使用中文表达。
+如果正文采用中文，英文券商模板标签会破坏发布一致性，也会让 PDF 首页评级框和图表编号出现混杂。
+
+Figure 1: Monte Carlo value distribution
+
+本分析仅供研究参考，不构成个性化投资建议。数据截至二零二六年七月一日。
+"""
+    findings = rl.lint(report)
+    rules = {f.rule for f in findings if f.severity == "FAIL"}
+    assert "english-rating-in-chinese-report" in rules
+    assert "english-template-label-in-chinese-report" in rules
+
+
 def test_charts_render(tmp_path):
     base = load_inputs(ASSUMP)
     values, _ = mc.simulate(base, trials=300, seed=2)

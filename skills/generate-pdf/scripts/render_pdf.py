@@ -55,9 +55,10 @@ MARKDOWN_EXTENSIONS = [
 ]
 
 # Chart placeholder regex: canonical format ![](figs/{TICKER}_{kind})
-# with optional .svg or .png extension. Stem must contain underscore.
+# with optional .svg or .png extension. Also accepts portable repo paths
+# ![](figs/{TICKER}/{TICKER}_{kind}.png). Stem must contain underscore.
 CHART_RE = re.compile(
-    r'!\[([^\]]*)\]\(figs/([\w.]+_\w+)(?:\.(svg|png))?\)',
+    r'!\[([^\]]*)\]\(figs/(?:[\w.-]+/)?([\w.]+_\w+)(?:\.(svg|png))?\)',
     re.IGNORECASE,
 )
 
@@ -162,7 +163,13 @@ def _detect_cjk_fonts() -> list[str]:
     if not fonts:
         if sys.platform == "win32":
             font_dir = os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts")
-            cjk_names = ["msyh.ttc", "simsun.ttc", "simhei.ttf"]
+            cjk_names = [
+                "NotoSansSC-VF.ttf",
+                "Noto Sans SC (TrueType).otf",
+                "msyh.ttc",
+                "simsun.ttc",
+                "simhei.ttf",
+            ]
             for name in cjk_names:
                 if os.path.exists(os.path.join(font_dir, name)):
                     fonts.append(name)
@@ -174,6 +181,13 @@ def _detect_cjk_fonts() -> list[str]:
                     fonts.append(name)
 
     return fonts
+
+
+def _lang_requires_cjk(lang: str | None) -> bool:
+    if not lang:
+        return False
+    normalized = lang.lower()
+    return normalized.startswith(("zh", "ja", "ko"))
 
 
 # ── Chart Index Verification (Type-A Programmatic Gate) ──────────────────────
@@ -385,9 +399,13 @@ def _resolve_charts(md_text: str, figs_dir: str,
       5. If neither found, insert a red placeholder note.
     """
     figs_path = Path(figs_dir)
+    is_zh = _has_cjk(md_text)
 
     def _replace_chart(match: re.Match) -> str:
-        alt_text = match.group(1) or "Chart"
+        raw_alt = (match.group(1) or "").strip()
+        alt_text = raw_alt or ("图表" if is_zh else "Chart")
+        if is_zh and raw_alt and not _has_cjk(raw_alt):
+            alt_text = "图表"
         stem = match.group(2)
         ext = match.group(3)  # explicit extension or None
 
@@ -550,12 +568,33 @@ def _style_rating_box(html_body: str) -> str:
     if h1_match:
         company_name = h1_match.group(1)
 
+    is_zh = _has_cjk(header_block)
+    labels = {
+        "rating": "评级" if is_zh else "Rating",
+        "intrinsic": "每股内在价值" if is_zh else "Intrinsic Value",
+        "price": "当前价格" if is_zh else "Price",
+        "downside": "上行/目标" if is_zh else "Downside",
+        "percentile": "价格分位" if is_zh else "Price %ile",
+        "thesis": "投资要点" if is_zh else "Thesis",
+    }
+
     # Extract rating data from the header
-    rating = _extract_kv(header_block, "Rating")
-    intrinsic = _extract_kv(header_block, "Intrinsic value")
-    price = _extract_kv(header_block, "Price")
-    downside = _extract_kv(header_block, "Downside")
-    percentile = _extract_kv(header_block, "Price.*ile")  # %ile or percentile
+    rating = _extract_kv(header_block, "Rating") or _extract_kv(header_block, "评级")
+    intrinsic = (
+        _extract_kv(header_block, "Intrinsic value")
+        or _extract_kv(header_block, "每股内在价值")
+    )
+    price = _extract_kv(header_block, "Price") or _extract_kv(header_block, "当前价格")
+    downside = (
+        _extract_kv(header_block, "Downside")
+        or _extract_kv(header_block, "上行空间")
+        or _extract_kv(header_block, "下行空间")
+        or _extract_kv(header_block, "目标区间")
+    )
+    percentile = (
+        _extract_kv(header_block, "Price.*ile")
+        or _extract_kv(header_block, "价格分位")
+    )
 
     # Build the rating box HTML
     box_parts = ['<div class="rating-box">']
@@ -570,21 +609,21 @@ def _style_rating_box(html_body: str) -> str:
 
     if rating:
         value_class = _rating_color_class(rating)
-        box_parts.append(f'<span class="kv-label">Rating</span>')
+        box_parts.append(f'<span class="kv-label">{labels["rating"]}</span>')
         box_parts.append(
             f'<span class="kv-value {value_class}">{rating}</span>'
         )
     if intrinsic:
-        box_parts.append(f'<span class="kv-label">Intrinsic Value</span>')
+        box_parts.append(f'<span class="kv-label">{labels["intrinsic"]}</span>')
         box_parts.append(f'<span class="kv-value">{intrinsic}</span>')
     if price:
-        box_parts.append(f'<span class="kv-label">Price</span>')
+        box_parts.append(f'<span class="kv-label">{labels["price"]}</span>')
         box_parts.append(f'<span class="kv-value">{price}</span>')
     if downside:
-        box_parts.append(f'<span class="kv-label">Downside</span>')
+        box_parts.append(f'<span class="kv-label">{labels["downside"]}</span>')
         box_parts.append(f'<span class="kv-value">{downside}</span>')
     if percentile:
-        box_parts.append(f'<span class="kv-label">Price %ile</span>')
+        box_parts.append(f'<span class="kv-label">{labels["percentile"]}</span>')
         box_parts.append(f'<span class="kv-value">{percentile}</span>')
 
     box_parts.append('</div>')  # close kv-grid
@@ -592,7 +631,7 @@ def _style_rating_box(html_body: str) -> str:
     # Extract thesis text — the paragraph after the bold rating line
     thesis = _extract_thesis(header_block)
     if thesis:
-        box_parts.append('<p class="thesis-label">Thesis</p>')
+        box_parts.append(f'<p class="thesis-label">{labels["thesis"]}</p>')
         box_parts.append(f'<p class="thesis-text">{thesis}</p>')
 
     # MOS buy-band extraction
@@ -609,7 +648,7 @@ def _style_rating_box(html_body: str) -> str:
     # Actually, simpler: output the rating box, then the original content
     # but with the first strong paragraph (which we consumed) removed
     first_strong_p = re.search(
-        r'<p><strong>Rating:.*?</strong>.*?</p>', header_block, re.DOTALL
+        r'<p><strong>\s*(?:Rating|评级).*?</strong>.*?</p>', header_block, re.DOTALL
     )
     if first_strong_p:
         header_block = header_block[:first_strong_p.start()] + \
@@ -620,18 +659,24 @@ def _style_rating_box(html_body: str) -> str:
 
 def _extract_kv(text: str, key: str) -> Optional[str]:
     """Extract a key-value pair from text. E.g. 'Rating: REDUCE' -> 'REDUCE'."""
-    pattern = re.compile(
-        r'\*\*' + key + r':?\*\*\s*(.+?)(?:\s*\*\*|$|<br|</p)',
-        re.IGNORECASE | re.DOTALL,
-    )
-    m = pattern.search(text)
-    if m:
-        value = m.group(1).strip()
-        # Clean up markdown formatting
-        value = re.sub(r'<[^>]+>', '', value)
-        value = re.sub(r'\*\*', '', value)
-        return value
+    patterns = [
+        r'<strong>\s*' + key + r'\s*[:：]\s*([^<]+?)</strong>',
+        r'<strong>\s*' + key + r'\s*[:：]?\s*</strong>\s*(.+?)(?=<strong>|<br|</p>)',
+        r'\*\*\s*' + key + r'\s*[:：]?\s*\*\*\s*(.+?)(?:\s*\*\*|$|<br|</p)',
+    ]
+    for raw_pattern in patterns:
+        m = re.search(raw_pattern, text, re.IGNORECASE | re.DOTALL)
+        if m:
+            value = m.group(1).strip()
+            # Clean up markdown / HTML formatting
+            value = re.sub(r'<[^>]+>', '', value)
+            value = re.sub(r'\*\*', '', value)
+            return value.strip(" \t\r\n|")
     return None
+
+
+def _has_cjk(text: str) -> bool:
+    return any("\u4e00" <= ch <= "\u9fff" for ch in text)
 
 
 def _extract_thesis(header_block: str) -> Optional[str]:
@@ -639,7 +684,11 @@ def _extract_thesis(header_block: str) -> Optional[str]:
     # Find all paragraph text
     paragraphs = re.findall(r'<p>(.*?)</p>', header_block, re.DOTALL)
     # Filter out lines that contain key metadata
-    meta_keys = ['Rating', 'Intrinsic', 'Price', 'Downside', 'MoS']
+    meta_keys = [
+        'Rating', 'Intrinsic', 'Price', 'Downside', 'MoS',
+        '评级', '当前价格', '每股内在价值', '上行空间', '下行空间',
+        '目标区间', '估值日期', '复核时点', '主要方法',
+    ]
     thesis_candidates = []
     for p in paragraphs:
         clean = re.sub(r'<[^>]+>', '', p).strip()
@@ -1101,6 +1150,18 @@ def render(md_path: str, pdf_path: str,
     # Step 2: Read markdown
     md_text = md_path_abs.read_text(encoding="utf-8")
     print(f"Markdown: {len(md_text)} chars")
+
+    if cjk and _lang_requires_cjk(lang):
+        cjk_fonts = _detect_cjk_fonts()
+        if not cjk_fonts:
+            sys.stderr.write(
+                "[ERROR] CJK rendering requested for a Chinese/Japanese/Korean "
+                "report, but no CJK-capable font was detected. Install Noto Sans CJK, "
+                "Microsoft YaHei, SimSun, SimHei, PingFang, or equivalent before "
+                "rendering the PDF.\n"
+            )
+            return None
+        print(f"CJK fonts: {', '.join(cjk_fonts[:3])}")
 
     # Step 3: Convert Markdown -> HTML
     html_body = md_to_html(md_text, str(figs_dir_abs), inline_svg=not no_inline_svg)

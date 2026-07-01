@@ -23,7 +23,7 @@ except ImportError:
 
 
 SOLVABLE = ("terminal_revenue", "target_operating_margin",
-            "sales_to_capital", "cost_of_capital_initial")
+            "sales_to_capital", "cost_of_capital_initial", "commodity_price")
 
 
 def _value_given(base_inp, variable, x) -> float:
@@ -73,9 +73,64 @@ def _main(argv=None) -> int:
     ap.add_argument("assumptions")
     ap.add_argument("--price", type=float, required=True)
     ap.add_argument("--solve-for", choices=SOLVABLE, default="terminal_revenue")
+    ap.add_argument(
+        "--cyclical-inputs",
+        default=None,
+        help="cyclical_inputs JSON; required when --solve-for commodity_price",
+    )
     ap.add_argument("--json", action="store_true",
                     help="emit the implied-expectation result as JSON (for charts.py)")
     args = ap.parse_args(argv)
+
+    if args.solve_for == "commodity_price":
+        if not args.cyclical_inputs:
+            raise SystemExit("--cyclical-inputs is required when --solve-for commodity_price")
+        try:
+            from cyclical_inputs import load_cyclical_inputs
+            import cyclical_valuation
+        except ImportError:
+            from scripts.cyclical_inputs import load_cyclical_inputs  # type: ignore
+            from scripts import cyclical_valuation  # type: ignore
+
+        cyc = load_cyclical_inputs(args.cyclical_inputs)
+        result = cyclical_valuation.solve_implied_normalized_price(cyc, args.price)
+        if args.json:
+            print(json.dumps(result, indent=2))
+            return 0
+
+        print(f"Reverse cyclical DCF for {result['company']}")
+        print("-" * 56)
+        print(f"Base cyclical value/share:       {result['base_value']:>10.2f}")
+        print(f"Market price:                    {result['price']:>10.2f}")
+        print("Solving for: normalized commodity / cycle price")
+        print("-" * 56)
+        if not result["converged"]:
+            direction = "below" if result["achieved"] < args.price else "above"
+            print("NO SOLUTION within trough/peak bounds.")
+            print(
+                f"  Nearest deck is {result['implied_normalized_price']:,.2f}; "
+                f"value/share is {result['achieved']:.2f}, still {direction} price."
+            )
+            print("  => the equity price requires assumptions outside the stated cycle band")
+            print("     or a joint move in volume, cost, capital intensity, and multiple.")
+            return 0
+        print(
+            "Price-implied normalized price: "
+            f"{result['implied_normalized_price']:>10,.2f}"
+        )
+        print(
+            "  vs base normalized price:     "
+            f"{result['base_normalized_price']:>10,.2f} "
+            f"({result['implied_vs_base_pct']:>+.1%})"
+        )
+        print(
+            "Cycle band:                      "
+            f"{result['trough_price']:,.2f} - {result['peak_price']:,.2f}"
+        )
+        print("-" * 56)
+        print("Judge: does that implied price clear the marginal supply / restart-cost")
+        print("threshold, or does it capitalize a peak-cycle spread?")
+        return 0
 
     base = load_inputs(args.assumptions)
     base_value = dcf.value(base).value_per_share

@@ -19,6 +19,20 @@ This sub-skill consumes the engine's JSON outputs and produces every chart in th
 report. It never recomputes a valuation -- it only visualises numbers the engine
 already produced, so a chart can never disagree with the report's arithmetic.
 
+## Shared publishing contract
+
+Read `references/publishing-contract.md` when a report is being produced or
+refreshed. The chart `lang` must equal the report `report_lang`.
+
+For Chinese reports:
+
+- render chart titles, subtitles, axes, legends, annotations, and source notes in
+  Chinese;
+- use CJK-capable fonts and fail fast if none are available;
+- format natural units locally where appropriate (`亿元`, `%`, `倍`);
+- avoid English broker-template words in SVG text unless they are tickers,
+  company legal names, formulas, or source titles.
+
 ## Architecture
 
 ```

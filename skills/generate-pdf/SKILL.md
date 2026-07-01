@@ -17,6 +17,21 @@ gate-passed Markdown report into a polished, professional PDF suitable for inves
 distribution, archival, and print. Runs after `/self-audit` passes and the adversarial
 reviewer signs off.
 
+## Shared publishing contract
+
+Read `references/publishing-contract.md` before rendering. The PDF language,
+rating box labels, figure prefixes, captions, and disclosure headings must match
+the report's `report_lang`.
+
+For Chinese reports:
+
+- pass `--lang zh` when calling `render_pdf.py` directly, or use the project
+  wrapper that auto-detects Chinese (`python src/common/build_report.py TICKER`);
+- fail before rendering if no CJK-capable font is detected;
+- render figure prefixes as `图表 N：`, not `Figure N:`;
+- visually inspect preview PNGs/PDF pages for CJK tofu, chart clipping, and
+  first-page rating-box language.
+
 ## Architecture overview
 
 ```

@@ -16,9 +16,22 @@ final research report — the deliverable.
 ## Input
 - All prior step outputs: archetype (1), industry (2), company (3), theme (4),
   assumptions (5), valuation results (6), durability (7), triangulation (8)
+- Publishing contract: `references/publishing-contract.md`
 - Output templates: `references/output-templates.md`
 - Style guide: `references/report-voice.md`
 - Worked example: `templates/report.example.md`
+
+## Language and publishing contract
+
+Read `references/publishing-contract.md` before drafting. Lock `report_lang`
+first and keep the entire report in that language. For Chinese reports, translate
+broker-template labels (`Rating`, `Thesis`, `Intrinsic`, `Downside`,
+`MoS buy-band`, `Figure`) into Chinese; leave English only for tickers, legal
+names, formulas, source titles, and quoted source snippets.
+
+Carry the same `report_lang` into chart captions, disclosure appendix headings,
+rating vocabulary, and the numbers ledger. A report that mixes Chinese body text
+with English broker-template labels must be revised before self-audit.
 
 ## Register (NON-NEGOTIABLE — read `references/report-voice.md` first)
 
@@ -68,6 +81,10 @@ Source: steps 5 + 6.
 Core + portfolio + net cash → per share. Source: step 6 SOTP output.
 
 ### 8. What the market is pricing (~400 words)
+For cyclicals, explicitly state the normalized commodity, panel, memory,
+freight, or chemical price implied by the stock price; compare it with the base
+price deck and trough/peak band; and judge whether the market is capitalizing
+peak-cycle profit.
 Reverse DCF + breakeven → the growth/margin the price implies, plausibility.
 Source: step 6 reverse/breakeven.
 
@@ -119,6 +136,8 @@ Every Mode A report must contain, developed in paragraphs:
 4. Competitive landscape (named competitors, named battlefields)
 5. Accounting adjustments with actual numbers (R&D cap, SBC dilution)
 6. Historical valuation context (multiples over time)
+7. For cyclicals: cycle position, price deck, cost-curve position, capital
+   discipline, and a mid-cycle valuation cross-check
 
 ## Chart references (canonical format)
 
@@ -155,6 +174,10 @@ format (SVG then PNG) automatically.
 | `breakeven` | "What the price is pricing" | Yes (Mode A) |
 | `tornado` | "Story to numbers" (sensitivity) | Optional |
 | `terminal` | "Story to numbers" (terminal share) | Optional |
+| `commodity_price_deck` | "Industry & macro" or "Story to numbers" | Yes for cyclicals when data exists |
+| `cycle_position_dashboard` | "Industry & macro" | Yes for cyclicals when data exists |
+| `midcycle_multiple_bridge` | "What the market is pricing" | Yes for cyclicals when data exists |
+| `cost_curve_position` | "The company" or "Industry & macro" | Optional for cyclicals |
 
 ### Caption
 
@@ -183,10 +206,18 @@ The write-report review is the most thorough — this IS the deliverable.
   bullet-fragment dumps. Any → REVISE.
 - [ ] **Led with stance:** Rating + value/target + current price + thesis in header.
   Missing any → REVISE.
+- [ ] **Language lock:** Output language matches `report_lang` from
+  `references/publishing-contract.md`; Chinese reports contain no English
+  broker-template labels such as `THESIS`, `INTRINSIC`, `DOWNSIDE`, `Figure`,
+  or standalone `HOLD`/`REDUCE` ratings. Any mismatch -> REVISE.
 - [ ] **Depth — all 6 Damodaran elements present:** (1) industry quant history,
   (2) company 10yr trajectory + drawdowns, (3) segment TAM×share build,
   (4) competitive landscape with named players, (5) accounting adjustments
   with numbers, (6) historical valuation context. Missing any → REVISE.
+- [ ] **Cyclical depth:** For cyclical archetypes, report states where the
+  industry is in the cycle, the base price deck, the cost-curve/capacity
+  position, mid-cycle EV/EBITDA cross-check, and the price-implied normalized
+  commodity/panel price. Missing any 鈫?REVISE.
 - [ ] **Prose-dominant:** Body is paragraphs, not bullet lists. Exhibits are few
   and purposeful. Wall of bullets → REVISE.
 - [ ] **Numbers woven in:** Numbers live in sentences, not isolated in tables.
@@ -231,6 +262,8 @@ The write-report review is the most thorough — this IS the deliverable.
 - [ ] Leads with rating + value + price + thesis
 - [ ] Prose-dominant; exhibits are few and purposeful
 - [ ] Every material number is tier-tagged (audited / guidance / consensus / aggregator / estimate)
+- [ ] Report language is consistent across header, body, chart captions,
+      disclosure appendix, and numbers ledger
 - [ ] Numbers ledger appended
 - [ ] MoS buy-band stated
 - [ ] Disclaimer present with data dates

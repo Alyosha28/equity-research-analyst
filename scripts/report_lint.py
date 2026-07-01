@@ -57,6 +57,13 @@ def _present(text: str, *patterns: str) -> bool:
     return any(re.search(p, text, re.IGNORECASE) for p in patterns)
 
 
+def _looks_like_chinese_report(text: str) -> bool:
+    sample = text[:5000]
+    cjk_count = sum(1 for ch in sample if "\u4e00" <= ch <= "\u9fff")
+    latin_count = sum(1 for ch in sample if ("A" <= ch <= "Z") or ("a" <= ch <= "z"))
+    return cjk_count >= 80 and cjk_count >= latin_count * 0.35
+
+
 # --- rules ---------------------------------------------------------------------
 
 def _body_lines(lines):
@@ -89,6 +96,61 @@ def rule_banned_callouts(lines):
     for i, ln in enumerate(lines, 1):
         if BANNED_CALLOUTS.search(ln):
             out.append(Finding("FAIL", "banned-callout", i, ln.strip()[:90]))
+    return out
+
+
+def rule_chinese_rating_language(text: str, lines):
+    """For Chinese reports, keep ratings in Chinese instead of broker-template English."""
+    if not _looks_like_chinese_report(text):
+        return []
+    english_rating = re.compile(
+        r"\b(BUY|SELL|HOLD|REDUCE|ACCUMULATE|NEUTRAL|OVERWEIGHT|UNDERWEIGHT)\b",
+        re.IGNORECASE,
+    )
+    out = []
+    for i, ln in enumerate(lines, 1):
+        if english_rating.search(ln):
+            out.append(Finding(
+                "FAIL",
+                "english-rating-in-chinese-report",
+                i,
+                ln.strip()[:90],
+            ))
+    return out
+
+
+def rule_chinese_template_language(text: str, lines):
+    """For Chinese reports, block untranslated broker-template labels."""
+    if not _looks_like_chinese_report(text):
+        return []
+    template_label = re.compile(
+        r"\b("
+        r"THESIS|INTRINSIC|DOWNSIDE|UPSIDE|"
+        r"MoS\s+BUY-?BAND|CURRENT\s+PRICE|"
+        r"Analyst\s+Certification|Meaning\s+of\s+Ratings|"
+        r"Conflicts?\s+of\s+Interest|Price\s+Target\s+Methodology|"
+        r"General\s+Disclaimer"
+        r")\b|"
+        r"\bRating\s*[:：]|"
+        r"\bFigure\s+\d+\s*[:：]|"
+        r"\bChart\s+\d+\s*[:：]",
+        re.IGNORECASE,
+    )
+    out = []
+    for i, ln in enumerate(lines, 1):
+        stripped = ln.strip()
+        if not stripped or stripped.startswith(">"):
+            continue
+        # Source URLs and citation titles can legitimately preserve English.
+        if "http://" in stripped or "https://" in stripped:
+            continue
+        if template_label.search(stripped):
+            out.append(Finding(
+                "FAIL",
+                "english-template-label-in-chinese-report",
+                i,
+                stripped[:90],
+            ))
     return out
 
 
@@ -181,6 +243,10 @@ def rule_required_warn(text, lines):
     if not _present(text, r"as of", r"valid[- ]as[- ]of", r"截至", r"revisit"):
         out.append(Finding("WARN", "missing-valid-as-of", None, "no valid-as-of / revisit-by stamp"))
     has_ledger = _present(text, r"ledger", r"数字台账", r"来源台账", r"sources?:")
+    has_ledger = has_ledger or _present(
+        text,
+        r"数据台账", r"数字台账", r"来源台账", r"关键来源链接", r"来源\s*/\s*置信度",
+    )
     if not has_ledger:
         out.append(Finding("WARN", "missing-numbers-ledger", None, "no numbers ledger / source list"))
     if not _present(text, r"terminal"):
@@ -229,10 +295,20 @@ def rule_disclosure_requirements(text, lines):
                         r"分析师.*证明.*观点|本人.*证明.*观点|我们.*证明.*观点",
                         r"特此.*证明|谨此.*证明")
     )
+    has_cert_views = has_cert_views or _present(
+        text,
+        r"本人认证", r"分析师认证", r"所有观点均准确反映.*个人观点",
+        r"观点.*准确反映.*个人观点",
+    )
     has_cert_comp = (
         bool(re.search(r"no part of[\s\S]*?compensation was, is, or will be[\s\S]*?related to the specific[\s\S]*?recommendations", text, re.IGNORECASE))
         or _present(text, r"薪酬.*与.*特定.*推荐|特定.*建议.*无关",
                         r"薪酬.*不受.*影响|薪酬.*独立.*于|报酬.*独立.*于")
+    )
+    has_cert_comp = has_cert_comp or _present(
+        text,
+        r"薪酬.*不会.*特定推荐", r"薪酬.*不会.*特定.*观点",
+        r"薪酬.*不会.*直接或间接.*相关",
     )
     if not (has_cert_views or has_cert_comp):
         out.append(Finding("WARN", "disclosure-missing-certification", None,
@@ -289,6 +365,17 @@ def rule_disclosure_requirements(text, lines):
         r"\(H\).*compensation from the subject company",
         r"\(I\).*other material conflict",
     ] if _present(text, p))
+    conflict_items_found += sum(1 for p in [
+        r"（A）.*财务利益",
+        r"（B）.*投行业务.*补偿",
+        r"（C）.*主承销",
+        r"（D）.*非投行业务.*补偿",
+        r"（E）.*客户",
+        r"（F）.*1%.*股权",
+        r"（G）.*做市",
+        r"（H）.*标的公司.*补偿",
+        r"（I）.*重大利益冲突",
+    ] if _present(text, p))
     if not has_conflict_section:
         out.append(Finding("WARN", "disclosure-missing-conflicts", None,
             "no conflicts of interest disclosure — B.4 is missing"))
@@ -343,6 +430,9 @@ def rule_disclosure_requirements(text, lines):
     # B.7 — General Disclaimer (stricter than the minimal FAIL check)
     has_info_date = _present(text, r"information.*as of|数据截至|as of.*date",
         r"信息.*截至.*日|数据.*截至.*日|截至.*日期|报告.*日期")
+    has_info_date = has_info_date or _present(
+        text, r"信息截至", r"数据截至", r"截至\s+\d{4}-\d{2}-\d{2}"
+    )
     if not has_info_date:
         out.append(Finding("WARN", "disclosure-incomplete-disclaimer", None,
             "general disclaimer missing information cutoff date — B.7 incomplete"))
@@ -601,6 +691,13 @@ def rule_wacc_stacking_explained(text: str) -> list[Finding]:
         r"互斥", r"mutually.*exclusive", r"溢价.*失败概率.*互斥",
         r"互补", r"complement", r"溢价.*覆盖.*风险",
     )
+    has_wacc_decomp = has_wacc_decomp or _present(
+        text, r"WACC.*分解", r"WACC.*拆解", r"规模溢价", r"亏损企业溢价"
+    )
+    has_mutex_explanation = has_mutex_explanation or _present(
+        text, r"互斥", r"互补", r"失败概率.*互斥", r"避免重复折价",
+        r"WACC.*反映.*失败分支.*反映",
+    )
     if not has_wacc_decomp or not has_mutex_explanation:
         missing = []
         if not has_wacc_decomp:
@@ -622,6 +719,8 @@ def lint(text, report_path=None):
     findings += rule_second_person(lines)
     findings += rule_emoji(lines)
     findings += rule_banned_callouts(lines)
+    findings += rule_chinese_rating_language(text, lines)
+    findings += rule_chinese_template_language(text, lines)
     findings += rule_required_fail(text)
     findings += rule_chart_coverage(text, report_path)
     findings += rule_required_warn(text, lines)

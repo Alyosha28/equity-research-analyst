@@ -1,4 +1,4 @@
-# Report Quality Gate — 54-Point Checklist
+# Report Quality Gate - 55-Point Checklist
 
 Every Mode A research report must pass this gate before publication. The checklist
 is derived from the XPEV report (the "gold standard" baseline) and covers four
@@ -14,6 +14,9 @@ triangulation, and narrative falsifiability.
   reviewer). Each receives PASS / REVISE / BLOCK.
 - **Checklist items** (labeled `[✓]`) are structural presence checks. The
   `self-audit` sub-skill verifies these by reading the report.
+- **Publishing contract**: Before scoring, apply
+  `references/publishing-contract.md`. Its language lock, source-tier ledger,
+  cyclical normalization, and PDF checks are part of this gate.
 
 ---
 
@@ -68,7 +71,8 @@ triangulation, and narrative falsifiability.
 | A23 | Limitations / self-falsification | [✓] | Explicit "what would prove this wrong" section with most sensitive assumptions |
 | A24 | Key risks + disclaimer | [A] | Risk list + not-investment-advice disclaimer present |
 | A25 | Numbers ledger (Appendix A) | [A] | Table: every material number has source + date |
-| A26 | Disclosures & Certifications (Appendix B) | [A] | B.1–B.8 all present: Reg AC, rating distribution, rating meanings, FINRA 2241 (>=3 items), methodology (>=2 methods), risk factors (>=3), information cutoff date, CSRC/SAC supplement (China names) |
+| A26 | Disclosures & Certifications (Appendix B) | [A] | B.1-B.8 all present: Reg AC, rating distribution, rating meanings, FINRA 2241 (>=3 items), methodology (>=2 methods), risk factors (>=3), information cutoff date, CSRC/SAC supplement (China names) |
+| A27 | Report language lock | [A] | Output language matches `report_lang`; Chinese reports contain no English broker-template labels (`THESIS`, `INTRINSIC`, `DOWNSIDE`, `MoS BUY-BAND`, `Figure N:`, standalone `HOLD`/`REDUCE`) outside tickers, legal names, formulas, source titles, or quotes |
 
 ---
 

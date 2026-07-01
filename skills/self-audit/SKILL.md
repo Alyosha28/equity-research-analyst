@@ -18,6 +18,7 @@ enforcement mechanism.
 ## Input
 - Draft report from step 9 (`TICKER_report.md`)
 - All prior step outputs (for fact-checking against)
+- Publishing contract: `references/publishing-contract.md`
 
 ## The gate — three checks, all must pass
 
@@ -36,6 +37,10 @@ AI-answer sentence patterns (`--strict`), AND missing/incomplete disclosure
 appendix sections (analyst certification, rating distribution, meaning of ratings,
 conflicts of interest, price target methodology, risk factors, China supplement
 where applicable — all WARN under default, FAIL under `--strict`).
+
+For Chinese reports, the linter also blocks English broker-template leakage such
+as standalone English ratings and labels like `THESIS`, `INTRINSIC`,
+`DOWNSIDE`, `MoS BUY-BAND`, or `Figure N:`.
 
 **Fix every FAIL.** There is no excuse for shipping a FAIL.
 
@@ -117,6 +122,8 @@ would have found first.
 - [ ] HIGH issues disclosed
 - [ ] Value, price, rating, terminal %, price percentile, MoS buy-band, numbers
       ledger all present
+- [ ] Report language is consistent across prose, rating box, charts, captions,
+      disclosure appendix, and PDF output
 - [ ] Bear case argued as hard as bull
 - [ ] Self-falsification woven into conclusion
 - [ ] valid-as-of / revisit-by stamped

@@ -32,6 +32,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+from statistics import mean
 
 import matplotlib
 matplotlib.use("Agg")                       # headless: no display required
@@ -39,10 +40,26 @@ matplotlib.use("Agg")                       # headless: no display required
 # CJK font configuration - detect and prepend CJK-capable font
 import matplotlib as _mpl
 import matplotlib.font_manager as _fm
+import matplotlib.text as _mtext
+_cjk_font_files = [
+    r"C:\Windows\Fonts\NotoSansSC-VF.ttf",
+    r"C:\Windows\Fonts\Noto Sans SC (TrueType).otf",
+    r"C:\Windows\Fonts\msyh.ttc",
+    r"C:\Windows\Fonts\simhei.ttf",
+    r"C:\Windows\Fonts\simsun.ttc",
+]
+_cjk_font_prop = None
+for _font_path in _cjk_font_files:
+    if os.path.exists(_font_path):
+        _fm.fontManager.addfont(_font_path)
+        _cjk_font_prop = _fm.FontProperties(fname=_font_path)
+        _mpl.rcParams['font.family'] = 'sans-serif'
+        _mpl.rcParams['font.sans-serif'] = [_cjk_font_prop.get_name()] + _mpl.rcParams['font.sans-serif']
+        break
 _cjk_opts = ['Noto Sans SC', 'Microsoft YaHei', 'SimHei', 'PingFang SC', 'Noto Sans CJK SC', 'WenQuanYi Micro Hei']
 _avail = {f.name for f in _fm.fontManager.ttflist}
 _cjk_found = next((f for f in _cjk_opts if f in _avail), None)
-if _cjk_found:
+if _cjk_font_prop is None and _cjk_found:
     _mpl.rcParams['font.sans-serif'] = [_cjk_found] + _mpl.rcParams['font.sans-serif']
     _mpl.rcParams['font.family'] = 'sans-serif'
 
@@ -92,6 +109,15 @@ def _style(ax, title, xlabel=None, ylabel=None):
 
 def _save(fig, out_dir, name):
     os.makedirs(out_dir, exist_ok=True)
+    if _cjk_font_prop is not None:
+        for text in fig.findobj(match=_mtext.Text):
+            size = text.get_fontsize()
+            weight = text.get_fontweight()
+            style = text.get_fontstyle()
+            text.set_fontproperties(_cjk_font_prop)
+            text.set_fontsize(size)
+            text.set_fontweight(weight)
+            text.set_fontstyle(style)
     paths = []
     for ext in ("png", "svg"):
         p = os.path.join(out_dir, f"{name}.{ext}")
@@ -112,17 +138,17 @@ def monte_carlo_hist(data, out_dir, name="montecarlo"):
 
     if band:
         ax.axvspan(band["buy_below"], band["rich_above"], color=PALETTE["band"], alpha=0.10,
-                   label=f"MoS buy-band ({band['mos']:.0%})")
+                   label=f"安全边际买入带（{band['mos']:.0%}）")
         ax.axvline(band["buy_below"], color=PALETTE["up"], linewidth=1.4, linestyle="--",
-                   label=f"Accumulate <= {band['buy_below']:.0f}")
+                   label=f"加仓 <= {band['buy_below']:.0f}")
         ax.axvline(band["median"], color=PALETTE["ink"], linewidth=1.6,
-                   label=f"Fair (median) {band['median']:.0f}")
+                   label=f"公允中位数 {band['median']:.0f}")
     if price is not None:
         pctl = data.get("price_percentile")
-        lab = f"Price {price:.0f}" + (f"  ({pctl:.0%} pctile)" if pctl is not None else "")
+        lab = f"当前价格 {price:.0f}" + (f"（{pctl:.0%} 分位）" if pctl is not None else "")
         ax.axvline(price, color=PALETTE["down"], linewidth=2.0, label=lab)
 
-    _style(ax, "Intrinsic value distribution (Monte Carlo)", "Value / share", "Trials")
+    _style(ax, "内在价值分布（蒙特卡洛）", "每股价值", "模拟次数")
     ax.legend(frameon=False, fontsize=8.5, loc="upper right")
     return _save(fig, out_dir, name)
 
@@ -141,12 +167,12 @@ def football_field(data, out_dir, name="football"):
         if l.get("mid") is not None:
             ax.plot([l["mid"]], [y], marker="D", color=PALETTE["ink"], markersize=7, zorder=3)
     if price is not None:
-        ax.axvline(price, color=PALETTE["down"], linewidth=2.0, label=f"Price {price:,.0f}")
+        ax.axvline(price, color=PALETTE["down"], linewidth=2.0, label=f"当前价格 {price:,.0f}")
         ax.legend(frameon=False, fontsize=9, loc="lower right")
     ax.set_yticks(list(ys))
     ax.set_yticklabels(labels, fontsize=9.5, color=PALETTE["ink"])
     ax.set_ylim(-0.6, len(lenses) - 0.4)
-    _style(ax, "Valuation football field", "Value / share")
+    _style(ax, "估值区间图", "每股价值")
     ax.grid(axis="y", visible=False)
     return _save(fig, out_dir, name)
 
@@ -161,16 +187,16 @@ def breakeven_heatmap(data, out_dir, name="breakeven"):
     ax.set_xticks(range(len(margins)))
     ax.set_xticklabels([f"{m:.0%}" for m in margins])
     ax.set_yticks(range(len(revenues)))
-    ax.set_yticklabels([f"{r/1000:,.0f}B" for r in revenues])
+    ax.set_yticklabels([f"{r/100:,.0f}亿" for r in revenues])
     for i, row in enumerate(grid):
         for j, v in enumerate(row):
             star = "*" if (price is not None and v >= price) else ""
             ax.text(j, i, f"{v:.0f}{star}", ha="center", va="center", fontsize=8,
                     color=PALETTE["ink"])
     cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.02)
-    cbar.set_label("Value / share", color=PALETTE["muted"], fontsize=9)
-    sub = f"  (* = reaches price {price:.0f})" if price is not None else ""
-    _style(ax, "Breakeven: what has to be true" + sub, "Target operating margin", "Year-10 revenue")
+    cbar.set_label("每股价值", color=PALETTE["muted"], fontsize=9)
+    sub = f"（* 表示达到当前价格 {price:.0f}）" if price is not None else ""
+    _style(ax, "盈亏平衡：需要兑现什么" + sub, "目标经营利润率", "第 10 年收入（亿元）")
     ax.grid(visible=False)
     return _save(fig, out_dir, name)
 
@@ -185,11 +211,11 @@ def sensitivity_tornado(data, out_dir, name="tornado"):
         lo, hi = sorted((d["low"], d["high"]))
         ax.barh(y, lo - base, left=base, color=PALETTE["down"], alpha=0.75)
         ax.barh(y, hi - base, left=base, color=PALETTE["up"], alpha=0.75)
-    ax.axvline(base, color=PALETTE["ink"], linewidth=1.6, label=f"Base {base:,.0f}")
+    ax.axvline(base, color=PALETTE["ink"], linewidth=1.6, label=f"基准 {base:,.0f}")
     ax.set_yticks(list(ys))
     ax.set_yticklabels(names, fontsize=9.5, color=PALETTE["ink"])
     ax.legend(frameon=False, fontsize=9, loc="lower right")
-    _style(ax, "Sensitivity (tornado): value / share vs driver +/-1SD", "Value / share")
+    _style(ax, "敏感性分析（龙卷风）：每股价值对关键驱动的 +/-1SD 变化", "每股价值")
     ax.grid(axis="y", visible=False)
     return _save(fig, out_dir, name)
 
@@ -204,11 +230,11 @@ def terminal_share(data, out_dir, name="terminal"):
         startangle=90, counterclock=False,
         wedgeprops=dict(width=0.42, edgecolor="white"),
     )
-    ax.text(0, 0, f"{term:.0%}\nin terminal", ha="center", va="center",
+    ax.text(0, 0, f"{term:.0%}\n来自终值", ha="center", va="center",
             fontsize=14, fontweight="bold", color=PALETTE["ink"])
-    ax.legend(wedges, [f"Explicit FCFF  {explicit:.0%}", f"Terminal value  {term:.0%}"],
+    ax.legend(wedges, [f"显性期 FCFF  {explicit:.0%}", f"终值  {term:.0%}"],
               frameon=False, fontsize=9.5, loc="lower center", bbox_to_anchor=(0.5, -0.08))
-    ax.set_title("Where the value sits", color=PALETTE["ink"], fontsize=13,
+    ax.set_title("价值构成", color=PALETTE["ink"], fontsize=13,
                  fontweight="bold", loc="left", pad=12)
     return _save(fig, out_dir, name)
 
@@ -259,14 +285,14 @@ def revenue_traj_chart(data, out_dir, name="revenue_traj"):
     # Forecast revenue bars ($B)
     rev_billions = [r / 1000 for r in revenue]
     ax1.bar(fcst_x, rev_billions, color=PALETTE["accent"], alpha=0.85,
-            label="Revenue (forecast)", zorder=2)
+            label="收入（预测）", zorder=2)
 
     # Historical revenue bars (shaded / lower alpha)
     if n_hist and hist_rev:
         hist_billions = [r / 1000 for r in hist_rev]
         ax1.bar(hist_x, hist_billions, color=PALETTE["band"], alpha=0.70,
                 edgecolor=PALETTE["grid"], linewidth=0.5,
-                label="Revenue (historical)", zorder=2)
+                label="收入（历史）", zorder=2)
 
     # Revenue growth rate line on right y-axis
     ax1b = ax1.twinx()
@@ -274,8 +300,8 @@ def revenue_traj_chart(data, out_dir, name="revenue_traj"):
         growth_pct = [g * 100 for g in rev_growth]
         ax1b.plot(fcst_x, growth_pct, color=PALETTE["muted"], linewidth=1.5,
                   linestyle="--", marker="s", markersize=3,
-                  label="Revenue growth (YoY %)", zorder=3)
-        ax1b.set_ylabel("Growth rate (%)", color=PALETTE["muted"], fontsize=8)
+                  label="收入增速（同比 %）", zorder=3)
+        ax1b.set_ylabel("增速（%）", color=PALETTE["muted"], fontsize=8)
         ax1b.tick_params(colors=PALETTE["muted"], labelsize=7)
 
     # Forecast-start vertical divider + zone labels
@@ -287,17 +313,17 @@ def revenue_traj_chart(data, out_dir, name="revenue_traj"):
         y_ref = max(all_rev_vals) * 1.08 if all_rev_vals else 1
         mid_hist = (n_hist - 1) / 2 if n_hist > 1 else 0
         mid_fcst = n_hist + (n_fcst - 1) / 2 if n_fcst > 1 else n_hist
-        ax1.text(mid_hist, y_ref, "← Historical", ha="center",
+        ax1.text(mid_hist, y_ref, "历史区间", ha="center",
                  fontsize=6.5, color=PALETTE["muted"], fontstyle="italic", va="bottom")
-        ax1.text(mid_fcst, y_ref, "Forecast →", ha="center",
+        ax1.text(mid_fcst, y_ref, "预测区间", ha="center",
                  fontsize=6.5, color=PALETTE["muted"], fontstyle="italic", va="bottom")
 
-    ax1.set_ylabel("Revenue ($B)", color=PALETTE["muted"], fontsize=9)
+    ax1.set_ylabel("收入（十亿）", color=PALETTE["muted"], fontsize=9)
     ax1.tick_params(colors=PALETTE["muted"], labelsize=7)
 
     # Dual-axis warning (per spec)
     ax1.text(0.01, 0.96,
-             "Note: Revenue ($B, left axis) and growth rate (%, right axis) use different scales.",
+             "注：收入（左轴）与增速（右轴）使用不同刻度。",
              transform=ax1.transAxes, fontsize=5.5, color=PALETTE["muted"],
              fontstyle="italic", va="top")
 
@@ -312,26 +338,26 @@ def revenue_traj_chart(data, out_dir, name="revenue_traj"):
     if n_hist and hist_margin:
         ax2.plot(hist_x, [m * 100 for m in hist_margin], color=PALETTE["accent"],
                  linewidth=1.5, linestyle=":", marker="o", markersize=4,
-                 alpha=0.6, label="Op. margin (historical)")
+                  alpha=0.6, label="经营利润率（历史）")
 
     # Forecast operating margin (solid)
     if op_margin:
         ax2.plot(fcst_x, [m * 100 for m in op_margin], color=PALETTE["accent"],
                  linewidth=2.0, marker="o", markersize=4,
-                 label="Operating margin")
+                  label="经营利润率")
 
     # Forecast FCFF margin (dashed, lighter navy)
     if fcff_margin:
         ax2.plot(fcst_x, [m * 100 for m in fcff_margin], color=accent_lite,
                  linewidth=1.8, linestyle="--", marker="s", markersize=3,
-                 label="FCFF margin")
+                  label="FCFF 利润率")
 
     # Forecast-start divider
     if n_hist:
         ax2.axvline(n_hist - 0.5, color=PALETTE["grid"], linewidth=1.2,
                     linestyle="--", alpha=0.8, zorder=1)
 
-    ax2.set_ylabel("Margin (%)", color=PALETTE["muted"], fontsize=9)
+    ax2.set_ylabel("利润率（%）", color=PALETTE["muted"], fontsize=9)
     ax2.tick_params(colors=PALETTE["muted"], labelsize=7)
     ax2.legend(frameon=False, fontsize=7.5, loc="upper right")
 
@@ -352,7 +378,7 @@ def revenue_traj_chart(data, out_dir, name="revenue_traj"):
         ax.set_axisbelow(True)
 
     # Overall figure title (left-aligned per chart catalog discipline)
-    fig.suptitle("Revenue & Margin Trajectory",
+    fig.suptitle("收入与利润率路径",
                  color=PALETTE["ink"], fontsize=13, fontweight="bold",
                  x=0.02, ha="left", y=0.97)
 
@@ -411,7 +437,7 @@ def roic_spread_chart(data, out_dir, name="roic_spread"):
     if cap_idx > 0 and cap_idx < n:
         y_max = max(max(roic), max(wacc))
         ax.axvline(cap_idx - 0.5, color=PALETTE["muted"], linewidth=1.2, linestyle=":")
-        ax.text(cap_idx - 0.5, y_max * 0.95, f"CAP = {cap}y",
+        ax.text(cap_idx - 0.5, y_max * 0.95, f"竞争优势期 = {cap}年",
                 ha="center", fontsize=8.5, color=PALETTE["muted"], va="top")
 
     # Historical data if present
@@ -422,7 +448,7 @@ def roic_spread_chart(data, out_dir, name="roic_spread"):
     if hist_roic and hist_years:
         hx = np.arange(-len(hist_roic), 0)
         ax.plot(hx, hist_roic, color=PALETTE["accent"], linewidth=1.5, linestyle=":",
-                marker="s", markersize=3, alpha=0.6, label="Historical ROIC")
+                marker="s", markersize=3, alpha=0.6, label="历史 ROIC")
         ax.axvline(-0.5, color=PALETTE["grid"], linewidth=1.0, linestyle="--")
         all_labels = [str(y) for y in hist_years] + all_labels
         all_positions = list(hx) + list(x)
@@ -432,8 +458,8 @@ def roic_spread_chart(data, out_dir, name="roic_spread"):
     ax.set_xticklabels(all_labels, fontsize=8, rotation=rotation,
                        color=PALETTE["muted"])
     ax.legend(frameon=False, fontsize=9, loc="upper right")
-    _style(ax, "ROIC-WACC Spread -- Durability Assessment",
-           "Year", "Return / Cost of capital")
+    _style(ax, "ROIC-WACC 利差：耐久性评估",
+           "年份", "回报率 / 资本成本")
     ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f"{y:.0%}"))
     return _save(fig, out_dir, name)
 
@@ -493,13 +519,13 @@ def scenarios_chart(data, out_dir, name="scenarios"):
 
     if price is not None:
         ax.axvline(price, color=PALETTE["down"], linewidth=2.0, linestyle="--",
-                   label=f"Price {price:,.0f}")
+                   label=f"当前价格 {price:,.0f}")
         ax.legend(frameon=False, fontsize=9, loc="lower right")
 
     ax.set_yticks(ys)
     ax.set_yticklabels(names, fontsize=10, color=PALETTE["ink"])
     ax.set_ylim(-0.6, len(scenarios) - 0.4)
-    _style(ax, "Scenario Analysis -- Value Ranges", "Value per share")
+    _style(ax, "情景分析：每股价值区间", "每股价值")
     ax.grid(axis="y", visible=False)
     return _save(fig, out_dir, name)
 
@@ -523,13 +549,13 @@ def price_vs_value_chart(data, out_dir, name="price_vs_value"):
 
     # Value band (shaded area)
     ax.fill_between(x, v_low, v_high, color=PALETTE["band"], alpha=0.35,
-                    label="Intrinsic value range")
+                    label="内在价值区间")
     # Value mid line
     ax.plot(x, v_mid, color=PALETTE["accent"], linewidth=1.8, linestyle="--",
-            marker="o", markersize=4, label="Intrinsic value (mid)")
+            marker="o", markersize=4, label="内在价值（中枢）")
     # Price line
     ax.plot(x, price, color=PALETTE["down"], linewidth=2.2, marker="s", markersize=4,
-            label="Market price")
+            label="市场价格")
 
     # Event markers
     date_to_idx = {d: i for i, d in enumerate(dates)}
@@ -555,9 +581,9 @@ def price_vs_value_chart(data, out_dir, name="price_vs_value"):
     last_price = price[-1]
     last_mid = v_mid[-1]
     gap_pct = (last_mid - last_price) / last_price if last_price else 0
-    direction = "discount" if gap_pct > 0 else "premium"
-    gap_label = (f"Price ${last_price:,.0f} / "
-                 f"Value ${last_mid:,.0f} = {gap_pct:+.0%} {direction}")
+    direction = "折价" if gap_pct > 0 else "溢价"
+    gap_label = (f"价格 {last_price:,.0f} / "
+                 f"价值 {last_mid:,.0f} = {gap_pct:+.0%} {direction}")
     ax.annotate(gap_label, xy=(x[-1], last_price),
                 xytext=(x[-1] + 0.3, last_price),
                 fontsize=7.5, color=PALETTE["muted"], va="center",
@@ -569,8 +595,8 @@ def price_vs_value_chart(data, out_dir, name="price_vs_value"):
     ax.set_xticklabels(visible, fontsize=8, rotation=45, color=PALETTE["muted"],
                        ha="right")
     ax.legend(frameon=False, fontsize=8.5, loc="upper left")
-    _style(ax, "Price vs. Intrinsic Value -- Historical Gap Analysis",
-           "Date", "Value / Price per share ($)")
+    _style(ax, "价格与内在价值：历史差距分析",
+           "日期", "每股价值 / 价格")
     return _save(fig, out_dir, name)
 
 
@@ -656,20 +682,20 @@ def waterfall_chart(data, out_dir, name="waterfall"):
 
     if price is not None:
         ax.axhline(price, color=PALETTE["down"], linewidth=1.2, linestyle="--",
-                   alpha=0.6, label=f"Market price {price:,.0f}")
+                   alpha=0.6, label=f"市场价格 {price:,.0f}")
         ax.legend(frameon=False, fontsize=8.5, loc="upper right")
 
     if base_value and price:
         gap = price - base_value
-        chart_title = (f"Value Bridge: from ${base_value:,.0f} to "
-                       f"${price:,.0f} (gap: ${gap:+,.0f})")
+        chart_title = (f"价值桥：从 {base_value:,.0f} 到 "
+                       f"{price:,.0f}（差距：{gap:+,.0f}）")
         ax.set_title(chart_title, color=PALETTE["ink"], fontsize=13,
                      fontweight="bold", loc="left", pad=12)
     else:
-        _style(ax, "Value Bridge: Driver Contributions", ylabel="Value per share ($)")
+        _style(ax, "价值桥：驱动因素贡献", ylabel="每股价值")
         return _save(fig, out_dir, name)
 
-    ax.set_ylabel("Value per share ($)", color=PALETTE["muted"], fontsize=10)
+    ax.set_ylabel("每股价值", color=PALETTE["muted"], fontsize=10)
     ax.tick_params(colors=PALETTE["muted"], labelsize=9)
     for spine in ("top", "right"):
         ax.spines[spine].set_visible(False)
@@ -701,11 +727,11 @@ def capex_cycle_chart(data, out_dir, name="capex_cycle"):
 
     # Left axis: demand growth and capacity additions
     ax1.plot(x, demand, color=PALETTE["accent"], linewidth=2.0, marker="o",
-             markersize=4, label="Demand growth (YoY %)")
+             markersize=4, label="需求增长（同比 %）")
     ax1.plot(x, capacity, color="#D97706", linewidth=1.8, marker="s", markersize=4,
-             linestyle="--", label="Capacity additions (YoY %)")
+             linestyle="--", label="产能新增（同比 %）")
     ax1.axhline(0, color=PALETTE["grid"], linewidth=0.8, linestyle="-")
-    ax1.set_ylabel("Growth rate (YoY %)", color=PALETTE["muted"], fontsize=10)
+    ax1.set_ylabel("同比增速（%）", color=PALETTE["muted"], fontsize=10)
     ax1.tick_params(colors=PALETTE["muted"], labelsize=9)
     ax1.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f"{y:.0f}%"))
 
@@ -713,10 +739,10 @@ def capex_cycle_chart(data, out_dir, name="capex_cycle"):
     ax2 = ax1.twinx()
     ax2.fill_between(x, util, alpha=0.15, color=PALETTE["accent"])
     ax2.plot(x, util, color=PALETTE["accent"], linewidth=2.2, marker="D",
-             markersize=4, label="Utilization rate")
+             markersize=4, label="产能利用率")
     ax2.axhline(100, color=PALETTE["ink"], linewidth=0.8, linestyle="--", alpha=0.4)
     ax2.axhline(85, color=PALETTE["grid"], linewidth=0.6, linestyle=":", alpha=0.5)
-    ax2.set_ylabel("Utilization rate (%)", color=PALETTE["muted"], fontsize=10)
+    ax2.set_ylabel("产能利用率（%）", color=PALETTE["muted"], fontsize=10)
     ax2.tick_params(colors=PALETTE["muted"], labelsize=9)
     ax2.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f"{y:.0f}%"))
 
@@ -736,7 +762,7 @@ def capex_cycle_chart(data, out_dir, name="capex_cycle"):
 
     # Current phase text box
     if current_phase:
-        phase_text = f"Current: {current_phase}"
+        phase_text = f"当前阶段：{current_phase}"
         ax1.text(0.98, 0.95, phase_text, transform=ax1.transAxes, fontsize=9,
                  color=PALETTE["ink"], ha="right", va="top",
                  bbox=dict(boxstyle="round,pad=0.3", facecolor=PALETTE["surface"],
@@ -753,7 +779,7 @@ def capex_cycle_chart(data, out_dir, name="capex_cycle"):
     visible = [str(y) if i % step == 0 else "" for i, y in enumerate(years)]
     ax1.set_xticklabels(visible, fontsize=8, rotation=45, color=PALETTE["muted"],
                         ha="right")
-    ax1.set_title(f"Industry Capacity Cycle -- {industry}",
+    ax1.set_title(f"行业产能周期：{industry}",
                   color=PALETTE["ink"], fontsize=13, fontweight="bold",
                   loc="left", pad=12)
     for spine in ("top", "right"):
@@ -786,6 +812,17 @@ def risk_matrix_chart(data, out_dir, name="risk_matrix"):
     categories = [r.get("category", "Other") for r in risks]
     names = [r.get("id", r.get("name", f"R{i}"))
              for i, r in enumerate(risks)]
+    category_labels = {
+        "Cycle": "周期",
+        "Competition": "竞争",
+        "Technology": "技术",
+        "Demand": "需求",
+        "Customer": "客户",
+        "Customer Concentration": "客户集中度",
+        "Geopolitical": "地缘政治",
+        "Financial": "财务",
+        "Other": "其他",
+    }
 
     # Category color mapping
     unique_cats = sorted(set(categories))
@@ -817,16 +854,16 @@ def risk_matrix_chart(data, out_dir, name="risk_matrix"):
     ax.axvline(med_prob, color=PALETTE["grid"], linewidth=1.0, linestyle="--")
 
     # Quadrant labels
-    ax.text(0.98, 0.98, "MITIGATE\n(high prob, high impact)",
+    ax.text(0.98, 0.98, "重点缓释\n（高概率，高影响）",
             transform=ax.transAxes, ha="right", va="top", fontsize=8,
             color=PALETTE["down"], fontweight="bold", alpha=0.7)
-    ax.text(0.02, 0.98, "MONITOR\n(low prob, high impact)",
+    ax.text(0.02, 0.98, "持续监测\n（低概率，高影响）",
             transform=ax.transAxes, ha="left", va="top", fontsize=8,
             color=PALETTE["ink"], fontweight="bold", alpha=0.7)
-    ax.text(0.98, 0.02, "MANAGE\n(high prob, low impact)",
+    ax.text(0.98, 0.02, "主动管理\n（高概率，低影响）",
             transform=ax.transAxes, ha="right", va="bottom", fontsize=8,
             color="#D97706", fontweight="bold", alpha=0.7)
-    ax.text(0.02, 0.02, "ACCEPT\n(low prob, low impact)",
+    ax.text(0.02, 0.02, "接受\n（低概率，低影响）",
             transform=ax.transAxes, ha="left", va="bottom", fontsize=8,
             color=PALETTE["muted"], fontweight="bold", alpha=0.7)
 
@@ -849,18 +886,18 @@ def risk_matrix_chart(data, out_dir, name="risk_matrix"):
     # Legend for categories
     legend_handles = [plt.Line2D([0], [0], marker="o", color="w",
                                  markerfacecolor=cat_colors[cat],
-                                 markersize=8, label=cat)
+                                 markersize=8, label=category_labels.get(cat, cat))
                       for cat in unique_cats]
     ax.legend(handles=legend_handles, frameon=False, fontsize=7.5,
-              loc="lower right", title="Risk Category", title_fontsize=8)
+              loc="lower right", title="风险类别", title_fontsize=8)
 
-    ax.set_xlabel("Estimated probability", color=PALETTE["muted"], fontsize=10)
+    ax.set_xlabel("估计概率", color=PALETTE["muted"], fontsize=10)
     if total_value:
-        ax.set_ylabel("Value impact (% of intrinsic value)",
+        ax.set_ylabel("价值影响（占内在价值比例）",
                       color=PALETTE["muted"], fontsize=10)
         ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f"{y:.0%}"))
     else:
-        ax.set_ylabel("Value impact ($ / share)", color=PALETTE["muted"],
+        ax.set_ylabel("价值影响（每股）", color=PALETTE["muted"],
                       fontsize=10)
     ax.set_xlim(-0.02, max(probs) * 1.08 if probs else 1.0)
     ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f"{x:.0%}"))
@@ -871,9 +908,141 @@ def risk_matrix_chart(data, out_dir, name="risk_matrix"):
         ax.spines[spine].set_color(PALETTE["grid"])
     ax.grid(axis="both", color=PALETTE["grid"], linewidth=0.6, alpha=0.5)
     ax.set_axisbelow(True)
-    ax.set_title("Risk Matrix -- Probability vs. Value Impact",
+    ax.set_title("风险矩阵：概率与价值影响",
                  color=PALETTE["ink"], fontsize=13, fontweight="bold",
                  loc="left", pad=12)
+    return _save(fig, out_dir, name)
+
+
+def commodity_price_deck_chart(data, out_dir, name="commodity_price_deck"):
+    rows = data["rows"]
+    years = [r["year"] for r in rows]
+    prices = [r["commodity_price"] for r in rows]
+    costs = [r.get("cash_cost") for r in rows]
+    norm = data.get("normalization", {})
+    commodity = data.get("commodity", {})
+    unit = commodity.get("price_unit", "")
+
+    fig, ax = plt.subplots(figsize=FIGSIZE)
+    ax.plot(years, prices, marker="o", linewidth=2.2, color=PALETTE["accent"],
+            label="预测价格表")
+    if any(c is not None for c in costs):
+        cost_vals = [np.nan if c is None else c for c in costs]
+        ax.plot(years, cost_vals, marker="s", linewidth=1.8, color=PALETTE["down"],
+                label="现金成本表")
+        ax.fill_between(years, prices, cost_vals, where=np.array(prices) >= np.array(cost_vals),
+                        color=PALETTE["up"], alpha=0.08)
+    if norm.get("normalized_price") is not None:
+        ax.axhline(norm["normalized_price"], color=PALETTE["ink"], linewidth=1.3,
+                   linestyle="--", label="正常化价格")
+    if norm.get("current_price") is not None:
+        ax.axhline(norm["current_price"], color=PALETTE["muted"], linewidth=1.1,
+                   linestyle=":", label="当前现货/参考价")
+
+    ylabel = f"价格（{unit}）" if unit else "价格"
+    _style(ax, "商品价格表与正常化价格", "年份", ylabel)
+    ax.legend(frameon=False, fontsize=8.5, loc="best")
+    return _save(fig, out_dir, name)
+
+
+def cost_curve_position_chart(data, out_dir, name="cost_curve_position"):
+    curve = data.get("cost_curve") or []
+    norm = data.get("normalization", {})
+    commodity = data.get("commodity", {})
+    unit = commodity.get("price_unit", "")
+
+    fig, ax = plt.subplots(figsize=FIGSIZE)
+    if curve:
+        labels = [str(x.get("label", f"Point {i + 1}")) for i, x in enumerate(curve)]
+        costs = [float(x["cash_cost"]) for x in curve]
+        colors = [PALETTE["accent"] if x.get("company") else PALETTE["grid"] for x in curve]
+        xs = np.arange(len(curve))
+        ax.bar(xs, costs, color=colors, width=0.64)
+        ax.set_xticks(xs)
+        ax.set_xticklabels(labels, rotation=25, ha="right", fontsize=8.5)
+    else:
+        rows = data["rows"]
+        labels = ["当前成本", "平均预测成本", "正常化价格"]
+        row_costs = [r.get("cash_cost") for r in rows if r.get("cash_cost") is not None]
+        current_cost = row_costs[0] if row_costs else 0.0
+        avg_cost = mean(row_costs) if row_costs else current_cost
+        costs = [current_cost, avg_cost, norm.get("normalized_price", 0.0)]
+        ax.bar(np.arange(3), costs, color=[PALETTE["accent"], PALETTE["grid"], PALETTE["up"]])
+        ax.set_xticks(np.arange(3))
+        ax.set_xticklabels(labels, rotation=0, fontsize=8.5)
+
+    if norm.get("current_price") is not None:
+        ax.axhline(norm["current_price"], color=PALETTE["down"], linewidth=1.6,
+                   label="当前现货/参考价")
+    if norm.get("normalized_price") is not None:
+        ax.axhline(norm["normalized_price"], color=PALETTE["ink"], linewidth=1.3,
+                   linestyle="--", label="正常化价格")
+
+    ylabel = f"成本 / 价格（{unit}）" if unit else "成本 / 价格"
+    _style(ax, "成本曲线位置", None, ylabel)
+    ax.legend(frameon=False, fontsize=8.5, loc="best")
+    return _save(fig, out_dir, name)
+
+
+def cycle_position_dashboard_chart(data, out_dir, name="cycle_position_dashboard"):
+    norm = data.get("normalization", {})
+    rows = data.get("rows", [])
+    utilization = [r.get("utilization") for r in rows if r.get("utilization") is not None]
+    margins = [r.get("ebitda_margin") for r in rows if r.get("ebitda_margin") is not None]
+    capex_to_ebitda = [
+        r["capex_m"] / r["ebitda_m"]
+        for r in rows
+        if r.get("ebitda_m") and r.get("capex_m") is not None
+    ]
+
+    metrics = [
+        ("价格分位", norm.get("cycle_price_percentile", 0.5)),
+        ("产能利用率", mean(utilization) if utilization else 0.5),
+        ("EBITDA 利润率", mean(margins) if margins else 0.0),
+        ("资本开支 / EBITDA", mean(capex_to_ebitda) if capex_to_ebitda else 0.0),
+    ]
+    labels = [m[0] for m in metrics]
+    values = [max(0.0, min(1.5, float(m[1]))) for m in metrics]
+    colors = [PALETTE["accent"], PALETTE["up"], PALETTE["ink"], PALETTE["down"]]
+
+    fig, ax = plt.subplots(figsize=FIGSIZE)
+    ys = np.arange(len(metrics))
+    ax.barh(ys, values, color=colors, alpha=0.85)
+    ax.axvline(1.0, color=PALETTE["grid"], linewidth=1.2, linestyle="--")
+    ax.set_yticks(ys)
+    ax.set_yticklabels(labels, fontsize=9.5, color=PALETTE["ink"])
+    ax.invert_yaxis()
+    for y, v in zip(ys, values):
+        ax.text(v + 0.02, y, f"{v:.0%}", va="center", fontsize=8.5,
+                color=PALETTE["muted"])
+    ax.set_xlim(0, max(1.25, max(values) * 1.18 if values else 1.25))
+    _style(ax, "周期位置仪表盘", "比例 / 分位")
+    ax.grid(axis="y", visible=False)
+    return _save(fig, out_dir, name)
+
+
+def midcycle_multiple_bridge_chart(data, out_dir, name="midcycle_multiple_bridge"):
+    methods = data.get("methods", [])
+    weighted = data.get("weighted", {})
+    label_map = {
+        "Price-deck DCF": "价格表 DCF",
+        "Mid-cycle EV/EBITDA": "中周期 EV/EBITDA",
+        "Asset NPV": "资产 NPV",
+    }
+    labels = [label_map.get(m.get("label", m["method"]), m.get("label", m["method"])) for m in methods] + ["加权值"]
+    values = [m["value_per_share"] for m in methods] + [weighted.get("value_per_share", 0.0)]
+    colors = [PALETTE["grid"]] * len(methods) + [PALETTE["accent"]]
+
+    fig, ax = plt.subplots(figsize=FIGSIZE)
+    xs = np.arange(len(values))
+    ax.bar(xs, values, color=colors, width=0.62)
+    ax.set_xticks(xs)
+    ax.set_xticklabels(labels, rotation=18, ha="right", fontsize=8.5)
+    for x, v in zip(xs, values):
+        ax.text(x, v, f"{v:,.1f}", ha="center", va="bottom", fontsize=8.5,
+                color=PALETTE["muted"])
+    _style(ax, "中周期估值桥", None, "每股价值")
+    ax.grid(axis="x", visible=False)
     return _save(fig, out_dir, name)
 
 
@@ -890,6 +1059,10 @@ KINDS = {
     "waterfall": waterfall_chart,
     "capex_cycle": capex_cycle_chart,
     "risk_matrix": risk_matrix_chart,
+    "commodity_price_deck": commodity_price_deck_chart,
+    "cost_curve_position": cost_curve_position_chart,
+    "cycle_position_dashboard": cycle_position_dashboard_chart,
+    "midcycle_multiple_bridge": midcycle_multiple_bridge_chart,
 }
 
 
@@ -901,7 +1074,7 @@ def _main(argv=None) -> int:
     ap.add_argument("--ticker", default=None, help="ticker symbol; output stem becomes {TICKER}_{kind}")
     ap.add_argument("--name", default=None, help="output file stem (overrides --ticker + --kind combination)")
     args = ap.parse_args(argv)
-    with open(args.in_path, "r", encoding="utf-8") as fh:
+    with open(args.in_path, "r", encoding="utf-8-sig") as fh:
         data = json.load(fh)
     fn = KINDS[args.kind]
     _default_name = f"{args.ticker}_{args.kind}" if args.ticker else args.kind

@@ -42,6 +42,12 @@ Before forecasting, adjust the historical financials:
   average margins, not peak or trough.
 - **Treat SBC as a real cost.** Count dilution in share count; do NOT add back as
   "non-cash" and ignore. State the annual dilution rate over the past 5 years.
+- **For cyclicals, build the cycle layer before the generic DCF.** Commodity,
+  panel, memory, shipping, chemicals, and other price-taking businesses require
+  a separate `TICKER_cyclical_inputs.json` containing the price deck, cost deck,
+  volume/capacity path, utilization, capex, normalized price, trough/peak price
+  band, mid-cycle EV/EBITDA multiple, and method weights. Do not hide the cycle
+  call inside a single revenue-growth or target-margin assumption.
 
 ### The four drivers (Default archetype)
 
@@ -122,7 +128,9 @@ For other archetypes, use the appropriate template from `templates/`:
 ## Output
 
 1. Write the assumptions JSON file to disk (name it after the ticker: `TICKER_assumptions.json`)
-2. Produce an assumptions narrative (~500 words) explaining each driver's basis,
+2. For cyclical archetypes, also write `TICKER_cyclical_inputs.json` for
+   `scripts/cyclical_valuation.py`
+3. Produce an assumptions narrative (~500 words) explaining each driver's basis,
    the accounting adjustments made, and the key judgment calls
 
 ## Integration notes
@@ -137,6 +145,9 @@ For other archetypes, use the appropriate template from `templates/`:
 - [ ] **Accounting first:** R&D capitalization done with NUMBERS (not described),
   leases normalized, one-offs stripped, SBC quantified. Described but not computed → REVISE.
 - [ ] **Revenue bottom-up:** Built by segment (TAM × share). Single growth rate → REVISE.
+- [ ] **Cyclical layer:** For cyclical archetypes, `TICKER_cyclical_inputs.json`
+  exists and states price deck, cost deck, volume/capacity, utilization, capex,
+  normalized price, trough/peak band, and mid-cycle multiple. Missing → REVISE.
 - [ ] **Driver basis:** Each of the four drivers has: current value, target value,
   convergence path, one-line justification, and low/base/high range. Missing any → REVISE.
 - [ ] **Margin justification:** Target margin justified against company history AND
